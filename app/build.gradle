@@ -52,6 +52,22 @@ android {
                 enableV4Signing = true
             }
         }
+        // 从 keystore.properties 读取签名配置
+        def keystorePropertiesFile = rootProject.file("keystore.properties")
+        if (keystorePropertiesFile.exists()) {
+            def keystoreProperties = new Properties()
+            keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
     }
     defaultConfig {
         applicationId "io.legado.app"
@@ -83,6 +99,8 @@ android {
         release {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.myConfig
+            } else if (rootProject.file("keystore.properties").exists()) {
+                signingConfig signingConfigs.release
             }
             applicationIdSuffix '.release'
             if (getApplicationIdSuffix() == '.releaseA') {
