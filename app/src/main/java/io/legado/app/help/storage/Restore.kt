@@ -32,6 +32,9 @@ import io.legado.app.help.book.upType
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
+import com.google.gson.JsonParser
+import io.legado.app.help.readrecord.DetailedReadRecordExport
+import io.legado.app.help.readrecord.DetailedReadRecordHelper
 import io.legado.app.model.VideoPlay.VIDEO_PREF_NAME
 import io.legado.app.model.BookCover
 import io.legado.app.model.localBook.LocalBook
@@ -183,6 +186,9 @@ object Restore {
                 }
             }
         }
+        readDetailedReadRecord(path)?.let { records ->
+            DetailedReadRecordHelper.insertFromExport(records)
+        }
         File(path, "servers.json").takeIf {
             it.exists()
         }?.runCatching {
@@ -326,6 +332,76 @@ object Restore {
             appCtx.toastOnUi("$fileName\n读取文件出错\n${e.localizedMessage}")
         }
         return null
+    }
+
+    private fun readDetailedReadRecord(path: String): List<DetailedReadRecordExport>? {
+        val fileName = "readRecord_detail.json"
+        return try {
+            val file = File(path, fileName)
+            if (!file.exists()) {
+                LogUtils.d(TAG, "阅读恢复备份 $fileName 文件不存在")
+                return null
+            }
+            val json = file.readText()
+            LogUtils.d(TAG, "阅读恢复备份 $fileName 文件大小 ${file.length()}")
+            val root = JsonParser.parseString(json)
+            if (!root.isJsonArray) return null
+            val result = mutableListOf<DetailedReadRecordExport>()
+            root.asJsonArray.forEach { item ->
+                if (!item.isJsonObject) return@forEach
+                val obj = item.asJsonObject
+                val bookName = when {
+                    obj.has("bookName") -> obj.get("bookName").asString
+                    obj.has("a") -> obj.get("a").asString
+                    else -> null
+                }
+                val sessionsEl = when {
+                    obj.has("sessions") -> obj.get("sessions")
+                    obj.has("b") -> obj.get("b")
+                    else -> null
+                }
+                if (bookName.isNullOrBlank() || sessionsEl == null || !sessionsEl.isJsonArray) {
+                    return@forEach
+                }
+                val sessions = mutableListOf<io.legado.app.help.readrecord.DetailedReadSession>()
+                sessionsEl.asJsonArray.forEach { sessionEl ->
+                    if (!sessionEl.isJsonObject) return@forEach
+                    val sessionObj = sessionEl.asJsonObject
+                    val startTime = when {
+                        sessionObj.has("startTime") -> sessionObj.get("startTime").asLong
+                        sessionObj.has("a") -> sessionObj.get("a").asLong
+                        else -> null
+                    }
+                    val endTime = when {
+                        sessionObj.has("endTime") -> sessionObj.get("endTime").asLong
+                        sessionObj.has("b") -> sessionObj.get("b").asLong
+                        else -> null
+                    }
+                    if (startTime != null && endTime != null) {
+                        sessions.add(
+                            io.legado.app.help.readrecord.DetailedReadSession(
+                                startTime = startTime,
+                                endTime = endTime
+                            )
+                        )
+                    }
+                }
+                if (sessions.isNotEmpty()) {
+                    result.add(
+                        DetailedReadRecordExport(
+                            bookName = bookName,
+                            sessions = sessions
+                        )
+                    )
+                }
+            }
+            LogUtils.d(TAG, "阅读恢复备份 $fileName 列表大小 ${result.size}")
+            result
+        } catch (e: Exception) {
+            AppLog.put("$fileName\n读取解析出错\n${e.localizedMessage}", e)
+            appCtx.toastOnUi("$fileName\n读取文件出错\n${e.localizedMessage}")
+            null
+        }
     }
 
 }

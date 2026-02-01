@@ -15,6 +15,7 @@ import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
 import io.legado.app.help.coroutine.Coroutine
+import io.legado.app.help.readrecord.DetailedReadRecordHelper
 import io.legado.app.model.BookCover
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
@@ -72,6 +73,7 @@ object Backup {
             "rssStar.json",
             "replaceRule.json",
             "readRecord.json",
+            "readRecord_detail.json",
             "searchHistory.json",
             "sourceSub.json",
             "txtTocRule.json",
@@ -145,6 +147,7 @@ object Backup {
         writeListToJson(appDb.rssStarDao.all, "rssStar.json", backupPath)
         writeListToJson(appDb.replaceRuleDao.all, "replaceRule.json", backupPath)
         writeListToJson(appDb.readRecordDao.all, "readRecord.json", backupPath)
+        writeDetailedReadRecordJson(backupPath)
         writeListToJson(appDb.searchKeywordDao.all, "searchHistory.json", backupPath)
         writeListToJson(appDb.ruleSubDao.all, "sourceSub.json", backupPath)
         writeListToJson(appDb.txtTocRuleDao.all, "txtTocRule.json", backupPath)
@@ -277,6 +280,21 @@ object Backup {
                 LogUtils.d(TAG, "阅读备份 $fileName 写入大小 ${file.length()}")
             } else {
                 LogUtils.d(TAG, "阅读备份 $fileName 列表为空")
+            }
+        }
+    }
+
+    private suspend fun writeDetailedReadRecordJson(path: String) {
+        currentCoroutineContext().ensureActive()
+        withContext(IO) {
+            val exportJson = DetailedReadRecordHelper.buildExportJson(appDb.detailedReadRecordDao.all())
+            if (exportJson != "[]") {
+                LogUtils.d(TAG, "阅读备份 readRecord_detail.json 列表非空")
+                val file = FileUtils.createFileIfNotExist(path + File.separator + "readRecord_detail.json")
+                file.writeText(exportJson)
+                LogUtils.d(TAG, "阅读备份 readRecord_detail.json 写入大小 ${file.length()}")
+            } else {
+                LogUtils.d(TAG, "阅读备份 readRecord_detail.json 列表为空")
             }
         }
     }

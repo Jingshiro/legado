@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.get
 import androidx.core.view.size
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import io.legado.app.BuildConfig
@@ -50,6 +51,8 @@ import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ReadTipConfig
 import io.legado.app.help.coroutine.Coroutine
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 import io.legado.app.help.source.getSourceType
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.dialogs.SelectItem
@@ -262,12 +265,19 @@ class ReadBookActivity : BaseReadBookActivity(),
     private val networkChangedListener by lazy {
         NetworkChangedListener(this)
     }
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { ReadBook.book?.name }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
+    }
     private var justInitData: Boolean = false
     private var syncDialog: AlertDialog? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        lifecycle.addObserver(detailedReadRecordObserver)
         binding.cursorLeft.setColorFilter(accentColor)
         binding.cursorRight.setColorFilter(accentColor)
         binding.cursorLeft.setOnTouchListener(this)
@@ -1755,6 +1765,13 @@ class ReadBookActivity : BaseReadBookActivity(),
             }
         }
         observeEvent<Int>(EventBus.ALOUD_STATE) {
+            if (it == Status.PLAY) {
+                detailedReadRecordTracker.stop()
+            } else if (it == Status.PAUSE || it == Status.STOP) {
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                    detailedReadRecordTracker.start()
+                }
+            }
             if (it == Status.STOP || it == Status.PAUSE) {
                 ReadBook.curTextChapter?.let { textChapter ->
                     val page = textChapter.getPageByReadPos(ReadBook.durChapterPos)

@@ -9,7 +9,6 @@ plugins {
     alias libs.plugins.android.application
     alias libs.plugins.kotlin.android
     alias libs.plugins.kotlin.parcelize
-    alias libs.plugins.room
     alias libs.plugins.ksp
     alias libs.plugins.google.services
 }
@@ -21,7 +20,15 @@ static def releaseTime() {
 
 def name = "legado"
 def version = "3." + releaseTime()
-def gitCommits = Integer.parseInt('git rev-list HEAD --count'.execute().text.trim())
+def gitCommits = 0
+try {
+    def output = 'git rev-list HEAD --count'.execute().text.trim()
+    if (output.isInteger()) {
+        gitCommits = output.toInteger()
+    }
+} catch (Throwable ignored) {
+    gitCommits = 0
+}
 
 android {
     compileSdk = compile_sdk_version
@@ -118,16 +125,12 @@ android {
         }
     }
 
-
-    room {
-        schemaDirectory "$projectDir/schemas"
-    }
     // 设定Room的KSP参数
     ksp {
         arg("room.incremental", "true")
         arg("room.expandProjection", "true")
         arg("room.generateKotlin", "false")
-        //arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.schemaLocation", "$projectDir/schemas")
 
     }
 

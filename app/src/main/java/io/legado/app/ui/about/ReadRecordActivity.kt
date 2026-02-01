@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
+import io.legado.app.constant.AppLog
 import io.legado.app.R
 import io.legado.app.base.BaseActivity
 import io.legado.app.base.adapter.ItemViewHolder
@@ -17,16 +19,20 @@ import io.legado.app.databinding.ActivityReadRecordBinding
 import io.legado.app.databinding.ItemReadRecordBinding
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.LocalConfig
+import io.legado.app.help.readrecord.DetailedReadRecordHelper
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.ui.book.search.SearchActivity
+import io.legado.app.utils.GSON
 import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.cnCompare
 import io.legado.app.utils.getInt
 import io.legado.app.utils.putInt
 import io.legado.app.utils.startActivityForBook
+import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
+import io.legado.app.utils.writeToOutputStream
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,6 +49,27 @@ class ReadRecordActivity : BaseActivity<ActivityReadRecordBinding>() {
         }
     private val searchView: SearchView by lazy {
         binding.titleBar.findViewById(R.id.search_view)
+    }
+    private val exportDetailRecord = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri ?: return@registerForActivityResult
+        lifecycleScope.launch {
+            kotlin.runCatching {
+                val exportJson = withContext(IO) {
+                    DetailedReadRecordHelper.buildExportJson(appDb.detailedReadRecordDao.all())
+                }
+                withContext(IO) {
+                    contentResolver.openOutputStream(uri)?.use {
+                        it.write(exportJson.toByteArray())
+                    } ?: throw IllegalStateException("openOutputStream failed")
+                }
+            }.onSuccess {
+                toastOnUi("导出成功")
+            }.onFailure {
+                AppLog.put("导出详细记录失败\n${it.localizedMessage}", it, true)
+            }
+        }
     }
 
     override val binding by viewBinding(ActivityReadRecordBinding::inflate)
@@ -90,6 +117,12 @@ class ReadRecordActivity : BaseActivity<ActivityReadRecordBinding>() {
 
             R.id.menu_enable_record -> {
                 AppConfig.enableReadRecord = !item.isChecked
+            }
+
+            R.id.menu_export_detail_record -> {
+                val dateFormat = SimpleDateFormat("yyMMddHHmmss", Locale.getDefault())
+                val fileName = "readRecord_detail-${dateFormat.format(System.currentTimeMillis())}.json"
+                exportDetailRecord.launch(fileName)
             }
         }
         return super.onCompatOptionsItemSelected(item)

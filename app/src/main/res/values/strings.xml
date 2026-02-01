@@ -976,6 +976,7 @@
     <string name="book_change_source">Change the source of the whole book</string>
     <string name="sort_by_time">Sort by time</string>
     <string name="enable_record">Enable record</string>
+    <string name="export_detail_record">Export detailed records</string>
     <string name="copy_all">Copy all</string>
     <string name="auto_complete">Automatic completion</string>
     <string name="sort_by_size">Sort by size</string>
