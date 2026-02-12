@@ -13,9 +13,10 @@ import io.legado.app.base.BaseViewModel
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern.JS_PATTERN
 import io.legado.app.exception.NoStackTraceException
+import io.legado.app.help.CacheManager
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.http.BackstageWebView
-import io.legado.app.utils.escapeForJs
+import io.legado.app.help.webView.WebJsExtensions.Companion.nameCache
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.toastOnUi
 import org.eclipse.tm4e.core.registry.IThemeSource
@@ -108,24 +109,40 @@ class CodeEditViewModel(application: Application) : BaseViewModel(application) {
             if (isHtml) {
                 return@execute formatCodeHtml(text)
             }
-            var start = 0
-            val jsMatcher = JS_PATTERN.matcher(text)
             var result = ""
-            while (jsMatcher.find()) {
-                if (jsMatcher.start() > start) {
-                    result += text.substring(start, jsMatcher.start()).trim()
+            var start = 0
+            val indexS = text.indexOf("<js>")
+            if (indexS >= 0) {
+                if (indexS > 0) {
+                    result += text.substring(start, indexS).trim()
                 }
-                if (jsMatcher.group(2) != null) {
-                    result += "@js:\n"
-                    val jsCode = jsMatcher.group(2)!!
-                    result += webFormatCode(jsCode)
-                } else if (jsMatcher.group(1) != null) {
-                    result += "<js>\n"
-                    val jsCode = jsMatcher.group(1)!!
-                    result += webFormatCode(jsCode)
-                    result += "\n</js>"
+                val indexE = text.indexOf("</js>", indexS)
+                val jsCode = text.substring(indexS + 4, indexE)
+                result += "<js>\n"
+                result += webFormatCode(jsCode)
+                result += "\n</js>"
+                start = indexE + 5
+            }
+            val indexS2 = text.indexOf("@js:")
+            if (indexS2 >= 0) {
+                if (indexS2 > start) {
+                    result += text.substring(start, indexS2).trim()
                 }
-                start = jsMatcher.end()
+                val jsCode = text.substring(indexS2 + 4)
+                result += "@js:\n"
+                result += webFormatCode(jsCode)
+                start = text.length
+            } else {
+                val indexS2 = text.indexOf("@webjs:")
+                if (indexS2 >= 0) {
+                    if (indexS2 > start) {
+                        result += text.substring(start, indexS2).trim()
+                    }
+                    val jsCode = text.substring(indexS2 + 7)
+                    result += "@webjs:\n"
+                    result += webFormatCode(jsCode)
+                    start = text.length
+                }
             }
             if (start == 0) {
                 result += webFormatCode(text)
@@ -143,11 +160,12 @@ class CodeEditViewModel(application: Application) : BaseViewModel(application) {
     }
 
     private suspend fun webFormatCode(jsCode: String): String? {
+        CacheManager.putMemory("web_format_code", jsCode)
         return BackstageWebView(
             url = null,
             html = """<html><body><script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify.min.js"></script>
                 <script>
-                window.result = js_beautify("${jsCode.escapeForJs()}", {
+                window.re = js_beautify($nameCache.getFromMemory('web_format_code'), {
                 indent_size: 4,
                 indent_char: ' ',
                 preserve_newlines: true,
@@ -161,9 +179,10 @@ class CodeEditViewModel(application: Application) : BaseViewModel(application) {
                 comma_first: false
                 });
                 </script></body></html>""".trimIndent(),
-            javaScript = "window.result",
+            javaScript = "window.re",
             cacheFirst = true,
-            timeout = 5000
+            timeout = 5000,
+            isRule = true
         ).getStrResponse().body
     }
 

@@ -5,15 +5,11 @@ import android.content.Context
 import android.content.MutableContextWrapper
 import android.os.Build
 import android.view.ViewGroup
-import android.webkit.URLUtil
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import io.legado.app.R
 import io.legado.app.help.config.AppConfig
-import io.legado.app.model.Download
 import io.legado.app.ui.rss.read.VisibleWebView
-import io.legado.app.utils.longSnackbar
 import io.legado.app.utils.setDarkeningAllowed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +19,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import splitties.init.appCtx
-import java.net.URLDecoder
 import java.util.Stack
 import kotlin.math.max
 import kotlin.random.Random
@@ -75,7 +70,7 @@ object WebViewPool {
         }
         // 重置WebView状态
         resetWebView(pooledWebView.realWebView)
-        pooledWebView.upContext(MutableContextWrapper(appCtx))
+        pooledWebView.upContext(appCtx)
         pooledWebView.isInUse = false
         if (idlePool.size < CACHED_WEB_VIEW_MAX_NUM - inUsePool.size) {
             pooledWebView.lastUseTime = System.currentTimeMillis()
@@ -100,6 +95,7 @@ object WebViewPool {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 setOnScrollChangeListener(null)
             }
+            setDownloadListener(null)
             outlineProvider = null
             clipToOutline = false
             webChromeClient = null
@@ -158,13 +154,6 @@ object WebViewPool {
             displayZoomControls = false
             setDarkeningAllowed(AppConfig.isNightTheme)
             textZoom = 100
-        }
-        webView.setDownloadListener { url, _, contentDisposition, _, _ ->
-            var fileName = URLUtil.guessFileName(url, contentDisposition, null)
-            fileName = URLDecoder.decode(fileName, "UTF-8")
-            webView.longSnackbar(fileName, appCtx.getString(R.string.action_download)) {
-                Download.start(appCtx, url, fileName)
-            }
         }
     }
 

@@ -13,6 +13,7 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import io.legado.app.R
@@ -47,6 +48,7 @@ import io.legado.app.lib.theme.backgroundColor
 import io.legado.app.lib.theme.bottomBackground
 import io.legado.app.lib.theme.getPrimaryTextColor
 import io.legado.app.model.BookCover
+import io.legado.app.model.ReadBook
 import io.legado.app.model.remote.RemoteBookWebDav
 import io.legado.app.ui.about.AppLogDialog
 import io.legado.app.ui.book.audio.AudioPlayActivity
@@ -353,7 +355,15 @@ class BookInfoActivity :
         }
 
         observeEvent<Boolean>(EventBus.REFRESH_BOOK_INFO) { //书源js函数触发刷新
-            refreshBook()
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                refreshBook()
+            }
+        }
+
+        observeEvent<Boolean>(EventBus.REFRESH_BOOK_TOC) { //书源js函数触发刷新
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                refreshToc()
+            }
         }
     }
 
@@ -372,6 +382,13 @@ class BookInfoActivity :
         upLoading(true)
         viewModel.getBook()?.let {
             viewModel.refreshBook(it)
+        }
+    }
+
+    private fun refreshToc() {
+        upLoading(true)
+        viewModel.getBook()?.let {
+            viewModel.loadChapter(it, true, isFromBookInfo = true)
         }
     }
 

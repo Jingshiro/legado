@@ -86,9 +86,11 @@ java.copyText(text: String)
 //实时更新登录界面用户信息，upLoginData(null)会全部重置为默认值
 java.upLoginData(data: Map<String, String?>?)
 //刷新登录界面
-java.reLoginView()
+java.reLoginView(deltaUp: Boolean = false)
 //刷新书籍详情页
 java.refreshBookInfo()
+//刷新书籍目录页
+java.refreshBookToc()
 //刷新书籍正文内容
 java.refreshContent()
 //清除tts源的缓存，仅限tts源的登录界面
