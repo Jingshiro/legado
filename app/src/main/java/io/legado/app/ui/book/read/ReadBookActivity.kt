@@ -143,7 +143,6 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
 import com.script.rhino.runScriptWithContext
 import io.legado.app.model.analyzeRule.AnalyzeUrl.Companion.paramPattern
 import io.legado.app.ui.login.SourceLoginJsExtensions
