@@ -510,7 +510,95 @@ class TextChapterLayout(
         textPage.text = stringBuilder.toString()
         currentCoroutineContext().ensureActive()
         onPageCompleted()
+        markThoughtColumns(book, bookChapter)
         onCompleted()
+    }
+
+    private fun markThoughtColumns(book: Book, bookChapter: BookChapter) {
+        val thoughts = appDb.bookThoughtDao.getByChapter(book.name, book.author, bookChapter.index)
+            .filter { it.selectedText.isNotEmpty() }
+        if (thoughts.isEmpty()) return
+        val chapterText = buildString {
+            textPages.forEach { append(it.text) }
+        }
+        if (chapterText.isEmpty()) return
+        val (normalizedChapter, normalizedToRawIndex) = normalizeWithIndexMap(chapterText)
+        thoughts.forEach { thought ->
+            var startSearch = 0
+            var matched = false
+            while (startSearch < chapterText.length) {
+                val start = chapterText.indexOf(thought.selectedText, startSearch)
+                if (start < 0) break
+                val end = start + thought.selectedText.length
+                markThoughtRange(start, end, thought.selectedText)
+                startSearch = start + thought.selectedText.length
+                matched = true
+            }
+            if (!matched) {
+                markThoughtRangeWithNormalized(
+                    thought.selectedText,
+                    normalizedChapter,
+                    normalizedToRawIndex
+                )
+            }
+        }
+    }
+
+    private fun markThoughtRange(start: Int, end: Int, selectedText: String) {
+        textPages.forEach { textPage ->
+            textPage.lines.forEach { line ->
+                if (line.chapterPosition >= end) return@forEach
+                if (line.chapterPosition + line.charSize <= start) return@forEach
+                line.columns.forEachIndexed { index, column ->
+                    val textColumn = column as? TextBaseColumn ?: return@forEachIndexed
+                    val charPos = line.chapterPosition + index
+                    if (charPos in start until end) {
+                        textColumn.thoughtText = selectedText
+                    }
+                }
+            }
+        }
+    }
+
+    private fun markThoughtRangeWithNormalized(
+        selectedText: String,
+        normalizedChapter: String,
+        normalizedToRawIndex: IntArray
+    ) {
+        val normalizedTarget = normalizeForMatch(selectedText)
+        if (normalizedTarget.isEmpty() || normalizedChapter.isEmpty()) return
+        var startSearch = 0
+        while (startSearch < normalizedChapter.length) {
+            val matchedStart = normalizedChapter.indexOf(normalizedTarget, startSearch)
+            if (matchedStart < 0) break
+            val matchedEndExclusive = matchedStart + normalizedTarget.length
+            val rawStart = normalizedToRawIndex[matchedStart]
+            val rawEnd = normalizedToRawIndex[matchedEndExclusive - 1] + 1
+            markThoughtRange(rawStart, rawEnd, selectedText)
+            startSearch = matchedEndExclusive
+        }
+    }
+
+    private fun normalizeForMatch(text: String): String {
+        val sb = StringBuilder(text.length)
+        text.forEach { c ->
+            if (!c.isWhitespace()) {
+                sb.append(c)
+            }
+        }
+        return sb.toString()
+    }
+
+    private fun normalizeWithIndexMap(text: String): Pair<String, IntArray> {
+        val normalizedBuilder = StringBuilder(text.length)
+        val indexList = ArrayList<Int>(text.length)
+        text.forEachIndexed { index, c ->
+            if (!c.isWhitespace()) {
+                normalizedBuilder.append(c)
+                indexList.add(index)
+            }
+        }
+        return normalizedBuilder.toString() to indexList.toIntArray()
     }
 
     /**

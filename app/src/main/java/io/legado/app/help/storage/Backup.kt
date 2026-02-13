@@ -67,6 +67,7 @@ object Backup {
         arrayOf(
             "bookshelf.json",
             "bookmark.json",
+            "bookThoughts.json",
             "bookGroup.json",
             "bookSource.json",
             "rssSources.json",
@@ -141,6 +142,7 @@ object Backup {
         FileUtils.delete(backupPath)
         writeListToJson(appDb.bookDao.all, "bookshelf.json", backupPath)
         writeListToJson(appDb.bookmarkDao.all, "bookmark.json", backupPath)
+        writeListToJson(appDb.bookThoughtDao.all, "bookThoughts.json", backupPath)
         writeListToJson(appDb.bookGroupDao.all, "bookGroup.json", backupPath)
         writeListToJson(appDb.bookSourceDao.all, "bookSource.json", backupPath)
         writeListToJson(appDb.rssSourceDao.all, "rssSources.json", backupPath)

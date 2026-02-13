@@ -41,6 +41,13 @@ data class TextColumn(
             }
             field = value
         }
+    override var thoughtText: String? = null
+        set(value) {
+            if (field != value) {
+                textLine.invalidate()
+            }
+            field = value
+        }
 
     override fun draw(view: ContentTextView, canvas: Canvas) {
         val textPaint = if (textLine.isTitle) {

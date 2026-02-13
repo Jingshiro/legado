@@ -21,3 +21,4 @@ package-lock.json
 keystore.properties
 *.jks
 my-release-key.jks
+THOUGHT_FEATURE_PRIVATE_NOTES.md

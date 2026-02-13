@@ -9,4 +9,5 @@ interface TextBaseColumn : BaseColumn {
     val charData: String
     var selected: Boolean
     var isSearchResult: Boolean
+    var thoughtText: String?
 }

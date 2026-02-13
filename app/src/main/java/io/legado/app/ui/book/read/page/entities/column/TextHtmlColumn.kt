@@ -52,6 +52,13 @@ data class TextHtmlColumn(
             }
             field = value
         }
+    override var thoughtText: String? = null
+        set(value) {
+            if (field != value) {
+                textLine.invalidate()
+            }
+            field = value
+        }
 
     override fun draw(view: ContentTextView, canvas: Canvas) {
         val y = textLine.lineBase - textLine.lineTop

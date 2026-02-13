@@ -15,6 +15,7 @@ import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.page.ContentTextView
 import io.legado.app.ui.book.read.page.entities.TextPage.Companion.emptyTextPage
 import io.legado.app.ui.book.read.page.entities.column.BaseColumn
+import io.legado.app.ui.book.read.page.entities.column.TextBaseColumn
 import io.legado.app.ui.book.read.page.entities.column.TextColumn
 import io.legado.app.ui.book.read.page.provider.ChapterProvider
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
@@ -181,6 +182,8 @@ data class TextLine(
             PaintPool.recycle(underlinePaint)
         }
 
+        drawThoughtUnderline(canvas)
+
         val underlineMode = ReadBookConfig.underlineMode
         if (underlineMode == 0) return
         if (!isImage && !isHtml && ReadBook.book?.isImage != true) {
@@ -250,6 +253,47 @@ data class TextLine(
                 lineY,
                 dashPath
             )
+        }
+    }
+
+    private fun drawThoughtUnderline(canvas: Canvas) {
+        val lineY = height + (ChapterProvider.lineSpacingExtra * 10 - 11).coerceIn(-1f, 10f).dpToPx()
+        val dashPaint = TextPaint(ChapterProvider.contentPaint).apply {
+            color = ReadBookConfig.textAccentColor
+            pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+        }
+        var start = -1f
+        var end = -1f
+        var lastRight = -1f
+        for (column in columns) {
+            val thoughtText = (column as? TextBaseColumn)?.thoughtText
+            if (thoughtText.isNullOrEmpty()) {
+                if (start >= 0f) {
+                    canvas.drawLine(start, lineY, end, lineY, dashPaint)
+                    start = -1f
+                    end = -1f
+                    lastRight = -1f
+                }
+                continue
+            }
+            if (start < 0f) {
+                start = column.start
+                end = column.end
+                lastRight = column.end
+                continue
+            }
+            if (column.start - lastRight > 1f) {
+                canvas.drawLine(start, lineY, end, lineY, dashPaint)
+                start = column.start
+                end = column.end
+                lastRight = column.end
+                continue
+            }
+            end = column.end
+            lastRight = column.end
+        }
+        if (start >= 0f) {
+            canvas.drawLine(start, lineY, end, lineY, dashPaint)
         }
     }
 

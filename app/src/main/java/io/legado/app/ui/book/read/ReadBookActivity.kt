@@ -34,6 +34,7 @@ import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.entities.BookSource
+import io.legado.app.data.entities.BookThought
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.AppWebDav
 import io.legado.app.help.IntentData
@@ -74,6 +75,7 @@ import io.legado.app.receiver.TimeBatteryReceiver
 import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.about.AppLogDialog
 import io.legado.app.ui.book.bookmark.BookmarkDialog
+import io.legado.app.ui.book.thought.BookThoughtDialog
 import io.legado.app.ui.book.changesource.ChangeBookSourceDialog
 import io.legado.app.ui.book.changesource.ChangeChapterSourceDialog
 import io.legado.app.ui.book.info.BookInfoActivity
@@ -88,9 +90,10 @@ import io.legado.app.ui.book.read.config.TipConfigDialog.Companion.TIP_COLOR
 import io.legado.app.ui.book.read.config.TipConfigDialog.Companion.TIP_DIVIDER_COLOR
 import io.legado.app.ui.book.read.page.ContentTextView
 import io.legado.app.ui.book.read.page.ReadView
+import io.legado.app.ui.book.read.page.entities.TextPage
+import io.legado.app.ui.book.read.page.entities.column.TextBaseColumn
 import io.legado.app.ui.book.read.page.delegate.ScrollPageDelegate
 import io.legado.app.ui.book.read.page.entities.PageDirection
-import io.legado.app.ui.book.read.page.entities.TextPage
 import io.legado.app.ui.book.read.page.provider.ChapterProvider
 import io.legado.app.ui.book.read.page.provider.LayoutProgressListener
 import io.legado.app.ui.book.searchContent.SearchContentActivity
@@ -882,6 +885,49 @@ class ReadBookActivity : BaseReadBookActivity(),
                 return true
             }
 
+            R.id.menu_thought -> binding.readView.curPage.let {
+                val thought = it.createThought()
+                if (thought == null) {
+                    toastOnUi(R.string.cannot_empty)
+                } else {
+                    lifecycleScope.launch {
+                        val oldThoughts = withContext(IO) {
+                            appDb.bookThoughtDao.findByText(
+                                thought.bookName,
+                                thought.bookAuthor,
+                                thought.chapterIndex,
+                                thought.selectedText
+                            )
+                        }
+                        when (oldThoughts.size) {
+                            0 -> showDialogFragment(BookThoughtDialog(thought))
+                            1 -> showDialogFragment(BookThoughtDialog(oldThoughts.first(), 0))
+                            else -> {
+                                val options = arrayListOf<String>()
+                                options.add(getString(R.string.new_thought))
+                                oldThoughts.forEachIndexed { index, item ->
+                                    options.add(
+                                        getString(
+                                            R.string.select_thought_item,
+                                            index + 1,
+                                            item.thought.take(20)
+                                        )
+                                    )
+                                }
+                                selector(getString(R.string.select_thought), options) { _, index ->
+                                    if (index == 0) {
+                                        showDialogFragment(BookThoughtDialog(thought))
+                                    } else {
+                                        showDialogFragment(BookThoughtDialog(oldThoughts[index - 1], 0))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return true
+            }
+
             R.id.menu_replace -> {
                 val scopes = arrayListOf<String>()
                 ReadBook.book?.name?.let {
@@ -1417,6 +1463,39 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
+    override fun onThoughtClick(selectedText: String) {
+        val book = ReadBook.book ?: return
+        lifecycleScope.launch {
+            val thoughts = withContext(IO) {
+                appDb.bookThoughtDao.findByText(
+                    book.name,
+                    book.author,
+                    ReadBook.durChapterIndex,
+                    selectedText
+                )
+            }
+            when (thoughts.size) {
+                0 -> Unit
+                1 -> showDialogFragment(BookThoughtDialog(thoughts.first(), 0))
+                else -> {
+                    val options = ArrayList<String>(thoughts.size)
+                    thoughts.forEachIndexed { index, item ->
+                        options.add(
+                            getString(
+                                R.string.select_thought_item,
+                                index + 1,
+                                item.thought.take(20)
+                            )
+                        )
+                    }
+                    selector(getString(R.string.select_thought), options) { _, index ->
+                        showDialogFragment(BookThoughtDialog(thoughts[index], 0))
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * 朗读按钮
@@ -1830,6 +1909,11 @@ class ReadBookActivity : BaseReadBookActivity(),
                 }
             }
         }
+        observeEvent<Boolean>(EventBus.REFRESH_BOOK_THOUGHT) { //想法变化后刷新当前阅读页
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                refreshThoughtMarksLightweight()
+            }
+        }
         observeEvent<Boolean>(EventBus.REFRESH_BOOK_TOC) { //书源js函数触发刷新
             if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                 ReadBook.book?.let {
@@ -1843,6 +1927,122 @@ class ReadBookActivity : BaseReadBookActivity(),
         val keepLightPrefer = getPrefString(PreferKey.keepLight)?.toInt() ?: 0
         screenTimeOut = keepLightPrefer * 1000L
         screenOffTimerStart()
+    }
+
+    private fun refreshThoughtMarksLightweight() {
+        val book = ReadBook.book ?: return
+        val textChapter = ReadBook.curTextChapter ?: return
+        lifecycleScope.launch {
+            val thoughts = withContext(IO) {
+                appDb.bookThoughtDao.getByChapter(book.name, book.author, ReadBook.durChapterIndex)
+                    .filter { it.selectedText.isNotEmpty() }
+            }
+            val pages = textChapter.pages
+            clearThoughtMarks(pages)
+            if (thoughts.isNotEmpty()) {
+                val chapterText = buildString {
+                    pages.forEach { append(it.text) }
+                }
+                if (chapterText.isNotEmpty()) {
+                    val (normalizedChapter, normalizedToRawIndex) = normalizeWithIndexMap(chapterText)
+                    thoughts.forEach { thought ->
+                        var startSearch = 0
+                        var matched = false
+                        while (startSearch < chapterText.length) {
+                            val start = chapterText.indexOf(thought.selectedText, startSearch)
+                            if (start < 0) break
+                            val end = start + thought.selectedText.length
+                            markThoughtRange(pages, start, end, thought.selectedText)
+                            startSearch = end
+                            matched = true
+                        }
+                        if (!matched) {
+                            markThoughtRangeWithNormalized(
+                                pages,
+                                thought.selectedText,
+                                normalizedChapter,
+                                normalizedToRawIndex
+                            )
+                        }
+                    }
+                }
+            }
+            binding.readView.curPage.invalidateContentView()
+            binding.readView.submitRenderTask()
+        }
+    }
+
+    private fun clearThoughtMarks(pages: List<TextPage>) {
+        pages.forEach { page ->
+            page.lines.forEach { line ->
+                line.columns.forEach { column ->
+                    (column as? TextBaseColumn)?.thoughtText = null
+                }
+            }
+        }
+    }
+
+    private fun markThoughtRange(
+        pages: List<TextPage>,
+        start: Int,
+        end: Int,
+        selectedText: String
+    ) {
+        pages.forEach { page ->
+            page.lines.forEach { line ->
+                if (line.chapterPosition >= end) return@forEach
+                if (line.chapterPosition + line.charSize <= start) return@forEach
+                line.columns.forEachIndexed { index, column ->
+                    val textColumn = column as? TextBaseColumn ?: return@forEachIndexed
+                    val charPos = line.chapterPosition + index
+                    if (charPos in start until end) {
+                        textColumn.thoughtText = selectedText
+                    }
+                }
+            }
+        }
+    }
+
+    private fun markThoughtRangeWithNormalized(
+        pages: List<TextPage>,
+        selectedText: String,
+        normalizedChapter: String,
+        normalizedToRawIndex: IntArray
+    ) {
+        val normalizedTarget = normalizeForMatch(selectedText)
+        if (normalizedTarget.isEmpty() || normalizedChapter.isEmpty()) return
+        var startSearch = 0
+        while (startSearch < normalizedChapter.length) {
+            val matchedStart = normalizedChapter.indexOf(normalizedTarget, startSearch)
+            if (matchedStart < 0) break
+            val matchedEndExclusive = matchedStart + normalizedTarget.length
+            val rawStart = normalizedToRawIndex[matchedStart]
+            val rawEnd = normalizedToRawIndex[matchedEndExclusive - 1] + 1
+            markThoughtRange(pages, rawStart, rawEnd, selectedText)
+            startSearch = matchedEndExclusive
+        }
+    }
+
+    private fun normalizeForMatch(text: String): String {
+        val sb = StringBuilder(text.length)
+        text.forEach { c ->
+            if (!c.isWhitespace()) {
+                sb.append(c)
+            }
+        }
+        return sb.toString()
+    }
+
+    private fun normalizeWithIndexMap(text: String): Pair<String, IntArray> {
+        val normalizedBuilder = StringBuilder(text.length)
+        val indexList = ArrayList<Int>(text.length)
+        text.forEachIndexed { index, c ->
+            if (!c.isWhitespace()) {
+                normalizedBuilder.append(c)
+                indexList.add(index)
+            }
+        }
+        return normalizedBuilder.toString() to indexList.toIntArray()
     }
 
     /**
