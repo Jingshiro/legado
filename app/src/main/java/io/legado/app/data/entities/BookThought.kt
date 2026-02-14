@@ -1,6 +1,7 @@
 package io.legado.app.data.entities
 
 import android.os.Parcelable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -20,6 +21,8 @@ data class BookThought(
     val bookName: String = "",
     val bookAuthor: String = "",
     val chapterIndex: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    val chapterPos: Int = 0,
     val chapterName: String = "",
     val selectedText: String = "",
     val textHash: String = "",

@@ -742,6 +742,8 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
                     bookName = book.name,
                     bookAuthor = book.author,
                     chapterIndex = page.chapterIndex,
+                    chapterPos = chapter.getReadLength(page.index) +
+                            page.getPosByLineColumn(selectStart.lineIndex, selectStart.columnIndex),
                     chapterName = chapter.title,
                     selectedText = selectedText,
                     textHash = selectedText.hashCode().toString()

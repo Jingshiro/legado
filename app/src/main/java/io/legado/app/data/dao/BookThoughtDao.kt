@@ -19,7 +19,7 @@ interface BookThoughtDao {
         """
         SELECT * FROM book_thoughts
         WHERE bookName = :bookName AND bookAuthor = :bookAuthor
-        ORDER BY chapterIndex, createTime
+        ORDER BY chapterIndex, chapterPos, createTime
     """
     )
     fun flowByBook(bookName: String, bookAuthor: String): Flow<List<BookThought>>
@@ -29,7 +29,7 @@ interface BookThoughtDao {
         SELECT * FROM book_thoughts
         WHERE bookName = :bookName AND bookAuthor = :bookAuthor
         AND (chapterName LIKE '%'||:key||'%' OR selectedText LIKE '%'||:key||'%' OR thought LIKE '%'||:key||'%')
-        ORDER BY chapterIndex, createTime
+        ORDER BY chapterIndex, chapterPos, createTime
     """
     )
     fun flowSearch(bookName: String, bookAuthor: String, key: String): Flow<List<BookThought>>
@@ -38,7 +38,7 @@ interface BookThoughtDao {
         """
         SELECT * FROM book_thoughts
         WHERE bookName = :bookName AND bookAuthor = :bookAuthor
-        ORDER BY chapterIndex, createTime
+        ORDER BY chapterIndex, chapterPos, createTime
     """
     )
     fun getByBook(bookName: String, bookAuthor: String): List<BookThought>
@@ -48,7 +48,7 @@ interface BookThoughtDao {
         SELECT * FROM book_thoughts
         WHERE bookName = :bookName AND bookAuthor = :bookAuthor
         AND chapterIndex = :chapterIndex
-        ORDER BY createTime
+        ORDER BY chapterPos, createTime
     """
     )
     fun getByChapter(bookName: String, bookAuthor: String, chapterIndex: Int): List<BookThought>

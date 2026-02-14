@@ -23,8 +23,7 @@ class TocViewModel(application: Application) : BaseViewModel(application) {
     var bookUrl: String = ""
     var bookData = MutableLiveData<Book>()
     var chapterListCallBack: ChapterListCallBack? = null
-    var bookMarkCallBack: BookmarkCallBack? = null
-    var thoughtCallBack: ThoughtCallBack? = null
+    var bookmarkThoughtCallBack: BookmarkThoughtCallBack? = null
     var searchKey: String? = null
 
     fun initBook(bookUrl: String) {
@@ -74,11 +73,7 @@ class TocViewModel(application: Application) : BaseViewModel(application) {
     }
 
     fun startBookmarkSearch(newText: String?) {
-        bookMarkCallBack?.upBookmark(newText)
-    }
-
-    fun startThoughtSearch(newText: String?) {
-        thoughtCallBack?.upThought(newText)
+        bookmarkThoughtCallBack?.upBookmarkThought(newText)
     }
 
     fun upChapterListAdapter() {
@@ -135,11 +130,7 @@ class TocViewModel(application: Application) : BaseViewModel(application) {
         fun upAdapter()
     }
 
-    interface BookmarkCallBack {
-        fun upBookmark(searchKey: String?)
-    }
-
-    interface ThoughtCallBack {
-        fun upThought(searchKey: String?)
+    interface BookmarkThoughtCallBack {
+        fun upBookmarkThought(searchKey: String?)
     }
 }

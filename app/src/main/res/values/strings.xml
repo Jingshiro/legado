@@ -279,6 +279,7 @@
     <string name="group_yf">Awaiting more</string>
     <string name="bookmark">Bookmarks</string>
     <string name="book_thought">Thoughts</string>
+    <string name="bookmark_and_thought">Bookmarks &amp; Thoughts</string>
     <string name="write_thought">Write thought</string>
     <string name="thought_hint">Write down your thought...</string>
     <string name="thought_saved">Thought saved</string>

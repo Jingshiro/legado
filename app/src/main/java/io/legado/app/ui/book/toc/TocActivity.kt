@@ -90,7 +90,6 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
                     viewModel.searchKey = newText
                     when (tabLayout.selectedTabPosition) {
                         1 -> viewModel.startBookmarkSearch(newText)
-                        2 -> viewModel.startThoughtSearch(newText)
                         else -> viewModel.startChapterListSearch(newText)
                     }
                     return false
@@ -109,11 +108,6 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
         when (tabLayout.selectedTabPosition) {
             1 -> {
                 menu.setGroupVisible(R.id.menu_group_bookmark, true)
-                menu.setGroupVisible(R.id.menu_group_toc, false)
-                menu.setGroupVisible(R.id.menu_group_text, false)
-            }
-            2 -> {
-                menu.setGroupVisible(R.id.menu_group_bookmark, false)
                 menu.setGroupVisible(R.id.menu_group_toc, false)
                 menu.setGroupVisible(R.id.menu_group_text, false)
             }
@@ -205,20 +199,18 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
 
         override fun getItem(position: Int): Fragment {
             return when (position) {
-                1 -> BookmarkFragment()
-                2 -> BookThoughtFragment()
+                1 -> BookmarkThoughtFragment()
                 else -> ChapterListFragment()
             }
         }
 
         override fun getCount(): Int {
-            return 3
+            return 2
         }
 
         override fun getPageTitle(position: Int): CharSequence {
             return when (position) {
-                1 -> getString(R.string.bookmark)
-                2 -> getString(R.string.book_thought)
+                1 -> getString(R.string.bookmark_and_thought)
                 else -> getString(R.string.chapter_list)
             }
         }
