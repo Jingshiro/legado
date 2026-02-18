@@ -103,11 +103,11 @@
                 android:orientation="horizontal">
 
                 <io.legado.app.ui.widget.text.AccentTextView
-                    android:id="@+id/tv_cancel"
+                    android:id="@+id/tv_share"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="12dp"
-                    android:text="@string/cancel"
+                    android:text="@string/share"
                     tools:ignore="RtlHardcoded" />
 
                 <io.legado.app.ui.widget.text.AccentTextView

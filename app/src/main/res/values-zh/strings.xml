@@ -282,6 +282,8 @@
     <string name="thought_hint">写下你的想法...</string>
     <string name="thought_saved">想法已保存</string>
     <string name="thought_deleted">想法已删除</string>
+    <string name="thought_image_saved">想法图片已保存：%1$s</string>
+    <string name="thought_image_save_failed">想法图片保存失败</string>
     <string name="edit_thought">编辑想法</string>
     <string name="delete_thought">删除想法</string>
     <string name="no_thoughts">暂无想法</string>

@@ -733,8 +733,8 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
     fun createThought(): BookThought? {
         val page = relativePage(selectStart.relativePagePos)
         page.getTextChapter().let { chapter ->
-            val selectedText = getSelectedText().trim()
-            if (selectedText.isEmpty()) {
+            val selectedText = getSelectedText().trimEnd('\r', '\n')
+            if (selectedText.isBlank()) {
                 return null
             }
             ReadBook.book?.let { book ->

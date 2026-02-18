@@ -284,6 +284,8 @@
     <string name="thought_hint">Write down your thought...</string>
     <string name="thought_saved">Thought saved</string>
     <string name="thought_deleted">Thought deleted</string>
+    <string name="thought_image_saved">Thought image saved: %1$s</string>
+    <string name="thought_image_save_failed">Failed to save thought image</string>
     <string name="edit_thought">Edit thought</string>
     <string name="delete_thought">Delete thought</string>
     <string name="no_thoughts">No thoughts yet</string>

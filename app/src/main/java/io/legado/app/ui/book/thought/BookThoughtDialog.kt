@@ -54,8 +54,23 @@ class BookThoughtDialog() : BaseDialogFragment(R.layout.dialog_book_thought, tru
             tvChapterName.text = bookThought.chapterName
             editSelectedText.setText(bookThought.selectedText)
             editThought.setText(bookThought.thought)
-            tvCancel.setOnClickListener {
-                dismiss()
+            tvShare.setOnClickListener {
+                val thoughtText = editThought.text?.toString()?.trim().orEmpty()
+                if (thoughtText.isEmpty()) {
+                    context?.toastOnUi(R.string.cannot_empty)
+                    return@setOnClickListener
+                }
+                lifecycleScope.launch {
+                    kotlin.runCatching {
+                        withContext(IO) {
+                            ThoughtImageExporter.exportToLocal(requireContext(), bookThought, thoughtText)
+                        }
+                    }.onSuccess {
+                        context?.toastOnUi(getString(R.string.thought_image_saved, it))
+                    }.onFailure {
+                        context?.toastOnUi(R.string.thought_image_save_failed)
+                    }
+                }
             }
             tvOk.setOnClickListener {
                 val thoughtText = editThought.text?.toString()?.trim().orEmpty()
