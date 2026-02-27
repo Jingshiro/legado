@@ -23,4 +23,4 @@ keystore.properties
 my-release-key.jks
 THOUGHT_FEATURE_PRIVATE_NOTES.md
 THOUGHT_SHARE_FEATURE_PLAN.md
-app/src/main/java/io/legado/app/ui/book/thought/ThoughtImageExporter.kt
+
