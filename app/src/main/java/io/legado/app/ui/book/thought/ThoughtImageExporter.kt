@@ -65,28 +65,28 @@ object ThoughtImageExporter {
         }
         val metaPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = accentGreen
-            textSize = 12f
+            textSize = 20f
             this.typeface = typeface
             isSubpixelText = true
             isLinearText = true
         }
         val selectedPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = textMain
-            textSize = 18f
+            textSize = 30f
             this.typeface = typeface
             isSubpixelText = true
             isLinearText = true
         }
         val thoughtTitlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = accentGreen
-            textSize = 16f
+            textSize = 26f
             this.typeface = Typeface.create(typeface, Typeface.BOLD)
             isSubpixelText = true
             isLinearText = true
         }
         val thoughtPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = textMain
-            textSize = 16f
+            textSize = 26f
             this.typeface = typeface
             isSubpixelText = true
             isLinearText = true
@@ -257,16 +257,16 @@ object ThoughtImageExporter {
         contentWidth: Int
     ): TopMeta {
         val workPaint = TextPaint(paint)
-        val gap = 24f
-        var size = 12f
-        while (size >= 10f) {
+        val gap = 38f
+        var size = 20f
+        while (size >= 16f) {
             workPaint.textSize = size
             if (workPaint.measureText(leftMeta) + workPaint.measureText(chapterName) + gap <= contentWidth) {
                 return TopMeta(size, leftMeta, chapterName)
             }
             size -= 0.5f
         }
-        workPaint.textSize = 10f
+        workPaint.textSize = 16f
         val rightMax = contentWidth * 0.38f
         val rightText = TextUtils.ellipsize(
             chapterName,
@@ -283,7 +283,7 @@ object ThoughtImageExporter {
             TextUtils.TruncateAt.END
         ).toString()
         return TopMeta(
-            textSize = 10f,
+            textSize = 16f,
             leftText = leftText,
             rightText = rightText
         )
