@@ -261,6 +261,7 @@ data class TextLine(
         val dashPaint = TextPaint(ChapterProvider.contentPaint).apply {
             color = ReadBookConfig.textAccentColor
             pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+            strokeWidth = 2.5f.dpToPx()
         }
         var start = -1f
         var end = -1f

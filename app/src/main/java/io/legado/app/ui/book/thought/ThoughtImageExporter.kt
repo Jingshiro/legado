@@ -37,7 +37,7 @@ object ThoughtImageExporter {
     }
 
     private fun buildBitmap(thought: BookThought, thoughtText: String): Bitmap {
-        val width = 700
+        val width = 1125
         val horizontalPadding = 36
         val topBarHeight = 6
         val topPadding = 22
