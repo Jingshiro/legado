@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Legado Card Templates</title>
+    <style>
+      :root {
+        --card-font-family: sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+      }
+
+      /* 卡片占满视口宽度，高度随内容自然撑开 */
+      .card {
+        width: 100vw;
+        padding: 20px 22px 18px;
+        position: relative;
+        font-family: var(--card-font-family);
+        /* 防止截屏时内容被截断 */
+        overflow: visible;
+      }
+
+      /* 顶部信息行：书名左对齐，章节名右对齐 */
+      .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 18px;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+
+      .header-row span {
+        flex-shrink: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-row span:first-child {
+        flex-grow: 1;
+        margin-right: 14px;
+      }
+
+      .header-row span:last-child {
+        flex-shrink: 0;
+        max-width: 48%;
+        text-align: right;
+      }
+
+      /* 原文内容 */
+      .content {
+        font-size: 18px;
+        line-height: 1.75;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      /* 感想区 */
+      .thought-box {
+        font-size: 15px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .thought-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+        display: block;
+        opacity: 0.65;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+      }
+
+      /* ── 风格 0：默认经典 ── */
+      .style-default {
+        background: #f5f5f0;
+        border: 2px solid #5a7c62;
+        color: #3d3d3d;
+      }
+      .style-default::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: #5a7c62;
+      }
+      .style-default .header-row { color: #5a7c62; }
+      .style-default .content {
+        background: rgba(90, 124, 98, 0.12);
+        padding: 8px 12px;
+        border-left: 3px solid #5a7c62;
+        border-radius: 2px;
+      }
+      .style-default .thought-box {
+        background: rgba(90, 124, 98, 0.07);
+        padding: 8px 12px 6px;
+        border-radius: 8px;
+      }
+      .style-default .thought-label { color: #5a7c62; }
+
+      /* ── 风格 1：暖色调黏土 ── */
+      .style-clay {
+        background: #fdf2d9;
+        border-radius: 0;
+        box-shadow:
+          inset 8px 8px 18px #f3e5c8,
+          inset -8px -8px 18px rgba(255, 255, 255, 0.55);
+        color: #8c7851;
+      }
+      .style-clay .thought-box {
+        background: #f7efe0;
+        padding: 8px 12px 6px;
+        border-radius: 14px;
+        box-shadow: inset 4px 4px 10px #e6dec9;
+      }
+      .style-clay .thought-label { opacity: 0.7; }
+
+      /* ── 风格 2：水墨古风 ── */
+      .style-ink {
+        background: #fcfaf2;
+        border: 1px solid #d1c7b7;
+        color: #222;
+        padding-top: 32px;
+      }
+      .style-ink .header-row {
+        border-bottom: 1px solid #d1c7b7;
+        padding-bottom: 10px;
+      }
+      .style-ink .content { padding: 8px 0; }
+      .style-ink .thought-box {
+        border-left: 2.5px solid #a62c2c;
+        padding-left: 14px;
+        color: #555;
+      }
+      .style-ink .thought-label { color: #a62c2c; }
+
+      /* ── 风格 3：民国报纸风 ── */
+      .style-news {
+        background: #ede9de;
+        border: 2px solid #333;
+        padding: 20px 18px;
+      }
+      .style-news .header-row {
+        border-bottom: 3px double #333;
+        color: #1d4ed8;
+        font-weight: bold;
+        padding-bottom: 6px;
+      }
+      .style-news .book-name { color: #b91c1c; font-size: 15px; }
+      .style-news .content { color: #000; text-align: justify; }
+      .style-news .thought-box {
+        border-top: 1px dashed #444;
+        padding: 7px 8px 4px;
+        background: rgba(0, 0, 0, 0.03);
+        color: #333;
+      }
+
+      /* ── 风格 4：文艺黑金 ── */
+      .style-art {
+        background: #1a1a1a;
+        color: #d4d4d4;
+        padding: 24px 26px 20px;
+      }
+      .style-art .header-row {
+        color: #a16207;
+        border-left: 2px solid #a16207;
+        padding-left: 10px;
+      }
+      .style-art .content {
+        font-size: 19px;
+        border-bottom: 1px solid #2e2e2e;
+        padding-bottom: 10px;
+      }
+      .style-art .thought-box { color: #ddd; padding-top: 8px; }
+      .style-art .thought-label { color: #a16207; }
+
+      /* 默认隐藏所有卡片，仅激活的显示 */
+      .card { display: none; }
+      .card.active { display: block; }
+    </style>
+  </head>
+  <body id="container">
+
+    <!-- 风格 0：默认经典 -->
+    <div class="card style-default" id="card-0">
+      <div class="header-row">
+        <span class="t-book-meta"></span>
+        <span class="t-chapter"></span>
+      </div>
+      <div class="content t-content"></div>
+      <div class="thought-box">
+        <span class="thought-label">[感想]</span>
+        <span class="t-thought"></span>
+      </div>
+    </div>
+
+    <!-- 风格 1：黏土 -->
+    <div class="card style-clay" id="card-1">
+      <div class="header-row">
+        <span class="t-book-meta"></span>
+        <span class="t-chapter"></span>
+      </div>
+      <div class="content t-content"></div>
+      <div class="thought-box">
+        <span class="thought-label">感想</span>
+        <span class="t-thought"></span>
+      </div>
+    </div>
+
+    <!-- 风格 2：水墨 -->
+    <div class="card style-ink" id="card-2">
+      <div class="header-row">
+        <span class="t-book-meta"></span>
+        <span class="t-chapter"></span>
+      </div>
+      <div class="content t-content"></div>
+      <div class="thought-box">
+        <span class="thought-label">感想</span>
+        <span class="t-thought"></span>
+      </div>
+    </div>
+
+    <!-- 风格 3：复古 -->
+    <div class="card style-news" id="card-3">
+      <div class="header-row">
+        <span class="book-name t-book-meta"></span>
+        <span class="t-chapter"></span>
+      </div>
+      <div class="content t-content"></div>
+      <div class="thought-box">
+        <span class="thought-label">感想</span>
+        <span class="t-thought"></span>
+      </div>
+    </div>
+
+    <!-- 风格 4：黑金 -->
+    <div class="card style-art" id="card-4">
+      <div class="header-row">
+        <span class="t-book-meta"></span>
+        <span class="t-chapter"></span>
+      </div>
+      <div class="content t-content"></div>
+      <div class="thought-box">
+        <span class="thought-label">感想</span>
+        <span class="t-thought"></span>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * 注入字体：将 base64 字体文件动态插入 @font-face，
+       * 并更新 CSS 变量 --card-font-family
+       * @param {string} base64Data  字体文件的 base64 编码（不含前缀）
+       * @param {string} mimeType    字体 MIME 类型，如 "font/ttf"、"font/otf"
+       */
+      function setFont(base64Data, mimeType) {
+        var style = document.getElementById('injected-font-style');
+        if (!style) {
+          style = document.createElement('style');
+          style.id = 'injected-font-style';
+          document.head.appendChild(style);
+        }
+        style.textContent =
+          '@font-face {' +
+          '  font-family: "ReadFont";' +
+          '  src: url("data:' + mimeType + ';base64,' + base64Data + '");' +
+          '}';
+        document.documentElement.style.setProperty('--card-font-family', '"ReadFont", sans-serif');
+      }
+
+      /**
+       * 使用系统字体族（无自定义字体时调用）
+       * @param {string} fontFamily  如 "serif"、"monospace"、"sans-serif"
+       */
+      function setSystemFont(fontFamily) {
+        var style = document.getElementById('injected-font-style');
+        if (style) style.textContent = '';
+        document.documentElement.style.setProperty('--card-font-family', fontFamily);
+      }
+
+      /**
+       * 更新所有卡片的文字内容，并切换到指定风格
+       */
+      function updateContent(bookName, author, chapter, content, thought, styleIndex) {
+        var meta = (bookName + (author ? ' · ' + author : ''))
+          .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var safeChapter = (chapter || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var safeContent = (content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var safeThought = (thought || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        document.querySelectorAll('.card').forEach(function(card) {
+          card.querySelector('.t-book-meta').innerHTML = meta;
+          card.querySelector('.t-chapter').innerHTML  = safeChapter;
+          card.querySelector('.t-content').innerHTML  = safeContent;
+          card.querySelector('.t-thought').innerHTML  = safeThought;
+        });
+
+        changeStyle(styleIndex);
+      }
+
+      /**
+       * 切换显示的卡片风格，并调整 body 背景色以适配截图
+       */
+      function changeStyle(index) {
+        document.querySelectorAll('.card').forEach(function(card) {
+          card.classList.remove('active');
+        });
+        var target = document.getElementById('card-' + index);
+        if (!target) return;
+        target.classList.add('active');
+
+        var bgMap = { 0: '#ffffff', 1: '#fdf2d9', 2: '#fcfaf2', 3: '#ede9de', 4: '#000000' };
+        document.body.style.backgroundColor = bgMap[index] || '#ffffff';
+      }
+    </script>
+  </body>
+</html>
