@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - '**/modules/web/**'
+      - "**/modules/web/**"
   pull_request:
     paths:
-      - '**/modules/web/**'
+      - "**/modules/web/**"
   workflow_dispatch:
 
 env:
-  UPSTREAM_REPOSITORY: Luoyacheng/legado
+  UPSTREAM_REPOSITORY: Jingshiro/legado
 
 jobs:
   build:
@@ -62,4 +62,3 @@ jobs:
         with:
           commit_message: Bump web ${{ env.APP_VER}}
           file_pattern: app/src/main/assets/web/vue/
-

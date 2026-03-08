@@ -1,11 +1,11 @@
 name: Release Build
 
 on:
-#  push:
-#    branches:
-#      - master
-#    paths:
-#      - 'CHANGELOG.md'
+  #  push:
+  #    branches:
+  #      - master
+  #    paths:
+  #      - 'CHANGELOG.md'
   workflow_dispatch:
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
     if: ${{ needs.prepare.outputs.sign }}
     strategy:
       matrix:
-        product: [ app, google ]
+        product: [app, google]
       fail-fast: false
     runs-on: ubuntu-latest
     env:
@@ -47,7 +47,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 17
 
       - name: Release Apk Sign
@@ -79,7 +79,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/apk/
           cp -rf ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk ${{ github.workspace }}/apk/
-          
+
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v6
         with:
@@ -98,7 +98,7 @@ jobs:
           files: ${{ github.workspace }}/apk/legado_app_*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Prepare For GooglePlay
         if: env.product == 'google' && env.play == 'yes'
         run: |
@@ -117,7 +117,7 @@ jobs:
           whatsNewDirectory: ${{ github.workspace }}/ReleaseNotes
 
       - name: Push Assets To "release" Branch
-        if: ${{ github.actor == 'gedoor' }}
+        if: ${{ github.actor == 'Jingshiro' }}
         run: |
           cd $GITHUB_WORKSPACE/apk/
           git init
@@ -128,9 +128,9 @@ jobs:
           git add *.apk
           git commit -m "${{ env.VERSION }}"
           git push -f -u origin release
-          
+
       - name: Purge Jsdelivr Cache
-        if: ${{ github.actor == 'gedoor' }}
+        if: ${{ github.actor == 'Jingshiro' }}
         run: |
           result=$(curl -s https://purge.jsdelivr.net/gh/${{ github.actor }}/release@release/)
           if echo $result |grep -q 'success.*true'; then

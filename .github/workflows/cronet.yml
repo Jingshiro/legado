@@ -2,14 +2,14 @@ name: Update Cronet
 
 on:
   schedule:
-  # 周一北京时间9点
+    # 周一北京时间9点
     - cron: 0 1 * * 1
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'Luoyacheng/legado' }}
+    if: ${{ github.repository == 'Jingshiro/legado' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -20,7 +20,7 @@ jobs:
         if: ${{ env.cronet == 'ok' }}
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 17
 
       - uses: gradle/actions/setup-gradle@v5
