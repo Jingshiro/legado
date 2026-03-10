@@ -3,9 +3,15 @@
 欢迎关注公众号[阅读Plus]即时了解软件更新资讯  
 <img src="https://open.weixin.qq.com/qr/code?username=legado_plus" width="300">
 
-### 本分支分支增强特性
+### 本分支特性
 
-- **详细阅读记录**：支持记录更细致的阅读进度，支持导出与统计。可选导入在线查询订阅源：[一键导入](https://pub-0e6ce5d0161d4148a621c594405613f1.r2.dev/rssSource_阅读记录查询.json)
+本分支由 Jingshiro 维护，项目地址：[https://github.com/Jingshiro/legado](https://github.com/Jingshiro/legado)
+
+- **详细阅读记录**：支持记录更细致的阅读进度，支持导出与统计。
+  - **可视化查看方式：**
+    1. 在订阅中通过“网络导入”以下链接：
+       `https://pub-0e6ce5d0161d4148a621c594405613f1.r2.dev/rssSource_阅读记录查询.json`
+    2. 导入成功后，点击该订阅源即可在线查询详细阅读记录。
 - **想法分享功能**：支持在阅读时长按文字写想法，并可以生成精美分享卡片。
 
 ## cronet版本: 128.0.6613.40
