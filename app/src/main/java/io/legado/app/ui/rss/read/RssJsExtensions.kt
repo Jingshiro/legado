@@ -13,6 +13,7 @@ import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.RssReadRecord
 import io.legado.app.data.entities.RssSource
 import io.legado.app.help.JsExtensions
+import io.legado.app.help.readrecord.DetailedReadRecordHelper
 import io.legado.app.model.AudioPlay
 import io.legado.app.model.ReadBook
 import io.legado.app.model.VideoPlay
@@ -65,6 +66,15 @@ open class RssJsExtensions(
     @JavascriptInterface
     fun get(key: String): String {
         return getSource()?.get(key) ?: ""
+    }
+
+    @JavascriptInterface
+    fun getReadRecordDetail(): String? {
+        val url = activityRef.get()?.findViewById<android.webkit.WebView>(io.legado.app.R.id.web_view)?.url ?: ""
+        if (url.contains("myst423.shop/recorder/")) {
+            return DetailedReadRecordHelper.buildExportJson(appDb.detailedReadRecordDao.all())
+        }
+        return null
     }
 
     @JavascriptInterface
