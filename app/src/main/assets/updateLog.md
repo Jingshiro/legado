@@ -1,13 +1,23 @@
 # 更新日志
+
 欢迎关注公众号[阅读Plus]即时了解软件更新资讯  
 <img src="https://open.weixin.qq.com/qr/code?username=legado_plus" width="300">
 
 ## cronet版本: 128.0.6613.40
 
+**2026/03/10**
+
+- 新增：详细阅读记录功能（支持查看、导出与统计）
+- 新增：在线查询订阅源导入（订阅：https://pub-0e6ce5d0161d4148a621c594405613f1.r2.dev/rssSource_阅读记录查询.json）
+- 新增：想法功能（支持长按文字写想法、分享想法到卡片）
+- 优化：同步代码时的历史记录清理与 .gitignore 配置更新
+
 **2026/03/07**
+
 - 优化代码，修复问题
 
 **2026/03/03**
+
 - 优化代码，修复问题
 - 视频悬浮窗播放时进行系统媒体播放通知
 - 净化规则使用js时支持调用java.log
@@ -17,6 +27,7 @@
 - 增加自动检查app更新功能
 
 **2026/02/16**
+
 - 优化代码，修复问题
 - 让小说朗读走系统媒体播放通道
 - 更新内置字典规则
@@ -27,9 +38,10 @@
 - 提升购买按钮权限
 
 **2026/01/31**
+
 - 优化代码，修复一些问题
 - 正文增加锁定反向横屏
-**2026/01/28**
+  **2026/01/28**
 - 新增java.reLoginView()函数，刷新登录界面
 - 书源发现支持更多丰富的按钮类型
 - 新增java.refreshExplore()函数
@@ -50,6 +62,7 @@
 - 其余优化与修复
 
 **2026/01/13**
+
 - 软件自定义背景图支持.9.png格式
 - 背景图导入支持直接输入图片在线链接
 - 主题分享支持在线背景图链接
@@ -72,17 +85,19 @@
 - 视频播放器支持记录函数调用时的播放进度
 - 其余细节优化与bug修复
 
-
 ## **必读**
+
 来源于fork仓库 [Luoyacheng/legado](https://github.com/Luoyacheng/legado)　  
-[查看实时详细日志](https://gitee.com/lyc486/legado/commits/main)　 
+[查看实时详细日志](https://gitee.com/lyc486/legado/commits/main)　
 
-【温馨提醒】 *更新前一定要做好备份，以免数据丢失！*  
-* 阅读只是一个转码工具，不提供内容，第一次安装app，需要自己手动导入书源。
-* 正文出现缺字漏字、内容缺失、排版错乱等情况，有可能是净化规则或简繁转换出现问题。
-----
+【温馨提醒】 _更新前一定要做好备份，以免数据丢失！_
 
-* [2025年日志](https://github.com/Luoyacheng/legado/blob/record2025/app/src/main/assets/updateLog.md)　
-* [2023年日志](https://github.com/gedoor/legado/blob/record2023/app/src/main/assets/updateLog.md)　
-* [2022年日志](https://github.com/gedoor/legado/blob/record2022/app/src/main/assets/updateLog.md)　
-* [2021年日志](https://github.com/gedoor/legado/blob/record2021/app/src/main/assets/updateLog.md)　
+- 阅读只是一个转码工具，不提供内容，第一次安装app，需要自己手动导入书源。
+- 正文出现缺字漏字、内容缺失、排版错乱等情况，有可能是净化规则或简繁转换出现问题。
+
+---
+
+- [2025年日志](https://github.com/Luoyacheng/legado/blob/record2025/app/src/main/assets/updateLog.md)　
+- [2023年日志](https://github.com/gedoor/legado/blob/record2023/app/src/main/assets/updateLog.md)　
+- [2022年日志](https://github.com/gedoor/legado/blob/record2022/app/src/main/assets/updateLog.md)　
+- [2021年日志](https://github.com/gedoor/legado/blob/record2021/app/src/main/assets/updateLog.md)　
