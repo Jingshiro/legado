@@ -43,7 +43,7 @@ const getImageSrc = (content: string) => {
     return API.getProxyImageUrl(
       bookUrl.value,
       src,
-      useBookStore().config.readWidth,
+      readWidth.value,
     )
   return src
 }
@@ -68,16 +68,15 @@ const proxyImage = (event: Event) => {
  * 处理传入的IMG标签错误事件，自动替换图片的代理链接
  */
 const handleImgLoadError = (event: Event) => {
-  if ((event.target as HTMLElement)?.tagName === "IMG") {
-    console.log("[ChapterContent]: IMG Load Error, replace src:",
-      (event.target as HTMLImageElement)?.getAttribute("src"), "=>",
-      API.getProxyImageUrl(
-        bookUrl.value,
-        (event.target as HTMLImageElement)?.getAttribute("src") ?? "",
-        readWidth.value,
-      )
+  const target = event.target
+  if (target instanceof HTMLImageElement) {
+    const newUrl = getImageSrc(target.outerHTML)
+    console.log(
+      "[ChapterContent]: IMG Load Error, replace src:",
+      target.getAttribute("src"), "=>",
+      newUrl
     )
-    proxyImage(event)
+    target.src = newUrl
   }
 }
 

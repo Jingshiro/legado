@@ -83,6 +83,7 @@ import io.legado.app.utils.observeEvent
 import io.legado.app.utils.openFileUri
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.setHtml
+import io.legado.app.utils.setMarkdown
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.toastOnUi
@@ -177,15 +178,26 @@ class BookInfoActivity :
 
     override val binding by viewBinding(ActivityBookInfoBinding::inflate)
     override val viewModel by viewModels<BookInfoViewModel>()
+    private val imgAvailableWidth by lazy {
+        val textView = binding.tvIntro
+        textView.width - textView.paddingLeft - textView.paddingRight - 8.dpToPx()  //8是为了文字对齐额外的右边距
+    }
     private var initGetter = false
     private val glideImageGetter by lazy {
         initGetter = true
-        GlideImageGetter(this, binding.tvIntro, lifecycle)
+        GlideImageGetter(
+            this,
+            binding.tvIntro,
+            lifecycle,
+            imgAvailableWidth,
+            viewModel.bookSource?.bookSourceUrl
+        )
     }
+
     private val textViewTagHandler by lazy {
         TextViewTagHandler(object : TextViewTagHandler.OnButtonClickListener {
-            override fun onButtonClick(name: String, click: String?) {
-                viewModel.onButtonClick(this@BookInfoActivity, name, click)
+            override fun onButtonClick(name: String, click: String) {
+                viewModel.onButtonClick(this@BookInfoActivity, "info button $name" , click)
             }
         })
     }
@@ -247,7 +259,13 @@ class BookInfoActivity :
             R.id.menu_custom_btn -> {
                 viewModel.bookSource?.customButton?.let {
                     viewModel.getBook()?.let { book ->
-                        SourceCallBack.callBackBtn(this,SourceCallBack.CLICK_CUSTOM_BUTTON, viewModel.bookSource, book, null)
+                        SourceCallBack.callBackBtn(
+                            this,
+                            SourceCallBack.CLICK_CUSTOM_BUTTON,
+                            viewModel.bookSource,
+                            book,
+                            null
+                        )
                     }
                 }
             }
@@ -262,9 +280,16 @@ class BookInfoActivity :
 
             R.id.menu_share_it -> {
                 viewModel.getBook()?.let {
-                    SourceCallBack.callBackBtn(this,SourceCallBack.CLICK_SHARE_BOOK, viewModel.bookSource, it, null) {
-                        val bookJson = GSON.toJson(it)
-                        val shareStr = "${it.bookUrl}#$bookJson"
+                    val bookJson = GSON.toJson(it)
+                    val shareStr = "${it.bookUrl}#$bookJson"
+                    SourceCallBack.callBackBtn(
+                        this,
+                        SourceCallBack.CLICK_SHARE_BOOK,
+                        viewModel.bookSource,
+                        it,
+                        null,
+                        result = shareStr
+                    ) {
                         val intent = Intent(Intent.ACTION_SEND)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         intent.putExtra(Intent.EXTRA_TEXT, shareStr)
@@ -290,13 +315,27 @@ class BookInfoActivity :
             R.id.menu_set_source_variable -> setSourceVariable()
             R.id.menu_set_book_variable -> setBookVariable()
             R.id.menu_copy_book_url -> viewModel.getBook()?.let {
-                SourceCallBack.callBackBtn(this, SourceCallBack.CLICK_COPY_BOOK_URL, viewModel.bookSource, it, null) {
+                SourceCallBack.callBackBtn(
+                    this,
+                    SourceCallBack.CLICK_COPY_BOOK_URL,
+                    viewModel.bookSource,
+                    it,
+                    null,
+                    result = it.bookUrl
+                ) {
                     sendToClip(it.bookUrl)
                 }
             }
 
             R.id.menu_copy_toc_url -> viewModel.getBook()?.let {
-                SourceCallBack.callBackBtn(this, SourceCallBack.CLICK_COPY_TOC_URL, viewModel.bookSource, it, null) {
+                SourceCallBack.callBackBtn(
+                    this,
+                    SourceCallBack.CLICK_COPY_TOC_URL,
+                    viewModel.bookSource,
+                    it,
+                    null,
+                    result = it.tocUrl
+                ) {
                     sendToClip(it.tocUrl)
                 }
             }
@@ -446,7 +485,17 @@ class BookInfoActivity :
                 return
             }
             val html = intro.substring(9, lastIndex)
-            tvIntro.setHtml(html, glideImageGetter, textViewTagHandler)
+            tvIntro.setHtml(
+                html,
+                glideImageGetter,
+                textViewTagHandler,
+                imgOnLongClickListener = {
+                    showDialogFragment(PhotoDialog(it, viewModel.bookSource?.bookSourceUrl))
+                },
+                imgOnClickListener = {
+                    viewModel.onButtonClick(this@BookInfoActivity, "info image" , it)
+                }
+            )
         } else if (intro.startsWith("<md>")) {
             val lastIndex = intro.lastIndexOf("<")
             if (lastIndex < 4) {
@@ -467,9 +516,8 @@ class BookInfoActivity :
                                 Glide.with(context)
                                     .applyDefaultRequestOptions(
                                         RequestOptions()
-                                            .override(tvIntro.width - tvIntro.paddingLeft - tvIntro.paddingRight - 8.dpToPx())
+                                            .override(imgAvailableWidth)
                                             .encodeQuality(88)
-                                            .format(DecodeFormat.PREFER_RGB_565)
                                     )
                             )
                         )
@@ -478,7 +526,13 @@ class BookInfoActivity :
                         .build()
                     markwon.toMarkdown(mark)
                 }
-                markwon.setParsedMarkdown(tvIntro, markdown)
+                tvIntro.setMarkdown(
+                    markwon,
+                    markdown,
+                    imgOnLongClickListener = { source ->
+                        showDialogFragment(PhotoDialog(source, viewModel.bookSource?.bookSourceUrl))
+                    }
+                )
             }
         } else {
             tvIntro.text = intro
@@ -501,7 +555,30 @@ class BookInfoActivity :
                 lbKind.gone()
             } else {
                 lbKind.visible()
-                lbKind.setLabels(kinds)
+                lbKind.setLabels(
+                    kinds,
+                    { kind ->
+                        SourceCallBack.callBackBtn(
+                            this@BookInfoActivity,
+                            SourceCallBack.CLICK_BOOK_LABEL,
+                            viewModel.bookSource,
+                            book,
+                            null,
+                            result = kind
+                        )
+                    },
+                    { kind ->
+                        SourceCallBack.callBackBtn(
+                            this@BookInfoActivity,
+                            SourceCallBack.LONG_CLICK_BOOK_LABEL,
+                            viewModel.bookSource,
+                            book,
+                            null,
+                            result = kind
+                        )
+                        true
+                    }
+                )
             }
         }
     }
@@ -644,7 +721,14 @@ class BookInfoActivity :
         }
         tvAuthor.setOnClickListener {
             viewModel.getBook(false)?.let { book ->
-                SourceCallBack.callBackBtn(this@BookInfoActivity, SourceCallBack.CLICK_AUTHOR, viewModel.bookSource, book, null) {
+                SourceCallBack.callBackBtn(
+                    this@BookInfoActivity,
+                    SourceCallBack.CLICK_AUTHOR,
+                    viewModel.bookSource,
+                    book,
+                    null,
+                    result = book.author
+                ) {
                     startActivity<SearchActivity> {
                         putExtra("key", book.author)
                     }
@@ -653,7 +737,14 @@ class BookInfoActivity :
         }
         tvAuthor.setOnLongClickListener {
             viewModel.getBook(false)?.let { book ->
-                SourceCallBack.callBackBtn(this@BookInfoActivity, SourceCallBack.LONG_CLICK_AUTHOR, viewModel.bookSource, book, null) {
+                SourceCallBack.callBackBtn(
+                    this@BookInfoActivity,
+                    SourceCallBack.LONG_CLICK_AUTHOR,
+                    viewModel.bookSource,
+                    book,
+                    null,
+                    result = book.author
+                ) {
                     startActivity<SearchActivity> {
                         putExtra("key", book.author)
                     }
@@ -663,7 +754,14 @@ class BookInfoActivity :
         }
         tvName.setOnClickListener {
             viewModel.getBook(false)?.let { book ->
-                SourceCallBack.callBackBtn(this@BookInfoActivity, SourceCallBack.CLICK_BOOK_NAME, viewModel.bookSource, book, null) {
+                SourceCallBack.callBackBtn(
+                    this@BookInfoActivity,
+                    SourceCallBack.CLICK_BOOK_NAME,
+                    viewModel.bookSource,
+                    book,
+                    null,
+                    result = book.name
+                ) {
                     startActivity<SearchActivity> {
                         putExtra("key", book.name)
                     }
@@ -672,7 +770,14 @@ class BookInfoActivity :
         }
         tvName.setOnLongClickListener {
             viewModel.getBook(false)?.let { book ->
-                SourceCallBack.callBackBtn(this@BookInfoActivity, SourceCallBack.LONG_CLICK_BOOK_NAME, viewModel.bookSource, book, null) {
+                SourceCallBack.callBackBtn(
+                    this@BookInfoActivity,
+                    SourceCallBack.LONG_CLICK_BOOK_NAME,
+                    viewModel.bookSource,
+                    book,
+                    null,
+                    result = book.name
+                ) {
                     startActivity<SearchActivity> {
                         putExtra("key", book.name)
                     }
