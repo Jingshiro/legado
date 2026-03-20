@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.legado.app.R
 import io.legado.app.base.BaseActivity
@@ -23,8 +25,23 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
         initView()
         bindEvent()
         observeData()
+        setupKeyboardAdjustment()
         // 让 initMessages 内部自行决定恢复缓存还是重新初始化
         viewModel.initMessages(ReadBook.curTextChapter?.getContent())
+    }
+
+    /**
+     * 监听键盘弹起/收起，手动调整底部 padding，兼容全面屏及 Android 10+ 的 edge-to-edge 场景。
+     */
+    private fun setupKeyboardAdjustment() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            // 键盘弹出时 imeHeight > navBarHeight，底部额外留出键盘高度
+            val bottomPadding = if (imeHeight > navBarHeight) imeHeight else navBarHeight
+            binding.root.setPadding(0, 0, 0, bottomPadding)
+            insets
+        }
     }
 
     private fun initView() {

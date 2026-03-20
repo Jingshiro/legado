@@ -164,7 +164,8 @@
         <activity
             android:name=".ui.book.read.ai.AiChatActivity"
             android:configChanges="locale|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- 阅读漫画界面 -->
         <activity
