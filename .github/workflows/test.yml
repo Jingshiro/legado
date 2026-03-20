@@ -180,7 +180,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build With Gradle
-        continue-on-error: true
         run: |
           if [ "${{ env.type }}" == 'release' ]; then
             typeName="原包名"
@@ -194,10 +193,15 @@ jobs:
           echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
           ./gradlew assemble${{ env.product }}release assemble${{ env.product }}debug --build-cache --parallel --daemon --warning-mode all
-          echo "修改APK文件名"
+      - name: Organize the Files
+        run: |
           mkdir -p ${{ github.workspace }}/apk/
-          for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
-            if [[ "$file" == *"debug"* ]]; then
+          find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec cp {} ${{ github.workspace }}/apk/ \;
+
+          # Rename APKs
+          for file in `find ${{ github.workspace }}/apk/ -maxdepth 1 -name "*.apk"`; do
+            filename=$(basename "$file")
+            if [[ "$filename" == *"debug"* ]]; then
               variant="debug"
             else
               variant="release"
