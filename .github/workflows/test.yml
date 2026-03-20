@@ -195,6 +195,11 @@ jobs:
           ./gradlew assemble${{ env.product }}release assemble${{ env.product }}debug --build-cache --parallel --daemon --warning-mode all
       - name: Organize the Files
         run: |
+          if [ "${{ env.type }}" == 'release' ]; then
+            typeName="原包名"
+          else
+            typeName="共存"
+          fi
           mkdir -p ${{ github.workspace }}/apk/
           find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec cp {} ${{ github.workspace }}/apk/ \;
 
