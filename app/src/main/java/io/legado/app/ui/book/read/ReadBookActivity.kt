@@ -1252,6 +1252,10 @@ class ReadBookActivity : BaseReadBookActivity(),
     /**
      * 打开搜索界面
      */
+    override fun openAiCompanion() {
+        startActivity<io.legado.app.ui.book.read.ai.AiChatActivity>()
+    }
+
     override fun openSearchActivity(searchWord: String?) {
         val book = ReadBook.book ?: return
         searchContentActivity.launch {

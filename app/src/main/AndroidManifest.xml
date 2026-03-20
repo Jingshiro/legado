@@ -160,6 +160,12 @@
                 android:resource="@xml/spen_remote_actions" />
         </activity>
 
+        <!-- AI阅读伴侣界面 -->
+        <activity
+            android:name=".ui.book.read.ai.AiChatActivity"
+            android:configChanges="locale|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:launchMode="singleTop" />
+
         <!-- 阅读漫画界面 -->
         <activity
             android:name=".ui.book.manga.ReadMangaActivity"
