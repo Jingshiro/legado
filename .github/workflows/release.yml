@@ -66,36 +66,30 @@ jobs:
       - name: Build With Gradle
         run: |
           if [ "${{ env.type }}" == 'release' ]; then
-            typeName="原包名"
+            typeName="标准版"
           else
-            typeName="共存"
+            typeName="Beta版"
             sed "s/'.release'/'.releaseS'/" $GITHUB_WORKSPACE/app/build.gradle  -i
           fi
           echo "统一版本号"
           sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
           echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
-          ./gradlew assemble${{ env.product }}release assemble${{ env.product }}debug --build-cache --parallel --daemon --warning-mode all
+          ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all
 
       - name: Organize the Files
         run: |
           if [ "${{ env.type }}" == 'release' ]; then
-            typeName="release"
+            typeName=""
           else
-            typeName="plus"
+            typeName="_beta"
           fi
           mkdir -p ${{ github.workspace }}/apk/
           find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec cp {} ${{ github.workspace }}/apk/ \;
 
           # Rename APKs
           for file in `find ${{ github.workspace }}/apk/ -maxdepth 1 -name "*.apk"`; do
-            filename=$(basename "$file")
-            if [[ "$filename" == *"debug"* ]]; then
-              variant="debug"
-            else
-              variant="release"
-            fi
-            mv "$file" ${{ github.workspace }}/apk/legado_app_${{ env.VERSION }}_${typeName}_${variant}.apk
+            mv "$file" ${{ github.workspace }}/apk/legado_app_${{ env.VERSION }}${typeName}.apk
           done
 
       - name: Upload App To Artifact
