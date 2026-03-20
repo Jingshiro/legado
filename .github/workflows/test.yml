@@ -135,11 +135,7 @@ jobs:
           echo "body=$CONTENT_JSON" >> $GITHUB_OUTPUT
       - id: set-matrix
         run: |
-          if [ "${{ steps.updateLog.outputs.updated }}" == "yes" ]; then
-            echo 'build_matrix={"product":["app"],"type":["release","releaseS"]}' >> $GITHUB_OUTPUT
-          else
-            echo 'build_matrix={"product":["app"],"type":["release"]}' >> $GITHUB_OUTPUT
-          fi
+          echo 'build_matrix={"product":["app"],"type":["release","releaseS"]}' >> $GITHUB_OUTPUT
 
   build:
     needs: prepare

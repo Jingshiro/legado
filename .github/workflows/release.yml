@@ -34,11 +34,13 @@ jobs:
     if: ${{ needs.prepare.outputs.sign }}
     strategy:
       matrix:
-        product: [app, google]
+        product: [app]
+        type: [release, releaseS]
       fail-fast: false
     runs-on: ubuntu-latest
     env:
       product: ${{ matrix.product }}
+      type: ${{ matrix.type }}
       VERSION: ${{ needs.prepare.outputs.version }}
       play: ${{ needs.prepare.outputs.play }}
     steps:
@@ -61,29 +63,45 @@ jobs:
           echo RELEASE_STORE_FILE='./key.jks' >> gradle.properties
           echo ${{ secrets.RELEASE_KEY_STORE }} | base64 --decode > $GITHUB_WORKSPACE/app/key.jks
 
-      - name: Unify Version Name
-        run: |
-          echo "统一版本号"
-          sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Build With Gradle
         run: |
-          echo "开始进行${{ env.product }}构建"
+          if [ "${{ env.type }}" == 'release' ]; then
+            typeName="原包名"
+          else
+            typeName="共存"
+            sed "s/'.release'/'.releaseS'/" $GITHUB_WORKSPACE/app/build.gradle  -i
+          fi
+          echo "统一版本号"
+          sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
+          echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
-          ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all
+          ./gradlew assemble${{ env.product }}release assemble${{ env.product }}debug --build-cache --parallel --daemon --warning-mode all
 
       - name: Organize the Files
         run: |
+          if [ "${{ env.type }}" == 'release' ]; then
+            typeName="release"
+          else
+            typeName="plus"
+          fi
           mkdir -p ${{ github.workspace }}/apk/
-          cp -rf ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk ${{ github.workspace }}/apk/
+          find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec cp {} ${{ github.workspace }}/apk/ \;
+
+          # Rename APKs
+          for file in `find ${{ github.workspace }}/apk/ -maxdepth 1 -name "*.apk"`; do
+            filename=$(basename "$file")
+            if [[ "$filename" == *"debug"* ]]; then
+              variant="debug"
+            else
+              variant="release"
+            fi
+            mv "$file" ${{ github.workspace }}/apk/legado_app_${{ env.VERSION }}_${typeName}_${variant}.apk
+          done
 
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: legado_${{ env.product }}
+          name: legado_${{ env.product }}_${{ env.type }}
           path: ${{ github.workspace }}/apk/*.apk
 
       - name: Release
@@ -95,26 +113,9 @@ jobs:
           body_path: ${{ github.workspace }}/CHANGELOG.md
           draft: false
           prerelease: false
-          files: ${{ github.workspace }}/apk/legado_app_*.apk
+          files: ${{ github.workspace }}/apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare For GooglePlay
-        if: env.product == 'google' && env.play == 'yes'
-        run: |
-          mkdir -p ReleaseNotes
-          ln -s ${{ github.workspace }}/CHANGELOG.md ReleaseNotes/whatsnew-en-US
-          ln -s ${{ github.workspace }}/CHANGELOG.md ReleaseNotes/whatsnew-zh-CN
-
-      - name: Release To GooglePlay
-        if: env.product == 'google' && env.play == 'yes'
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: io.legado.play
-          releaseFiles: ${{ github.workspace }}/apk/legado_google_*.apk
-          track: production
-          whatsNewDirectory: ${{ github.workspace }}/ReleaseNotes
 
       - name: Push Assets To "release" Branch
         if: ${{ github.actor == 'Jingshiro' }}

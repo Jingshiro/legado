@@ -1,13 +1,17 @@
 package io.legado.app.ui.book.read.ai
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import io.legado.app.R
 import io.legado.app.databinding.ItemAiChatBinding
 import io.legado.app.help.config.AiConfig
 import io.legado.app.help.glide.ImageLoader
+import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.utils.gone
 import io.legado.app.utils.visible
 import java.net.URI
@@ -27,16 +31,28 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
             holder.binding.llAiMsg.gone()
             holder.binding.tvUserContent.text = msg.content
             if (AiConfig.userAvatar.isNotBlank()) {
-                holder.binding.ivUserAvatar.clearColorFilter()
+                ImageViewCompat.setImageTintList(holder.binding.ivUserAvatar, null)
                 ImageLoader.load(context, encodeAvatarUrl(AiConfig.userAvatar)).into(holder.binding.ivUserAvatar)
+            } else {
+                ImageViewCompat.setImageTintList(
+                    holder.binding.ivUserAvatar,
+                    ColorStateList.valueOf(ThemeStore.primaryColor(context))
+                )
+                holder.binding.ivUserAvatar.setImageResource(R.drawable.ic_person)
             }
         } else {
             holder.binding.llAiMsg.visible()
             holder.binding.llUserMsg.gone()
             holder.binding.tvAiContent.text = msg.content
             if (AiConfig.aiAvatar.isNotBlank()) {
-                holder.binding.ivAiAvatar.clearColorFilter()
+                ImageViewCompat.setImageTintList(holder.binding.ivAiAvatar, null)
                 ImageLoader.load(context, encodeAvatarUrl(AiConfig.aiAvatar)).into(holder.binding.ivAiAvatar)
+            } else {
+                ImageViewCompat.setImageTintList(
+                    holder.binding.ivAiAvatar,
+                    ColorStateList.valueOf(ThemeStore.primaryColor(context))
+                )
+                holder.binding.ivAiAvatar.setImageResource(R.drawable.ic_ai_companion)
             }
         }
     }
