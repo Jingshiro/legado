@@ -222,6 +222,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
             }
             finish()
         }
+        detailedReadRecordTracker.start()
     }
 
     private fun initView() {

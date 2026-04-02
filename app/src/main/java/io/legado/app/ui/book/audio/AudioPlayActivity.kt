@@ -124,6 +124,7 @@ class AudioPlayActivity :
         }
         viewModel.customBtnListData.observe(this) { menuCustomBtn?.isVisible = it }
         viewModel.initData(intent) {
+            detailedReadRecordTracker.start()
             initListener()
         }
         initView()

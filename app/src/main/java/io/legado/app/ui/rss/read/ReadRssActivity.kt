@@ -171,7 +171,9 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         initView()
         initWebView()
         initLiveData()
-        viewModel.initData(intent)
+        viewModel.initData(intent) {
+            detailedReadRecordTracker.start()
+        }
         currentWebView.clearHistory()
         onBackPressedDispatcher.addCallback(this) {
             if (binding.customWebView.size > 0) { //关闭全屏
@@ -229,7 +231,9 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         binding.progressBar.visible()
         binding.progressBar.setDurProgress(30)
         setIntent(intent)
-        viewModel.initData(intent)
+        viewModel.initData(intent) {
+            detailedReadRecordTracker.start()
+        }
     }
 
     @Suppress("DEPRECATION")

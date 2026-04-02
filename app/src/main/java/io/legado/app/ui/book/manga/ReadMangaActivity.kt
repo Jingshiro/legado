@@ -261,6 +261,7 @@ class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewMode
     }
 
     override fun upContent() {
+        detailedReadRecordTracker.start()
         lifecycleScope.launch {
             setTitle(ReadManga.book?.name)
             val data = withContext(IO) { ReadManga.mangaContents }
