@@ -110,7 +110,7 @@ jobs:
         with:
           name: legado_app_${{ env.VERSION }}
           tag_name: ${{ env.VERSION }}
-          body_path: ${{ github.workspace }}/CHANGELOG.md
+          generate_release_notes: true
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/apk/*.apk
