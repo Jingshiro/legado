@@ -251,6 +251,7 @@ class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewMode
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        detailedReadRecordTracker.stop()
         viewModel.initData(intent)
     }
 
