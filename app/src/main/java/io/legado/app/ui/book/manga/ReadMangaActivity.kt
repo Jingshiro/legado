@@ -75,6 +75,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import kotlin.math.ceil
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 
 class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewModel>(),
     ReadManga.Callback, ChangeBookSourceDialog.CallBack, MangaMenu.CallBack,
@@ -112,6 +114,12 @@ class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewMode
         ScrollTimer(this, binding.recyclerView, lifecycleScope).apply {
             setSpeed(AppConfig.mangaAutoPageSpeed)
         }
+    }
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { ReadManga.book?.name }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
     }
     private var enableAutoScrollPage = false
     private var enableAutoScroll = false
@@ -155,6 +163,7 @@ class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewMode
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        lifecycle.addObserver(detailedReadRecordObserver)
         ReadManga.register(this)
         upSystemUiVisibility(false)
         initRecyclerView()

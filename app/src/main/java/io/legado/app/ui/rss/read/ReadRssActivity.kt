@@ -101,6 +101,8 @@ import java.lang.ref.WeakReference
 import splitties.systemservices.powerManager
 import java.net.URLDecoder
 import androidx.core.graphics.createBitmap
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 
 /**
  * rss阅读界面
@@ -121,6 +123,12 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
     private var customWebViewCallback: WebChromeClient.CustomViewCallback? = null
     private var interfaceInjected: String? = null
     private var needClearHistory = true
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { viewModel.rssSource?.sourceName ?: binding.titleBar.title.toString() }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
+    }
     private val selectImageDir = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
             ACache.get().put(imagePathKey, uri.toString())
@@ -153,6 +161,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        lifecycle.addObserver(detailedReadRecordObserver)
         pooledWebView = WebViewPool.acquire(this)
         currentWebView = pooledWebView.realWebView
         binding.webViewContainer.addView(currentWebView)

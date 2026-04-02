@@ -58,6 +58,8 @@ import io.legado.app.ui.book.audio.SliderPopup.Companion.SPEED
 import io.legado.app.ui.book.audio.SliderPopup.Companion.TIMER
 import io.legado.app.model.SourceCallBack
 import io.legado.app.utils.gone
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 
 /**
  * 音频播放
@@ -78,6 +80,12 @@ class AudioPlayActivity :
     private var lyricOn = false
     private var oldLyric: String? = null
     private var menuCustomBtn: MenuItem? = null
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { AudioPlay.book?.name }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
+    }
 
     private val progressTimeFormat by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -103,6 +111,7 @@ class AudioPlayActivity :
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        lifecycle.addObserver(detailedReadRecordObserver)
         binding.titleBar.setBackgroundResource(R.color.transparent)
         AudioPlay.register(this)
         viewModel.titleData.observe(this) { name ->
