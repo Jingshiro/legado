@@ -40,6 +40,11 @@ object DetailedReadRecordHelper {
     fun buildExportJson(records: List<DetailedReadRecord>): String {
         if (records.isEmpty()) return "[]"
         val root = JsonArray()
+
+        // 预先查询所有笔记并在内存中按书名分组，避免在循环中重复查询数据库，防止 N+1 性能问题
+        val allThoughtsByBook = appDb.bookThoughtDao.all.groupBy { it.bookName }
+        val allBookmarksByBook = appDb.bookmarkDao.all.groupBy { it.bookName }
+
         records.groupBy { it.bookName }.toSortedMap().forEach { (bookName, sessions) ->
             val obj = JsonObject()
             obj.addProperty("bookName", bookName)
@@ -51,6 +56,36 @@ object DetailedReadRecordHelper {
                 sessionArray.add(sessionObj)
             }
             obj.add("sessions", sessionArray)
+
+            // 整合笔记：BookThought（想法）和 Bookmark（书签）
+            val notesArray = JsonArray()
+
+            // 从 BookThought 表中查询该书的所有想法
+            val thoughts = allThoughtsByBook[bookName]?.sortedBy { it.createTime } ?: emptyList()
+            thoughts.forEach { thought ->
+                val noteObj = JsonObject()
+                noteObj.addProperty("bookName", thought.bookName)
+                noteObj.addProperty("chapterName", thought.chapterName)
+                noteObj.addProperty("bookText", thought.selectedText)
+                noteObj.addProperty("content", thought.thought)
+                noteObj.addProperty("time", thought.createTime)
+                notesArray.add(noteObj)
+            }
+
+            // 从 Bookmark 表中查询该书的所有书签（包含书签笔记内容）
+            val bookmarks = allBookmarksByBook[bookName]?.sortedBy { it.time } ?: emptyList()
+            bookmarks.forEach { bookmark ->
+                val noteObj = JsonObject()
+                noteObj.addProperty("bookName", bookmark.bookName)
+                noteObj.addProperty("chapterName", bookmark.chapterName)
+                noteObj.addProperty("bookText", bookmark.bookText)
+                noteObj.addProperty("content", bookmark.content)
+                noteObj.addProperty("time", bookmark.time)
+                notesArray.add(noteObj)
+            }
+
+            obj.add("notes", notesArray)
+
             root.add(obj)
         }
         return GSON.toJson(root)
