@@ -46,6 +46,7 @@ import io.legado.app.help.book.isEpub
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isLocalTxt
 import io.legado.app.help.book.isMobi
+import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.help.book.removeType
 import io.legado.app.help.book.update
 import io.legado.app.help.config.AppConfig
@@ -319,7 +320,13 @@ class ReadBookActivity : BaseReadBookActivity(),
         super.onPostCreate(savedInstanceState)
         viewModel.initReadBookConfig(intent)
         Looper.myQueue().addIdleHandler {
-            viewModel.initData(intent)
+            viewModel.initData(intent) {
+                // 初始化完成后检测书籍是否为已读完状态，若是则询问是否进行下一刷
+                val book = ReadBook.book ?: return@initData
+                if (ReadIterationHelper.isFinished(book) && ReadBook.inBookshelf) {
+                    showNextIterationDialog(book)
+                }
+            }
             false
         }
         justInitData = true
@@ -1114,6 +1121,60 @@ class ReadBookActivity : BaseReadBookActivity(),
     override fun cancelSelect() {
         runOnUiThread {
             binding.readView.cancelSelect()
+        }
+    }
+
+    /**
+     * 实现 ReadBook.CallBack - 书籍读到末尾时弹窗
+     */
+    override fun onBookEnd() {
+        val book = ReadBook.book ?: return
+        // 只处理奇数前的状态：0->1(读完), 2->3(二刷完), ... 即 readIteration 为偶数时
+        if (book.readIteration % 2 != 0) return
+        if (!ReadBook.inBookshelf) return
+        val iterNum = book.readIteration / 2
+        val title = when (iterNum) {
+            0 -> getString(R.string.mark_book_finished)
+            else -> {
+                val nthStr = iterNum + 1
+                "标记${when(nthStr) { 2->"二"; 3->"三"; 4->"四"; 5->"五"; else->"${nthStr}" }}刷完"
+            }
+        }
+        val message = when (iterNum) {
+            0 -> "已读完《${book.name}》，是否标记为已读完？"
+            else -> {
+                val nthStr = iterNum + 1
+                "已完成${when(nthStr) { 2->"二"; 3->"三"; 4->"四"; 5->"五"; else->"${nthStr}" }}刷，是否标记？"
+            }
+        }
+        runOnUiThread {
+            alert(title) {
+                setMessage(message)
+                yesButton {
+                    ReadIterationHelper.markAsFinished(book)
+                    postEvent(EventBus.UP_BOOKSHELF, book.bookUrl)
+                }
+                noButton()
+            }
+        }
+    }
+
+    /**
+     * 弹出是否进行下一刷的弹窗
+     */
+    private fun showNextIterationDialog(book: Book) {
+        val nextIterNum = (book.readIteration + 3) / 2
+        val nthStr = when (nextIterNum) {
+            2 -> "二"; 3 -> "三"; 4 -> "四"; 5 -> "五"; 6 -> "六"; 7 -> "七"
+            else -> "${nextIterNum}"
+        }
+        alert("开始${nthStr}刷") {
+            setMessage("《${book.name}》已标记为读完，是否开始${nthStr}刷？")
+            yesButton {
+                ReadIterationHelper.moveToNextIteration(book)
+                postEvent(EventBus.UP_BOOKSHELF, book.bookUrl)
+            }
+            noButton()
         }
     }
 

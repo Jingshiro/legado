@@ -26,6 +26,24 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="UnusedAttribute" />
 
+    <TextView
+        android:id="@+id/tv_read_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:paddingStart="3dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="1dp"
+        android:textSize="10sp"
+        android:textColor="#FFFFFFFF"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:maxLines="1"
+        app:layout_constraintRight_toRightOf="@+id/iv_cover"
+        app:layout_constraintTop_toTopOf="@+id/iv_cover"
+        tools:ignore="RtlHardcoded,HardcodedText,SmallSp" />
+
     <FrameLayout
         android:id="@+id/fl_has_new"
         android:layout_width="wrap_content"

@@ -413,6 +413,9 @@
     <string name="source_no_login">The current source has not configured with a login address</string>
     <string name="no_prev_page">No prior page</string>
     <string name="no_next_page">No next page</string>
+    <string name="mark_book_finished">标记已读完</string>
+    <string name="read_iteration_tag_color">阅读状态标签颜色</string>
+    <string name="read_iteration_tag_color_summary">书架封面右上角显示的读完/刷书标签背景色</string>
 
     <!-- source start-->
     <string name="source_name">Source Name(sourceName)</string>
