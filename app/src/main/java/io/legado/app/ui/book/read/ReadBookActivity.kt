@@ -1155,7 +1155,7 @@ class ReadBookActivity : BaseReadBookActivity(),
                     postEvent(EventBus.UP_BOOKSHELF, book.bookUrl)
                 }
                 noButton()
-            }
+            }.show()
         }
     }
 
@@ -1175,7 +1175,7 @@ class ReadBookActivity : BaseReadBookActivity(),
                 postEvent(EventBus.UP_BOOKSHELF, book.bookUrl)
             }
             noButton()
-        }
+        }.show()
     }
 
     /**
