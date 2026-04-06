@@ -158,6 +158,12 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             val offset = (ChapterProvider.visibleHeight - textPage.height).toInt()
             pageOffset = min(0, offset)
             pageDelegate?.abortAnim()
+            // 滚动到末尾时触发读完回调（利用 noNext 防止重复触发）
+            val delegate = pageDelegate
+            if (delegate != null && !delegate.noNext) {
+                delegate.noNext = true
+                ReadBook.callBack?.onBookEnd()
+            }
         } else if (pageOffset > 0) {
             if (pageFactory.moveToPrev(true)) {
                 pageOffset -= textPage.height.toInt()
