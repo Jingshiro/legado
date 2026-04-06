@@ -15,7 +15,8 @@ private const val MIN_SESSION_DURATION = 60_000L
 
 data class DetailedReadSession(
     val startTime: Long,
-    val endTime: Long
+    val endTime: Long,
+    val readIteration: Int = 0
 )
 
 data class DetailedReadRecordExport(
@@ -31,7 +32,7 @@ object DetailedReadRecordHelper {
             DetailedReadRecordExport(
                 bookName = bookName,
                 sessions = sessions.sortedBy { it.startTime }.map {
-                    DetailedReadSession(it.startTime, it.endTime)
+                    DetailedReadSession(it.startTime, it.endTime, it.readIteration)
                 }
             )
         }.sortedBy { it.bookName }
@@ -53,6 +54,7 @@ object DetailedReadRecordHelper {
                 val sessionObj = JsonObject()
                 sessionObj.addProperty("startTime", session.startTime)
                 sessionObj.addProperty("endTime", session.endTime)
+                sessionObj.addProperty("readIteration", session.readIteration)
                 sessionArray.add(sessionObj)
             }
             obj.add("sessions", sessionArray)
@@ -97,11 +99,13 @@ object DetailedReadRecordHelper {
         if (duration <= MIN_SESSION_DURATION) return
         if (bookName.isBlank()) return
         Coroutine.async(context = IO) {
+            val book = appDb.bookDao.findByName(bookName).firstOrNull()
             appDb.detailedReadRecordDao.insert(
                 DetailedReadRecord(
                     bookName = bookName,
                     startTime = startTime,
-                    endTime = endTime
+                    endTime = endTime,
+                    readIteration = book?.readIteration ?: 0
                 )
             )
         }
@@ -118,7 +122,8 @@ object DetailedReadRecordHelper {
                     DetailedReadRecord(
                         bookName = export.bookName,
                         startTime = session.startTime,
-                        endTime = session.endTime
+                        endTime = session.endTime,
+                        readIteration = session.readIteration
                     )
                 }
             }
