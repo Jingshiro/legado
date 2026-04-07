@@ -20,7 +20,7 @@
             android:id="@+id/iv_ai_avatar"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_ai_companion"
+            android:src="@drawable/ic_chat_ai"
             app:tint="?attr/colorPrimary" />
 
         <TextView
@@ -39,7 +39,6 @@
         android:id="@+id/ll_user_msg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="end|top"
         android:orientation="horizontal"
         android:paddingStart="48dp"

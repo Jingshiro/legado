@@ -3,6 +3,9 @@ package io.legado.app.ui.book.read.ai
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.graphics.Color
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,8 +29,12 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
         bindEvent()
         observeData()
         setupKeyboardAdjustment()
-        // 让 initMessages 内部自行决定恢复缓存还是重新初始化
-        viewModel.initMessages(ReadBook.curTextChapter?.getContent())
+        val currentChapter = (ReadBook.durChapterIndex + 1).toString()
+        binding.etChapterStart.setText(currentChapter)
+        binding.etChapterEnd.setText(currentChapter)
+
+        viewModel.initMessages((ReadBook.durChapterIndex + 1), (ReadBook.durChapterIndex + 1))
+        updateWordCount()
     }
 
     /**
@@ -53,12 +60,34 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
     }
 
     private fun bindEvent() {
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateWordCount()
+            }
+        }
+        binding.etChapterStart.addTextChangedListener(textWatcher)
+        binding.etChapterEnd.addTextChangedListener(textWatcher)
+
         binding.btnSend.setOnClickListener {
             val text = binding.etInput.text.toString()
             if (text.isNotBlank()) {
-                viewModel.sendMessage(text)
+                val start = binding.etChapterStart.text.toString().toIntOrNull() ?: (ReadBook.durChapterIndex + 1)
+                val end = binding.etChapterEnd.text.toString().toIntOrNull() ?: (ReadBook.durChapterIndex + 1)
+                viewModel.sendMessage(text, start, end)
                 binding.etInput.setText("")
             }
+        }
+    }
+
+    private fun updateWordCount() {
+        val start = binding.etChapterStart.text.toString().toIntOrNull()
+        val end = binding.etChapterEnd.text.toString().toIntOrNull()
+        val bookUrl = ReadBook.book?.bookUrl
+        val chapterSize = ReadBook.chapterSize
+        if (start != null && end != null && start > 0 && end > 0 && bookUrl != null && chapterSize > 0) {
+            viewModel.calculateWordCount(bookUrl, start, end)
         }
     }
 
@@ -68,6 +97,16 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
             adapter.submitList(displayMsgs)
             if (displayMsgs.isNotEmpty()) {
                 binding.recyclerView.scrollToPosition(displayMsgs.size - 1)
+            }
+        }
+
+        viewModel.wordCountLiveData.observe(this) { count ->
+            val countStr = if (count >= 10000) String.format("%.1f万", count / 10000f) else count.toString()
+            binding.tvWordCount.text = "字数: $countStr"
+            if (count > 50000) {
+                binding.tvWordCount.setTextColor(Color.RED)
+            } else {
+                binding.tvWordCount.setTextColor(Color.parseColor("#888888")) // Secondary color approximation
             }
         }
     }

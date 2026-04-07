@@ -14,9 +14,12 @@ import io.legado.app.help.glide.ImageLoader
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.utils.gone
 import io.legado.app.utils.visible
+import io.noties.markwon.Markwon
 import java.net.URI
 
 class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CALLBACK) {
+
+    private var markwon: Markwon? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val binding = ItemAiChatBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -26,10 +29,15 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val msg = getItem(position)
         val context = holder.binding.root.context
+        
+        if (markwon == null) {
+            markwon = Markwon.create(context)
+        }
+        
         if (msg.role == "user") {
             holder.binding.llUserMsg.visible()
             holder.binding.llAiMsg.gone()
-            holder.binding.tvUserContent.text = msg.content
+            markwon?.setMarkdown(holder.binding.tvUserContent, msg.content ?: "")
             if (AiConfig.userAvatar.isNotBlank()) {
                 ImageViewCompat.setImageTintList(holder.binding.ivUserAvatar, null)
                 ImageLoader.load(context, encodeAvatarUrl(AiConfig.userAvatar)).into(holder.binding.ivUserAvatar)
@@ -43,7 +51,7 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
         } else {
             holder.binding.llAiMsg.visible()
             holder.binding.llUserMsg.gone()
-            holder.binding.tvAiContent.text = msg.content
+            markwon?.setMarkdown(holder.binding.tvAiContent, msg.content ?: "")
             if (AiConfig.aiAvatar.isNotBlank()) {
                 ImageViewCompat.setImageTintList(holder.binding.ivAiAvatar, null)
                 ImageLoader.load(context, encodeAvatarUrl(AiConfig.aiAvatar)).into(holder.binding.ivAiAvatar)
@@ -52,7 +60,7 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
                     holder.binding.ivAiAvatar,
                     ColorStateList.valueOf(ThemeStore.primaryColor(context))
                 )
-                holder.binding.ivAiAvatar.setImageResource(R.drawable.ic_ai_companion)
+                holder.binding.ivAiAvatar.setImageResource(R.drawable.ic_chat_ai)
             }
         }
     }

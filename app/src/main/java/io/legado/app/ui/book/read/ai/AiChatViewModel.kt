@@ -10,6 +10,8 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import io.legado.app.data.appDb
+import io.legado.app.help.book.BookHelp
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -18,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AiChatViewModel(application: Application) : BaseViewModel(application) {
 
     val messagesLiveData = MutableLiveData<List<ChatMessage>>()
+    val wordCountLiveData = MutableLiveData<Int>()
 
     // 私有可变列表，外部只能读取快照
     private val _messages = mutableListOf<ChatMessage>()
@@ -26,66 +29,127 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
     // 使用 AtomicBoolean 保证并发安全
     private val isGenerating = AtomicBoolean(false)
 
-    fun initMessages(chapterContent: String?) {
-        val currentBookUrl = ReadBook.book?.bookUrl ?: ""
-        val currentChapterIndex = ReadBook.curTextChapter?.position ?: -1
+    // 防止 calculateWordCount 高频触发：用最新的请求结果覆盖旧结果
+    private val wordCountJobVersion = java.util.concurrent.atomic.AtomicLong(0L)
 
+    fun calculateWordCount(bookUrl: String, start: Int, end: Int) {
+        val chapterSize = ReadBook.chapterSize
+        val clampedStart = start.coerceIn(1, chapterSize.coerceAtLeast(1))
+        val clampedEnd = end.coerceIn(1, chapterSize.coerceAtLeast(1))
+        val st = minOf(clampedStart, clampedEnd)
+        val ed = maxOf(clampedStart, clampedEnd)
+
+        // 防抖：递增版本号，协程内部检查版本是否仍是最新，否则放弃
+        val myVersion = wordCountJobVersion.incrementAndGet()
+        execute {
+            var totalCount = 0
+            val book = ReadBook.book ?: return@execute
+            val chapterList = appDb.bookChapterDao.getChapterList(bookUrl, st - 1, ed - 1)
+            for (chapter in chapterList) {
+                if (wordCountJobVersion.get() != myVersion) return@execute // 被更新的请求抢占，退出
+                val content = BookHelp.getContent(book, chapter)
+                if (content != null) {
+                    totalCount += content.length
+                }
+            }
+            if (wordCountJobVersion.get() == myVersion) {
+                wordCountLiveData.postValue(totalCount)
+            }
+        }
+    }
+
+    fun initMessages(start: Int, end: Int) {
+        val currentBookUrl = ReadBook.book?.bookUrl ?: ""
         val cached = AiChatCache.state
         if (cached.bookUrl == currentBookUrl &&
-            cached.chapterIndex == currentChapterIndex &&
+            cached.chapterIndex == start &&
             cached.messages.isNotEmpty()
         ) {
-            _messages.clear()
-            _messages.addAll(cached.messages)
+            synchronized(_messages) {
+                _messages.clear()
+                _messages.addAll(cached.messages)
+            }
             messagesLiveData.postValue(_messages.toList())
             return
         }
 
-        _messages.clear()
-        if (chapterContent != null) {
-            val systemPrompt = buildSystemPrompt(chapterContent)
-            _messages.add(ChatMessage("system", systemPrompt))
-        }
-
-        AiChatCache.state = AiChatCache.State(
-            bookUrl = currentBookUrl,
-            chapterIndex = currentChapterIndex,
-            messages = _messages.toList()
-        )
-
-        messagesLiveData.postValue(_messages.toList())
-    }
-
-    private fun buildSystemPrompt(chapterContent: String): String {
-        return buildString {
-            append("【人设与要求】\n")
-            append(AiConfig.persona)
-            if (AiConfig.memory.isNotBlank()) {
-                append("\n\n【之前的对话记忆】\n")
-                append(AiConfig.memory)
+        // 不提前 clear，避免短暂空列表被观察者渲染
+        execute {
+            val systemPrompt = buildSystemPrompt(start, end)
+            synchronized(_messages) {
+                _messages.clear()
+                _messages.add(ChatMessage("system", systemPrompt))
             }
-            append("\n\n【当前正在阅读的章节内容】\n")
-            append(chapterContent)
+            AiChatCache.state = AiChatCache.State(
+                bookUrl = currentBookUrl,
+                chapterIndex = start,
+                messages = _messages.toList()
+            )
+            messagesLiveData.postValue(_messages.toList())
         }
     }
 
-    fun sendMessage(userText: String) {
+    private suspend fun buildSystemPrompt(start: Int, end: Int): String {
+        return withContext(Dispatchers.IO) {
+            val chapterSize = ReadBook.chapterSize
+            val clampedStart = start.coerceIn(1, chapterSize.coerceAtLeast(1))
+            val clampedEnd = end.coerceIn(1, chapterSize.coerceAtLeast(1))
+            val st = minOf(clampedStart, clampedEnd)
+            val ed = maxOf(clampedStart, clampedEnd)
+            buildString {
+                append("【人设与要求】\n")
+                append(AiConfig.persona)
+                if (AiConfig.memory.isNotBlank()) {
+                    append("\n\n【之前的对话记忆】\n")
+                    append(AiConfig.memory)
+                }
+                append("\n\n【参考章节内容】\n")
+                val book = ReadBook.book
+                if (book != null) {
+                    val chapterList = appDb.bookChapterDao.getChapterList(book.bookUrl, st - 1, ed - 1)
+                    for (chapter in chapterList) {
+                        val content = BookHelp.getContent(book, chapter) ?: continue
+                        append("=== ${chapter.title} ===\n")
+                        append(content)
+                        append("\n\n")
+                    }
+                }
+            }
+        }
+    }
+
+    fun sendMessage(userText: String, start: Int, end: Int) {
         if (!isGenerating.compareAndSet(false, true)) return
         if (userText.isBlank()) {
             isGenerating.set(false)
             return
         }
 
-        _messages.add(ChatMessage("user", userText))
+        synchronized(_messages) {
+            _messages.add(ChatMessage("user", userText))
+        }
         syncCache()
         messagesLiveData.postValue(_messages.toList())
 
         execute {
             try {
+                val newSystemPrompt = buildSystemPrompt(start, end)
+                synchronized(_messages) {
+                    if (_messages.isNotEmpty() && _messages.first().role == "system") {
+                        _messages[0] = ChatMessage("system", newSystemPrompt)
+                    } else {
+                        _messages.add(0, ChatMessage("system", newSystemPrompt))
+                    }
+                }
+
                 val responseText = requestOpenAi(_messages.toList())
-                _messages.add(ChatMessage("assistant", responseText))
+                synchronized(_messages) {
+                    _messages.add(ChatMessage("assistant", responseText))
+                }
             } catch (e: Exception) {
-                _messages.add(ChatMessage("assistant", "请求失败: ${e.message}"))
+                synchronized(_messages) {
+                    _messages.add(ChatMessage("assistant", "请求失败: ${e.message}"))
+                }
             } finally {
                 isGenerating.set(false)
                 syncCache()
