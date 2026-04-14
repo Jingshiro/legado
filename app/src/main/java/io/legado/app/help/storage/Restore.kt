@@ -13,7 +13,6 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.BookSource
-import io.legado.app.data.entities.BookThought
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.data.entities.DictRule
 import io.legado.app.data.entities.HttpTTS
@@ -33,9 +32,6 @@ import io.legado.app.help.book.upType
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfig
-import com.google.gson.JsonParser
-import io.legado.app.help.readrecord.DetailedReadRecordExport
-import io.legado.app.help.readrecord.DetailedReadRecordHelper
 import io.legado.app.model.VideoPlay.VIDEO_PREF_NAME
 import io.legado.app.model.BookCover
 import io.legado.app.model.localBook.LocalBook
@@ -103,12 +99,8 @@ object Restore {
     }
 
     private suspend fun restore(path: String) {
-        val backupRootPath = resolveBackupRootPath(path)
-        if (backupRootPath == null) {
-            throw Exception("未在备份中找到可恢复的数据文件")
-        }
         val aes = BackupAES()
-        fileToListT<Book>(backupRootPath, "bookshelf.json")?.let {
+        fileToListT<Book>(path, "bookshelf.json")?.let {
             it.forEach { book ->
                 book.upType()
             }
@@ -134,53 +126,50 @@ object Restore {
             }
             appDb.bookDao.insert(*newBooks.toTypedArray())
         }
-        fileToListT<Bookmark>(backupRootPath, "bookmark.json")?.let {
+        fileToListT<Bookmark>(path, "bookmark.json")?.let {
             appDb.bookmarkDao.insert(*it.toTypedArray())
         }
-        fileToListT<BookThought>(backupRootPath, "bookThoughts.json")?.let {
-            appDb.bookThoughtDao.insert(*it.toTypedArray())
-        }
-        fileToListT<BookGroup>(backupRootPath, "bookGroup.json")?.let {
+        fileToListT<BookGroup>(path, "bookGroup.json")?.let {
             appDb.bookGroupDao.insert(*it.toTypedArray())
         }
-        fileToListT<BookSource>(backupRootPath, "bookSource.json")?.let {
+        fileToListT<BookSource>(path, "bookSource.json")?.let {
             appDb.bookSourceDao.insert(*it.toTypedArray())
         } ?: run {
-            val bookSourceFile = getBackupFile(backupRootPath, "bookSource.json")
+            val bookSourceFile = File(path, "bookSource.json")
             if (bookSourceFile.exists()) {
                 val json = bookSourceFile.readText()
                 ImportOldData.importOldSource(json)
             }
         }
-        fileToListT<RssSource>(backupRootPath, "rssSources.json")?.let {
+        fileToListT<RssSource>(path, "rssSources.json")?.let {
             appDb.rssSourceDao.insert(*it.toTypedArray())
         }
-        fileToListT<RssStar>(backupRootPath, "rssStar.json")?.let {
+        fileToListT<RssStar>(path, "rssStar.json")?.let {
             appDb.rssStarDao.insert(*it.toTypedArray())
         }
-        fileToListT<ReplaceRule>(backupRootPath, "replaceRule.json")?.let {
+        fileToListT<ReplaceRule>(path, "replaceRule.json")?.let {
             appDb.replaceRuleDao.insert(*it.toTypedArray())
         }
-        fileToListT<SearchKeyword>(backupRootPath, "searchHistory.json")?.let {
+        fileToListT<SearchKeyword>(path, "searchHistory.json")?.let {
             appDb.searchKeywordDao.insert(*it.toTypedArray())
         }
-        fileToListT<RuleSub>(backupRootPath, "sourceSub.json")?.let {
+        fileToListT<RuleSub>(path, "sourceSub.json")?.let {
             appDb.ruleSubDao.insert(*it.toTypedArray())
         }
-        fileToListT<TxtTocRule>(backupRootPath, "txtTocRule.json")?.let {
+        fileToListT<TxtTocRule>(path, "txtTocRule.json")?.let {
             appDb.txtTocRuleDao.insert(*it.toTypedArray())
         }
-        fileToListT<HttpTTS>(backupRootPath, "httpTTS.json")?.let {
+        fileToListT<HttpTTS>(path, "httpTTS.json")?.let {
             appDb.httpTTSDao.insert(*it.toTypedArray())
         }
-        fileToListT<DictRule>(backupRootPath, "dictRule.json")?.let {
+        fileToListT<DictRule>(path, "dictRule.json")?.let {
             appDb.dictRuleDao.insert(*it.toTypedArray())
         }
-        fileToListT<KeyboardAssist>(backupRootPath, "keyboardAssists.json")?.let {
+        fileToListT<KeyboardAssist>(path, "keyboardAssists.json")?.let {
             appDb.keyboardAssistsDao.deleteAll() //先删除所有,保证和备份数据一样
             appDb.keyboardAssistsDao.insert(*it.toTypedArray())
         }
-        fileToListT<ReadRecord>(backupRootPath, "readRecord.json")?.let {
+        fileToListT<ReadRecord>(path, "readRecord.json")?.let {
             it.forEach { readRecord ->
                 //判断是不是本机记录
                 if (readRecord.deviceId != androidId) {
@@ -194,10 +183,7 @@ object Restore {
                 }
             }
         }
-        readDetailedReadRecord(backupRootPath)?.let { records ->
-            DetailedReadRecordHelper.insertFromExport(records)
-        }
-        getBackupFile(backupRootPath, "servers.json").takeIf {
+        File(path, "servers.json").takeIf {
             it.exists()
         }?.runCatching {
             var json = readText()
@@ -210,7 +196,7 @@ object Restore {
         }?.onFailure {
             AppLog.put("恢复服务器配置出错\n${it.localizedMessage}", it)
         }
-        getBackupFile(backupRootPath, DirectLinkUpload.ruleFileName).takeIf {
+        File(path, DirectLinkUpload.ruleFileName).takeIf {
             it.exists()
         }?.runCatching {
             val json = readText()
@@ -219,7 +205,7 @@ object Restore {
             AppLog.put("恢复直链上传出错\n${it.localizedMessage}", it)
         }
         //恢复主题配置
-        getBackupFile(backupRootPath, ThemeConfig.configFileName).takeIf {
+        File(path, ThemeConfig.configFileName).takeIf {
             it.exists()
         }?.runCatching {
             FileUtils.delete(ThemeConfig.configFilePath)
@@ -228,7 +214,7 @@ object Restore {
         }?.onFailure {
             AppLog.put("恢复主题出错\n${it.localizedMessage}", it)
         }
-        getBackupFile(backupRootPath, BookCover.configFileName).takeIf {
+        File(path, BookCover.configFileName).takeIf {
             it.exists()
         }?.runCatching {
             val json = readText()
@@ -238,7 +224,7 @@ object Restore {
         }
         if (!BackupConfig.ignoreReadConfig) {
             //恢复阅读界面配置
-            getBackupFile(backupRootPath, ReadBookConfig.configFileName).takeIf {
+            File(path, ReadBookConfig.configFileName).takeIf {
                 it.exists()
             }?.runCatching {
                 FileUtils.delete(ReadBookConfig.configFilePath)
@@ -247,7 +233,7 @@ object Restore {
             }?.onFailure {
                 AppLog.put("恢复阅读界面出错\n${it.localizedMessage}", it)
             }
-            getBackupFile(backupRootPath, ReadBookConfig.shareConfigFileName).takeIf {
+            File(path, ReadBookConfig.shareConfigFileName).takeIf {
                 it.exists()
             }?.runCatching {
                 FileUtils.delete(ReadBookConfig.shareConfigFilePath)
@@ -258,7 +244,7 @@ object Restore {
             }
         }
         //AppWebDav.downBgs()
-        appCtx.getSharedPreferences(backupRootPath, "config")?.all?.let { map ->
+        appCtx.getSharedPreferences(path, "config")?.all?.let { map ->
             val edit = appCtx.defaultSharedPreferences.edit()
 
             map.forEach { (key, value) ->
@@ -290,7 +276,7 @@ object Restore {
             }
             edit.apply()
         }
-        appCtx.getSharedPreferences(backupRootPath, "videoConfig")?.all?.let { map ->
+        appCtx.getSharedPreferences(path, "videoConfig")?.all?.let { map ->
             appCtx.getSharedPreferences(VIDEO_PREF_NAME, Context.MODE_PRIVATE).edit().apply {
                 map.forEach { (key, value) ->
                     when (value) {
@@ -324,7 +310,7 @@ object Restore {
 
     private inline fun <reified T> fileToListT(path: String, fileName: String): List<T>? {
         try {
-            val file = getBackupFile(path, fileName)
+            val file = File(path, fileName)
             if (file.exists()) {
                 LogUtils.d(TAG, "阅读恢复备份 $fileName 文件大小 ${file.length()}")
                 FileInputStream(file).use {
@@ -340,97 +326,6 @@ object Restore {
             appCtx.toastOnUi("$fileName\n读取文件出错\n${e.localizedMessage}")
         }
         return null
-    }
-
-    private fun readDetailedReadRecord(path: String): List<DetailedReadRecordExport>? {
-        val fileName = "readRecord_detail.json"
-        return try {
-            val file = getBackupFile(path, fileName)
-            if (!file.exists()) {
-                LogUtils.d(TAG, "阅读恢复备份 $fileName 文件不存在")
-                return null
-            }
-            val json = file.readText()
-            LogUtils.d(TAG, "阅读恢复备份 $fileName 文件大小 ${file.length()}")
-            val root = JsonParser.parseString(json)
-            if (!root.isJsonArray) return null
-            val result = mutableListOf<DetailedReadRecordExport>()
-            root.asJsonArray.forEach { item ->
-                if (!item.isJsonObject) return@forEach
-                val obj = item.asJsonObject
-                val bookName = when {
-                    obj.has("bookName") -> obj.get("bookName").asString
-                    obj.has("a") -> obj.get("a").asString
-                    else -> null
-                }
-                val sessionsEl = when {
-                    obj.has("sessions") -> obj.get("sessions")
-                    obj.has("b") -> obj.get("b")
-                    else -> null
-                }
-                if (bookName.isNullOrBlank() || sessionsEl == null || !sessionsEl.isJsonArray) {
-                    return@forEach
-                }
-                val sessions = mutableListOf<io.legado.app.help.readrecord.DetailedReadSession>()
-                sessionsEl.asJsonArray.forEach { sessionEl ->
-                    if (!sessionEl.isJsonObject) return@forEach
-                    val sessionObj = sessionEl.asJsonObject
-                    val startTime = when {
-                        sessionObj.has("startTime") -> sessionObj.get("startTime").asLong
-                        sessionObj.has("a") -> sessionObj.get("a").asLong
-                        else -> null
-                    }
-                    val endTime = when {
-                        sessionObj.has("endTime") -> sessionObj.get("endTime").asLong
-                        sessionObj.has("b") -> sessionObj.get("b").asLong
-                        else -> null
-                    }
-                    if (startTime != null && endTime != null) {
-                        sessions.add(
-                            io.legado.app.help.readrecord.DetailedReadSession(
-                                startTime = startTime,
-                                endTime = endTime
-                            )
-                        )
-                    }
-                }
-                if (sessions.isNotEmpty()) {
-                    result.add(
-                        DetailedReadRecordExport(
-                            bookName = bookName,
-                            sessions = sessions
-                        )
-                    )
-                }
-            }
-            LogUtils.d(TAG, "阅读恢复备份 $fileName 列表大小 ${result.size}")
-            result
-        } catch (e: Exception) {
-            AppLog.put("$fileName\n读取解析出错\n${e.localizedMessage}", e)
-            appCtx.toastOnUi("$fileName\n读取文件出错\n${e.localizedMessage}")
-            null
-        }
-    }
-
-    private fun resolveBackupRootPath(path: String): String? {
-        val root = File(path)
-        if (!root.exists()) return null
-        val mustFiles = setOf("bookshelf.json", "bookSource.json", "config.xml")
-        val rootHas = mustFiles.any { File(root, it).exists() }
-        if (rootHas) return root.absolutePath
-        val candidate = root.walkTopDown()
-            .filter { it.isFile && it.name in mustFiles }
-            .mapNotNull { it.parentFile }
-            .firstOrNull()
-        return candidate?.absolutePath
-    }
-
-    private fun getBackupFile(path: String, fileName: String): File {
-        val direct = File(path, fileName)
-        if (direct.exists()) return direct
-        return File(path).walkTopDown()
-            .firstOrNull { it.isFile && it.name == fileName }
-            ?: direct
     }
 
 }

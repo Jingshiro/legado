@@ -53,10 +53,8 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
             }
             if (upContent) upContent(resetPageOffset = false)
             true
-        } else {
-            ReadBook.callBack?.onBookEnd()
+        } else
             false
-        }
     }
 
     override fun moveToPrev(upContent: Boolean): Boolean = with(dataSource) {

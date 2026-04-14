@@ -9,7 +9,6 @@ import io.legado.app.data.entities.Book
 import io.legado.app.databinding.ItemBookshelfGrid2Binding
 import io.legado.app.databinding.ItemBookshelfGridBinding
 import io.legado.app.help.book.isLocal
-import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.help.config.AppConfig
 import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
@@ -101,7 +100,6 @@ class BooksAdapterGrid(context: Context, private val callBack: CallBack) :
                         bvUnread.invisible()
                     }
                 }
-                ReadIterationHelper.applyTagStyle(tvReadTag, item.readIteration)
             }
             is ItemBookshelfGrid2Binding -> binding.run {
                 if (!item.isLocal && callBack.isUpdate(item.bookUrl)) {
@@ -116,7 +114,6 @@ class BooksAdapterGrid(context: Context, private val callBack: CallBack) :
                         bvUnread.invisible()
                     }
                 }
-                ReadIterationHelper.applyTagStyle(tvReadTag, item.readIteration)
             }
         }
     }

@@ -21,8 +21,7 @@ object LauncherIconHelp {
         ComponentName(appCtx, Launcher4::class.java.name),
         ComponentName(appCtx, Launcher5::class.java.name),
         ComponentName(appCtx, Launcher6::class.java.name),
-        ComponentName(appCtx, Launcher7::class.java.name),
-        ComponentName(appCtx, Launcher8::class.java.name)
+        ComponentName(appCtx, Launcher7::class.java.name)
     )
 
     fun changeIcon(icon: String?) {

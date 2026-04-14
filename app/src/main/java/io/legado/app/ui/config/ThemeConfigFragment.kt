@@ -167,10 +167,6 @@ class ThemeConfigFragment : PreferenceFragment(),
             PreferKey.bgImageN -> {
                 upPreferenceSummary(key, getPrefString(key))
             }
-
-            PreferKey.readIterationTagColor -> {
-                postEvent(EventBus.UP_BOOKSHELF, "")
-            }
         }
 
     }

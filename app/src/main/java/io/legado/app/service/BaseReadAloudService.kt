@@ -37,7 +37,6 @@ import io.legado.app.constant.Status
 import io.legado.app.help.MediaHelp
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.readrecord.DetailedReadRecordTracker
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.lib.permission.Permissions
 import io.legado.app.lib.permission.PermissionsCompat
@@ -110,9 +109,6 @@ abstract class BaseReadAloudService : BaseService(),
     }
     private val mFocusRequest: AudioFocusRequestCompat by lazy {
         MediaHelp.buildAudioFocusRequestCompat(this)
-    }
-    private val detailedReadRecordTracker by lazy {
-        DetailedReadRecordTracker { ReadBook.book?.name }
     }
     private val mediaSessionCompat by lazy {
         MediaSessionCompat(this, "readAloud")
@@ -192,7 +188,6 @@ abstract class BaseReadAloudService : BaseService(),
 
     override fun onDestroy() {
         super.onDestroy()
-        detailedReadRecordTracker.stop()
         if (useWakeLock) {
             wakeLock.release()
             wifiLock?.release()
@@ -285,7 +280,6 @@ abstract class BaseReadAloudService : BaseService(),
             wakeLock.acquire()
             wifiLock?.acquire()
         }
-        detailedReadRecordTracker.start()
         isRun = true
         pause = false
         needResumeOnAudioFocusGain = false
@@ -303,7 +297,6 @@ abstract class BaseReadAloudService : BaseService(),
             wakeLock.release()
             wifiLock?.release()
         }
-        detailedReadRecordTracker.stop()
         pause = true
         if (abandonFocus) {
             abandonFocus()
@@ -325,7 +318,6 @@ abstract class BaseReadAloudService : BaseService(),
         pause = false
         needResumeOnAudioFocusGain = false
         needResumeOnCallStateIdle = false
-        detailedReadRecordTracker.start()
         upReadAloudNotification()
         upMediaSessionPlaybackState(PlaybackStateCompat.STATE_PLAYING)
         postEvent(EventBus.ALOUD_STATE, Status.PLAY)

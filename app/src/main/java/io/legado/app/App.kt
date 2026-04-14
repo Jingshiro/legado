@@ -70,10 +70,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         CrashHandler(this)
-        
-        // 开启 WebView 慢速全量绘制，解决分享卡片截图底部截断问题
-        android.webkit.WebView.enableSlowWholeDocumentDraw()
-        
         if (isDebuggable) {
             ThreadUtils.setThreadAssertsDisabledForTesting(true)
         }

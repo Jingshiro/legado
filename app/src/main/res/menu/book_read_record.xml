@@ -42,9 +42,4 @@
         android:title="@string/enable_record"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/menu_export_detail_record"
-        android:title="@string/export_detail_record"
-        app:showAsAction="never" />
-
 </menu>

@@ -9,6 +9,7 @@ plugins {
     alias libs.plugins.android.application
     alias libs.plugins.kotlin.android
     alias libs.plugins.kotlin.parcelize
+    alias libs.plugins.room
     alias libs.plugins.ksp
     alias libs.plugins.google.services
 }
@@ -20,15 +21,7 @@ static def releaseTime() {
 
 def name = "legado"
 def version = "3." + releaseTime()
-def gitCommits = 0
-try {
-    def output = 'git rev-list HEAD --count'.execute().text.trim()
-    if (output.isInteger()) {
-        gitCommits = output.toInteger()
-    }
-} catch (Throwable ignored) {
-    gitCommits = 0
-}
+def gitCommits = Integer.parseInt('git rev-list HEAD --count'.execute().text.trim())
 
 android {
     compileSdk = compile_sdk_version
@@ -46,22 +39,6 @@ android {
                 storePassword RELEASE_STORE_PASSWORD
                 keyAlias RELEASE_KEY_ALIAS
                 keyPassword RELEASE_KEY_PASSWORD
-                enableV1Signing = true
-                enableV2Signing = true
-                enableV3Signing = true
-                enableV4Signing = true
-            }
-        }
-        // 从 keystore.properties 读取签名配置
-        def keystorePropertiesFile = rootProject.file("keystore.properties")
-        if (keystorePropertiesFile.exists()) {
-            def keystoreProperties = new Properties()
-            keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-            release {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
                 enableV1Signing = true
                 enableV2Signing = true
                 enableV3Signing = true
@@ -99,8 +76,6 @@ android {
         release {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.myConfig
-            } else if (rootProject.file("keystore.properties").exists()) {
-                signingConfig signingConfigs.release
             }
             applicationIdSuffix '.release'
             if (getApplicationIdSuffix() == '.releaseA') {
@@ -143,12 +118,16 @@ android {
         }
     }
 
+
+    room {
+        schemaDirectory "$projectDir/schemas"
+    }
     // 设定Room的KSP参数
     ksp {
         arg("room.incremental", "true")
         arg("room.expandProjection", "true")
         arg("room.generateKotlin", "false")
-        arg("room.schemaLocation", "$projectDir/schemas")
+        //arg("room.schemaLocation", "$projectDir/schemas")
 
     }
 

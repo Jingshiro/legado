@@ -183,22 +183,4 @@
 
     </io.legado.app.lib.prefs.PreferenceCategory>
 
-    <io.legado.app.lib.prefs.PreferenceCategory
-        android:key="bookshelfTagCategory"
-        android:title="@string/read_iteration_tag_color"
-        app:allowDividerAbove="true"
-        app:allowDividerBelow="false"
-        app:iconSpaceReserved="false"
-        app:layout="@layout/view_preference_category">
-
-        <io.legado.app.lib.prefs.ColorPreference
-            android:defaultValue="0xCCB5451B"
-            android:key="readIterationTagColor"
-            android:summary="@string/read_iteration_tag_color_summary"
-            android:title="@string/read_iteration_tag_color"
-            app:cpv_dialogType="preset"
-            app:iconSpaceReserved="false" />
-
-    </io.legado.app.lib.prefs.PreferenceCategory>
-
 </androidx.preference.PreferenceScreen>

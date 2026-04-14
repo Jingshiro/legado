@@ -123,10 +123,7 @@ data class Book(
     var readConfig: ReadConfig? = null,
     //同步时间
     @ColumnInfo(defaultValue = "0")
-    var syncTime: Long = 0L,
-    // 阅读轮次(0=未读完, 1=读完, 2=二刷, 3=二刷完, 依此类推)
-    @ColumnInfo(defaultValue = "0")
-    var readIteration: Int = 0
+    var syncTime: Long = 0L
 ) : Parcelable, BaseBook {
 
     override fun equals(other: Any?): Boolean {
@@ -417,7 +414,6 @@ data class Book(
         newBook.customTag = customTag
         newBook.canUpdate = canUpdate
         newBook.readConfig = readConfig
-        newBook.readIteration = readIteration
         return newBook
     }
 

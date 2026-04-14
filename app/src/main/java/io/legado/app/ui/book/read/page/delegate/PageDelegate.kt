@@ -8,7 +8,6 @@ import android.widget.Scroller
 import androidx.annotation.CallSuper
 import com.google.android.material.snackbar.Snackbar
 import io.legado.app.R
-import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.page.PageView
 import io.legado.app.ui.book.read.page.ReadView
 import io.legado.app.ui.book.read.page.entities.PageDirection
@@ -179,10 +178,6 @@ abstract class PageDelegate(protected val readView: ReadView) {
             if (!snackBar.isShown) {
                 snackBar.setText(R.string.no_next_page)
                 snackBar.show()
-            }
-            // 只在每次手势按下后首次检测到无下一页时触发读完回调，避免重复弹窗
-            if (!noNext) {
-                ReadBook.callBack?.onBookEnd()
             }
         }
         return hasNext

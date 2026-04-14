@@ -10,7 +10,6 @@ import io.legado.app.databinding.ItemBookshelfList2Binding
 import io.legado.app.databinding.ItemBookshelfListBinding
 import io.legado.app.databinding.ItemBookshelfListGroupBinding
 import io.legado.app.help.book.isLocal
-import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.help.config.AppConfig
 import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
@@ -117,7 +116,6 @@ class BooksAdapterList(context: Context, callBack: CallBack) :
                     binding.bvUnread.invisible()
                 }
             }
-            ReadIterationHelper.applyTagStyle(binding.tvReadTag, item.readIteration)
         }
 
     }
@@ -186,7 +184,6 @@ class BooksAdapterList(context: Context, callBack: CallBack) :
                     binding.bvUnread.invisible()
                 }
             }
-            ReadIterationHelper.applyTagStyle(binding.tvReadTag, item.readIteration)
         }
 
     }

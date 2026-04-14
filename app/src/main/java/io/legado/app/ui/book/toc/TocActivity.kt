@@ -88,9 +88,10 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
 
                 override fun onQueryTextChange(newText: String): Boolean {
                     viewModel.searchKey = newText
-                    when (tabLayout.selectedTabPosition) {
-                        1 -> viewModel.startBookmarkSearch(newText)
-                        else -> viewModel.startChapterListSearch(newText)
+                    if (tabLayout.selectedTabPosition == 1) {
+                        viewModel.startBookmarkSearch(newText)
+                    } else {
+                        viewModel.startChapterListSearch(newText)
                     }
                     return false
                 }
@@ -105,17 +106,14 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
     }
 
     override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
-        when (tabLayout.selectedTabPosition) {
-            1 -> {
-                menu.setGroupVisible(R.id.menu_group_bookmark, true)
-                menu.setGroupVisible(R.id.menu_group_toc, false)
-                menu.setGroupVisible(R.id.menu_group_text, false)
-            }
-            else -> {
-                menu.setGroupVisible(R.id.menu_group_bookmark, false)
-                menu.setGroupVisible(R.id.menu_group_toc, true)
-                menu.setGroupVisible(R.id.menu_group_text, viewModel.bookData.value?.isLocalTxt == true)
-            }
+        if (tabLayout.selectedTabPosition == 1) {
+            menu.setGroupVisible(R.id.menu_group_bookmark, true)
+            menu.setGroupVisible(R.id.menu_group_toc, false)
+            menu.setGroupVisible(R.id.menu_group_text, false)
+        } else {
+            menu.setGroupVisible(R.id.menu_group_bookmark, false)
+            menu.setGroupVisible(R.id.menu_group_toc, true)
+            menu.setGroupVisible(R.id.menu_group_text, viewModel.bookData.value?.isLocalTxt == true)
         }
         menu.findItem(R.id.menu_use_replace)?.isChecked =
             AppConfig.tocUiUseReplace
@@ -199,7 +197,7 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
 
         override fun getItem(position: Int): Fragment {
             return when (position) {
-                1 -> BookmarkThoughtFragment()
+                1 -> BookmarkFragment()
                 else -> ChapterListFragment()
             }
         }
@@ -210,7 +208,7 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
 
         override fun getPageTitle(position: Int): CharSequence {
             return when (position) {
-                1 -> getString(R.string.bookmark_and_thought)
+                1 -> getString(R.string.bookmark)
                 else -> getString(R.string.chapter_list)
             }
         }
