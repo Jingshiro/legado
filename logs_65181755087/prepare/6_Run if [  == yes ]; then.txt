@@ -1,8 +1,0 @@
-﻿2026-04-18T11:46:37.9689438Z ##[group]Run if [ "" == "yes" ]; then
-2026-04-18T11:46:37.9690206Z [36;1mif [ "" == "yes" ]; then[0m
-2026-04-18T11:46:37.9691514Z [36;1m  echo 'build_matrix={"product":["app"],"type":["release","releaseS"]}' >> $GITHUB_OUTPUT[0m
-2026-04-18T11:46:37.9692924Z [36;1melse[0m
-2026-04-18T11:46:37.9693879Z [36;1m  echo 'build_matrix={"product":["app"],"type":["release"]}' >> $GITHUB_OUTPUT[0m
-2026-04-18T11:46:37.9695369Z [36;1mfi[0m
-2026-04-18T11:46:37.9717864Z shell: /usr/bin/bash -e {0}
-2026-04-18T11:46:37.9718476Z ##[endgroup]

@@ -1,5 +1,0 @@
-﻿2026-04-18T11:46:37.7223082Z ##[group]Run echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
-2026-04-18T11:46:37.7224740Z [36;1mecho "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT[0m
-2026-04-18T11:46:37.7225676Z [36;1mecho "versionL=$(date -d "8 hour" -u +3.%y.%m%d%H%M)" >> $GITHUB_OUTPUT[0m
-2026-04-18T11:46:37.7251841Z shell: /usr/bin/bash -e {0}
-2026-04-18T11:46:37.7252379Z ##[endgroup]

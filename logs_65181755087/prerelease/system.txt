@@ -1,4 +1,0 @@
-2026-04-18T11:47:08.8540000Z Evaluating prerelease.if
-2026-04-18T11:47:08.8540000Z Evaluating: (success() && (((github.event_name != 'pull_request') && (github.repository == 'Luoyacheng/legado'))))
-2026-04-18T11:47:08.8540000Z Expanded: (false && ((github.event_name != 'pull_request') && (github.repository == 'Luoyacheng/legado')))
-2026-04-18T11:47:08.8540000Z Result: false
