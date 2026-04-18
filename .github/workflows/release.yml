@@ -19,7 +19,7 @@ jobs:
     steps:
       - id: set-ver
         run: |
-          echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
+          echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H%M%S)" >> $GITHUB_OUTPUT
       - id: check
         run: |
           if [ ! -z "${{ secrets.RELEASE_KEY_STORE }}" ]; then
@@ -64,7 +64,7 @@ jobs:
       - name: Unify Version Name
         run: |
           echo "统一版本号"
-          sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
+          sed -i "/def version/c\\def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -79,7 +79,10 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/apk/
           cp -rf ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk ${{ github.workspace }}/apk/
-          
+          # Rename APK to a predictable pattern for later steps
+          for f in ${{ github.workspace }}/apk/*.apk; do
+            mv "$f" "${{ github.workspace }}/apk/legado_${{ env.product }}_${{ env.VERSION }}.apk"
+          done
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v7
         with:
