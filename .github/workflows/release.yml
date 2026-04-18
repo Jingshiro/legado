@@ -82,11 +82,20 @@ jobs:
             typeName="_beta"
           fi
           mkdir -p ${{ github.workspace }}/apk/
+          # 清理历史残留
+          rm -f ${{ github.workspace }}/apk/*.apk
+          # 拷贝所有 apk
           find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec cp {} ${{ github.workspace }}/apk/ \;
 
-          # 重命名文件以便在一个 Release 中区分
-          for file in `ls ${{ github.workspace }}/apk/*.apk`; do
-             mv "$file" "${{ github.workspace }}/apk/legado_app_${{ env.VERSION }}${typeName}.apk"
+          # 进入目录进行批量重命名
+          cd ${{ github.workspace }}/apk/
+          for file in *.apk; do
+             # 生成新文件名：前缀 + 原文件名
+             new_name="legado_app_${{ env.VERSION }}${typeName}_${file}"
+             # 如果文件名还没被改过（防止重复运行时的冲突）
+             if [ "$file" != "$new_name" ]; then
+                mv "$file" "$new_name"
+             fi
           done
 
       - name: Upload App To Artifact
