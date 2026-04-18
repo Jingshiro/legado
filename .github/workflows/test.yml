@@ -134,6 +134,7 @@ jobs:
           CONTENT_JSON=$(echo "$UPDATED_CONTENT" | jq -Rs . 2>/dev/null || echo "\"Error generating update content\"")
           echo "DEBUG: CONTENT_JSON=$CONTENT_JSON"
           echo "body=$CONTENT_JSON" >> $GITHUB_OUTPUT
+          echo "updated=yes" >> $GITHUB_OUTPUT
       - id: set-matrix
         run: |
           if [ "${{ steps.updateLog.outputs.updated }}" == "yes" ]; then
@@ -253,7 +254,7 @@ jobs:
 
   prerelease:
     needs: [ prepare, build ]
-    if: github.event_name != 'pull_request' && github.repository == 'Luoyacheng/legado'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
