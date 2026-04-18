@@ -20,7 +20,7 @@ static def releaseTime() {
 }
 
 def name = "legado"
-def version = "3." + releaseTime()
+def version = "3.26.04181816"
 def gitCommits = Integer.parseInt('git rev-list HEAD --count'.execute().text.trim())
 
 android {
@@ -50,7 +50,7 @@ android {
         applicationId "io.legado.app"
         minSdk 21
         targetSdk 36
-        versionCode 10000 + gitCommits
+        versionCode 10001 + gitCommits
         versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         project.ext.set("archivesBaseName", name + "_" + version)
