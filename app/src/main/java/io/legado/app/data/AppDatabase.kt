@@ -36,6 +36,8 @@ import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.BookSourcePart
 import io.legado.app.data.entities.Bookmark
+import io.legado.app.data.entities.BookThought
+import io.legado.app.data.entities.DetailedReadRecord
 import io.legado.app.data.entities.Cache
 import io.legado.app.data.entities.Cookie
 import io.legado.app.data.entities.DictRule
@@ -73,7 +75,8 @@ val appDb by lazy {
         ReplaceRule::class, SearchBook::class, SearchKeyword::class, Cookie::class,
         RssSource::class, Bookmark::class, RssArticle::class, RssReadRecord::class,
         RssStar::class, TxtTocRule::class, ReadRecord::class, HttpTTS::class, Cache::class,
-        RuleSub::class, DictRule::class, KeyboardAssist::class, Server::class],
+        RuleSub::class, DictRule::class, KeyboardAssist::class, Server::class,
+        BookThought::class, DetailedReadRecord::class],
     views = [BookSourcePart::class],
     autoMigrations = [
         AutoMigration(from = 43, to = 44),
@@ -147,6 +150,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val dictRuleDao: DictRuleDao
     abstract val keyboardAssistsDao: KeyboardAssistsDao
     abstract val serverDao: ServerDao
+    abstract val bookThoughtDao: io.legado.app.data.dao.BookThoughtDao
+    abstract val detailedReadRecordDao: io.legado.app.data.dao.DetailedReadRecordDao
 
     companion object {
 

@@ -1236,4 +1236,22 @@
     <string name="auto_check_new_backup_t">自动检查新备份</string>
     <string name="auto_check_new_backup_s">打开软件时检查是否有新备份，有新备份时提示是否更新</string>
     <string name="sys_image_picker">系统图片选择器</string>
+
+    <!-- AI companion -->
+    <string name="ai_companion">AI阅读伴侣</string>
+    <string name="ai_input_hint">给 AI 发消息…</string>
+    <string name="ai_send">发送</string>
+    <string name="ai_hint_api_url">API 地址</string>
+    <string name="ai_hint_api_key">API Key</string>
+    <string name="ai_api_key_warning">⚠️ API Key 仅存储在本地设备</string>
+    <string name="ai_hint_model">模型名称</string>
+    <string name="ai_hint_user_avatar">用户头像 URL（可为空）</string>
+    <string name="ai_hint_ai_avatar">AI 头像 URL（可为空）</string>
+    <string name="ai_hint_persona">AI 人设 / System Prompt</string>
+    <string name="ai_memory_length">聊天记忆条数（参考）</string>
+    <string name="ai_view_memory">查看记忆</string>
+    <string name="ai_clear_memory">清空记忆</string>
+    <string name="ai_save_config">保存配置</string>
+    <string name="ai_summarize">保存交流记忆</string>
+    <string name="ai_settings">AI 设置</string>
 </resources>

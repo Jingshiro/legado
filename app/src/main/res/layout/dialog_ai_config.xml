@@ -138,12 +138,21 @@
             </LinearLayout>
 
             <Button
+                android:id="@+id/btn_view_memory"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/ai_view_memory" />
+
+            <Button
                 android:id="@+id/btn_clear_memory"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/ai_clear_memory" />
+
 
             <Button
                 android:id="@+id/btn_save"

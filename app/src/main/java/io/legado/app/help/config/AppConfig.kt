@@ -55,6 +55,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
     var editAutoComplete = appCtx.getPrefBoolean(PreferKey.editAutoComplete, true)
     var showBoardLine = appCtx.getPrefInt(PreferKey.showBoardLine, 1)
     var adaptSpecialStyle = appCtx.getPrefBoolean(PreferKey.adaptSpecialStyle, true)
+    var thoughtShareStyle = appCtx.getPrefInt("thoughtShareStyle", 0)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
