@@ -1,0 +1,73 @@
+﻿2026-04-18T11:46:53.2231211Z ##[group]Run if [ "release" == 'release' ]; then
+2026-04-18T11:46:53.2231621Z [36;1mif [ "release" == 'release' ]; then[0m
+2026-04-18T11:46:53.2231919Z [36;1m  typeName="原包名"[0m
+2026-04-18T11:46:53.2232157Z [36;1melse[0m
+2026-04-18T11:46:53.2232377Z [36;1m  typeName="共存"[0m
+2026-04-18T11:46:53.2232740Z [36;1m  sed "s/'.release'/'.releaseS'/" $GITHUB_WORKSPACE/app/build.gradle  -i[0m
+2026-04-18T11:46:53.2233272Z [36;1m  # sed 's/.release/.releaseS/'     $GITHUB_WORKSPACE/app/google-services.json -i[0m
+2026-04-18T11:46:53.2233700Z [36;1mfi[0m
+2026-04-18T11:46:53.2234137Z [36;1mecho "统一版本号"[0m
+2026-04-18T11:46:53.2234533Z [36;1msed "/def version/c def version = \"3.26.041819\"" $GITHUB_WORKSPACE/app/build.gradle  -i[0m
+2026-04-18T11:46:53.2235012Z [36;1mecho "开始app$typeName构建"[0m
+2026-04-18T11:46:53.2235302Z [36;1mchmod +x gradlew[0m
+2026-04-18T11:46:53.2235712Z [36;1m./gradlew assembleapprelease --build-cache --parallel --daemon --warning-mode all[0m
+2026-04-18T11:46:53.2236183Z [36;1mecho "修改APK文件名"[0m
+2026-04-18T11:46:53.2236519Z [36;1mmkdir -p /home/runner/work/legado/legado/apk/[0m
+2026-04-18T11:46:53.2236994Z [36;1mfor file in `ls /home/runner/work/legado/legado/app/build/outputs/apk/*/*/*.apk`; do[0m
+2026-04-18T11:46:53.2237444Z [36;1m  if [ "release" == 'release' ]; then[0m
+2026-04-18T11:46:53.2237912Z [36;1m    mv "$file" /home/runner/work/legado/legado/apk/legado_测试版_3.26.04181946_$typeName.apk[0m
+2026-04-18T11:46:53.2238347Z [36;1m  else[0m
+2026-04-18T11:46:53.2238708Z [36;1m    mv "$file" /home/runner/work/legado/legado/apk/legado_正式版_3.26.04181946_$typeName.apk[0m
+2026-04-18T11:46:53.2239118Z [36;1m  fi[0m
+2026-04-18T11:46:53.2239311Z [36;1mdone[0m
+2026-04-18T11:46:53.2239526Z [36;1mecho "移动mapping文件"[0m
+2026-04-18T11:46:53.2239836Z [36;1mmkdir -p /home/runner/work/legado/legado/mapping/[0m
+2026-04-18T11:46:53.2240333Z [36;1mfor file in `ls /home/runner/work/legado/legado/app/build/outputs/mapping/*/mapping.txt`; do[0m
+2026-04-18T11:46:53.2240870Z [36;1m  mv "$file" /home/runner/work/legado/legado/mapping/mapping.txt[0m
+2026-04-18T11:46:53.2241218Z [36;1mdone[0m
+2026-04-18T11:46:53.2254603Z shell: /usr/bin/bash -e {0}
+2026-04-18T11:46:53.2254871Z env:
+2026-04-18T11:46:53.2255079Z   product: app
+2026-04-18T11:46:53.2255285Z   type: release
+2026-04-18T11:46:53.2255489Z   VERSION: 3.26.041819
+2026-04-18T11:46:53.2255712Z   VERSIONL: 3.26.04181946
+2026-04-18T11:46:53.2256190Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:46:53.2256683Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:46:53.2257094Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-04-18T11:46:53.2257413Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-04-18T11:46:53.2257707Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-04-18T11:46:53.2258004Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-04-18T11:46:53.2258443Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-04-18T11:46:53.2258923Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-04-18T11:46:53.2259251Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-04-18T11:46:53.2259516Z ##[endgroup]
+2026-04-18T11:46:53.2585521Z 统一版本号
+2026-04-18T11:46:53.3010999Z 开始app原包名构建
+2026-04-18T11:46:54.6184510Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-04-18T11:47:01.6192052Z gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1776512818054.json
+2026-04-18T11:47:01.6197379Z 
+2026-04-18T11:47:01.6210414Z FAILURE: Build failed with an exception.
+2026-04-18T11:47:01.6210835Z 
+2026-04-18T11:47:01.6211807Z [Incubating] Problems report is available at: file:///home/runner/work/legado/legado/build/reports/problems/problems-report.html
+2026-04-18T11:47:01.6212928Z 
+2026-04-18T11:47:01.6213404Z * Where:
+2026-04-18T11:47:01.6214261Z Build file '/home/runner/work/legado/legado/app/build.gradle' line: 23
+2026-04-18T11:47:01.6214913Z 
+2026-04-18T11:47:01.6215183Z * What went wrong:
+2026-04-18T11:47:01.6216373Z Could not compile build file '/home/runner/work/legado/legado/app/build.gradle'.
+2026-04-18T11:47:01.6217207Z > startup failed:
+2026-04-18T11:47:01.6218121Z   build file '/home/runner/work/legado/legado/app/build.gradle': 23: Unexpected input: '<' @ line 23, column 3.
+2026-04-18T11:47:01.6219170Z      <<<<<<< HEAD
+2026-04-18T11:47:01.6219631Z        ^
+2026-04-18T11:47:01.6220067Z   
+2026-04-18T11:47:01.6220515Z   1 error
+2026-04-18T11:47:01.6220816Z 
+2026-04-18T11:47:01.6220934Z 
+2026-04-18T11:47:01.6221183Z * Try:
+2026-04-18T11:47:01.6221718Z > Run with --stacktrace option to get the stack trace.
+2026-04-18T11:47:01.6234375Z > Run with --info or --debug option to get more log output.
+2026-04-18T11:47:01.6236720Z > Run with --scan to get full insights.
+2026-04-18T11:47:01.6237606Z > Get more help at https://help.gradle.org.
+2026-04-18T11:47:01.6238192Z 
+2026-04-18T11:47:01.6238448Z BUILD FAILED in 8s
+2026-04-18T11:47:02.0057981Z ##[error]Process completed with exit code 1.

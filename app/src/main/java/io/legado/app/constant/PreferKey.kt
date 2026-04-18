@@ -209,4 +209,8 @@ object PreferKey {
     const val editAutoWrap = "editAutoWrap"
     const val editAutoComplete = "editAutoComplete"
     const val showBoardLine = "showBoardLine"
+
+    const val readIterationTagColor = "readIterationTagColor"
+    const val readIteration = "readIteration"
+    const val thoughtShareStyle = "thoughtShareStyle"
 }

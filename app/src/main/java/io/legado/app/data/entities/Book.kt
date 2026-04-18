@@ -123,7 +123,10 @@ data class Book(
     var readConfig: ReadConfig? = null,
     //同步时间
     @ColumnInfo(defaultValue = "0")
-    var syncTime: Long = 0L
+    var syncTime: Long = 0L,
+    //阅读轮次
+    @ColumnInfo(defaultValue = "0")
+    var readIteration: Int = 0
 ) : Parcelable, BaseBook {
 
     override fun equals(other: Any?): Boolean {

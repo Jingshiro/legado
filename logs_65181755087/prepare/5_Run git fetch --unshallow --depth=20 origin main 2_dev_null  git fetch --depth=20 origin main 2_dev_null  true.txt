@@ -1,0 +1,81 @@
+﻿2026-04-18T11:46:37.7537895Z ##[group]Run git fetch --unshallow --depth=20 origin main 2>/dev/null || git fetch --depth=20 origin main 2>/dev/null || true
+2026-04-18T11:46:37.7539740Z [36;1mgit fetch --unshallow --depth=20 origin main 2>/dev/null || git fetch --depth=20 origin main 2>/dev/null || true[0m
+2026-04-18T11:46:37.7540793Z [36;1mUPDATED_CONTENT=""[0m
+2026-04-18T11:46:37.7541274Z [36;1mIS_MERGE_PR=false[0m
+2026-04-18T11:46:37.7541757Z [36;1mif [[ -n "$COMMIT_MSG" ]]; then[0m
+2026-04-18T11:46:37.7542392Z [36;1m  if [[ "$COMMIT_MSG" =~ ^"Merge pull request" ]] || [0m
+2026-04-18T11:46:37.7543053Z [36;1m    [[ "$COMMIT_MSG" =~ ^"Merge branch" ]] || [0m
+2026-04-18T11:46:37.7543695Z [36;1m    [[ "$COMMIT_MSG" =~ ^"Sync upstream" ]]; then[0m
+2026-04-18T11:46:37.7544512Z [36;1m    IS_MERGE_PR=true[0m
+2026-04-18T11:46:37.7544998Z [36;1m  fi[0m
+2026-04-18T11:46:37.7545385Z [36;1mfi[0m
+2026-04-18T11:46:37.7545755Z [36;1m[0m
+2026-04-18T11:46:37.7546303Z [36;1mCHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null)[0m
+2026-04-18T11:46:37.7547483Z [36;1mUPDATE_LOG_CHANGED=$(echo "$CHANGED_FILES" | grep -q "app/src/main/assets/updateLog.md" && echo "yes" || echo "no")[0m
+2026-04-18T11:46:37.7548895Z [36;1mCRONET_JSON_CHANGED=$(echo "$CHANGED_FILES" | grep -q "app/src/main/assets/cronet.json" && echo "yes" || echo "no")[0m
+2026-04-18T11:46:37.7549838Z [36;1m[0m
+2026-04-18T11:46:37.7550285Z [36;1mecho "DEBUG: CHANGED_FILES=$CHANGED_FILES"[0m
+2026-04-18T11:46:37.7550855Z [36;1m[0m
+2026-04-18T11:46:37.7551464Z [36;1mif [ "$UPDATE_LOG_CHANGED" = "yes" ] && [ "$CRONET_JSON_CHANGED" = "no" ]; then[0m
+2026-04-18T11:46:37.7552276Z [36;1m  echo "updated=yes" >> $GITHUB_OUTPUT[0m
+2026-04-18T11:46:37.7552925Z [36;1m  if [ -f "app/src/main/assets/updateLog.md" ]; then[0m
+2026-04-18T11:46:37.7553555Z [36;1m    UPDATED_CONTENT=$(awk '[0m
+2026-04-18T11:46:37.7554302Z [36;1m    /^\*\*20/ && !found {[0m
+2026-04-18T11:46:37.7554793Z [36;1m      found=1[0m
+2026-04-18T11:46:37.7555213Z [36;1m    }[0m
+2026-04-18T11:46:37.7555609Z [36;1m    found {[0m
+2026-04-18T11:46:37.7556038Z [36;1m      if (NF == 0) exit[0m
+2026-04-18T11:46:37.7556501Z [36;1m      print[0m
+2026-04-18T11:46:37.7556905Z [36;1m    }[0m
+2026-04-18T11:46:37.7557339Z [36;1m    ' app/src/main/assets/updateLog.md)[0m
+2026-04-18T11:46:37.7557933Z [36;1m    if [ -z "$UPDATED_CONTENT" ]; then[0m
+2026-04-18T11:46:37.7558665Z [36;1m      UPDATED_CONTENT=$(head -n 10 app/src/main/assets/updateLog.md)[0m
+2026-04-18T11:46:37.7559358Z [36;1m    fi[0m
+2026-04-18T11:46:37.7559742Z [36;1m  fi[0m
+2026-04-18T11:46:37.7560250Z [36;1m  echo "DEBUG: UPDATED_CONTENT (from updateLog.md)="[0m
+2026-04-18T11:46:37.7560910Z [36;1m  echo "$UPDATED_CONTENT"[0m
+2026-04-18T11:46:37.7561451Z [36;1melif [ "$IS_MERGE_PR" = true ]; then[0m
+2026-04-18T11:46:37.7562230Z [36;1m    UPDATED_CONTENT="$COMMIT_MSG"[0m
+2026-04-18T11:46:37.7562936Z [36;1m    echo "DEBUG: UPDATED_CONTENT (from commit msg)=$UPDATED_CONTENT"[0m
+2026-04-18T11:46:37.7563634Z [36;1melse[0m
+2026-04-18T11:46:37.7564835Z [36;1m  if [ "push" == "push" ] && [ "14d5a1d86cb790422e754b56bca14c852f8a6382" != "0000000000000000000000000000000000000000" ]; then[0m
+2026-04-18T11:46:37.7566027Z [36;1m    BEFORE_SHA="14d5a1d86cb790422e754b56bca14c852f8a6382"[0m
+2026-04-18T11:46:37.7566813Z [36;1m    AFTER_SHA="be46521ca87558d75a6ca9e346e39dbfacf1ab35"[0m
+2026-04-18T11:46:37.7567529Z [36;1m    COMMIT_RANGE="$BEFORE_SHA..$AFTER_SHA"[0m
+2026-04-18T11:46:37.7568164Z [36;1m    echo "DEBUG: COMMIT_RANGE=$COMMIT_RANGE"[0m
+2026-04-18T11:46:37.7568870Z [36;1m    if git rev-parse "$COMMIT_RANGE" >/dev/null 2>&1; then[0m
+2026-04-18T11:46:37.7570063Z [36;1m      UPDATED_CONTENT=$(git log $COMMIT_RANGE --pretty=format:"* %s" --reverse 2>/dev/null | grep -v "^* Merge" || echo "* $COMMIT_MSG")[0m
+2026-04-18T11:46:37.7571272Z [36;1m      echo "DEBUG: UPDATED_CONTENT (from commit range) set"[0m
+2026-04-18T11:46:37.7571908Z [36;1m    else[0m
+2026-04-18T11:46:37.7572666Z [36;1m      UPDATED_CONTENT=$(git log -10 --pretty=format:"* %s (%h)" --reverse 2>/dev/null | grep -v "^* Merge")[0m
+2026-04-18T11:46:37.7573892Z [36;1m      echo "DEBUG: UPDATED_CONTENT (from recent logs) set"[0m
+2026-04-18T11:46:37.7574713Z [36;1m    fi[0m
+2026-04-18T11:46:37.7575135Z [36;1m    echo "$UPDATED_CONTENT"[0m
+2026-04-18T11:46:37.7575634Z [36;1m  fi[0m
+2026-04-18T11:46:37.7576018Z [36;1mfi[0m
+2026-04-18T11:46:37.7576386Z [36;1m[0m
+2026-04-18T11:46:37.7576804Z [36;1mif [ -z "$UPDATED_CONTENT" ]; then[0m
+2026-04-18T11:46:37.7577423Z [36;1m  echo "DEBUG: fallback to last commit body"[0m
+2026-04-18T11:46:37.7578073Z [36;1m  UPDATED_CONTENT=$(git log -1 --pretty=%B)[0m
+2026-04-18T11:46:37.7578653Z [36;1mfi[0m
+2026-04-18T11:46:37.7579024Z [36;1m[0m
+2026-04-18T11:46:37.7579488Z [36;1mif [[ "$UPDATED_CONTENT" =~ ^"Bump web" ]]; then[0m
+2026-04-18T11:46:37.7580271Z [36;1m  PREVIOUS_COMMIT_BODY=$(git log --skip=1 -1 --pretty=%B)[0m
+2026-04-18T11:46:37.7581213Z [36;1m  UPDATED_CONTENT=$(printf "* %s\n* %s" "$UPDATED_CONTENT" "$PREVIOUS_COMMIT_BODY")[0m
+2026-04-18T11:46:37.7582233Z [36;1m  echo "DEBUG: Updated content with previous commit message for Bump web"[0m
+2026-04-18T11:46:37.7582985Z [36;1mfi[0m
+2026-04-18T11:46:37.7583367Z [36;1m[0m
+2026-04-18T11:46:37.7584319Z [36;1mCONTENT_JSON=$(echo "$UPDATED_CONTENT" | jq -Rs . 2>/dev/null || echo "\"Error generating update content\"")[0m
+2026-04-18T11:46:37.7585331Z [36;1mecho "DEBUG: CONTENT_JSON=$CONTENT_JSON"[0m
+2026-04-18T11:46:37.7585979Z [36;1mecho "body=$CONTENT_JSON" >> $GITHUB_OUTPUT[0m
+2026-04-18T11:46:37.7607278Z shell: /usr/bin/bash -e {0}
+2026-04-18T11:46:37.7607780Z env:
+2026-04-18T11:46:37.7608158Z   COMMIT_MSG: 回退
+2026-04-18T11:46:37.7608567Z ##[endgroup]
+2026-04-18T11:46:37.9547065Z DEBUG: CHANGED_FILES=.github/workflows/release.yml
+2026-04-18T11:46:37.9548194Z app/build.gradle
+2026-04-18T11:46:37.9551117Z DEBUG: COMMIT_RANGE=14d5a1d86cb790422e754b56bca14c852f8a6382..be46521ca87558d75a6ca9e346e39dbfacf1ab35
+2026-04-18T11:46:37.9594789Z DEBUG: UPDATED_CONTENT (from commit range) set
+2026-04-18T11:46:37.9596525Z * Revert to d34ddfdc8e9ee062904af05d38be2ae58b47d3a8 and bump version to 3.26.04181817
+2026-04-18T11:46:37.9598105Z * 回退
+2026-04-18T11:46:37.9635721Z DEBUG: CONTENT_JSON="* Revert to d34ddfdc8e9ee062904af05d38be2ae58b47d3a8 and bump version to 3.26.04181817\n* 回退\n"

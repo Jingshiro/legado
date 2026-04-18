@@ -1,0 +1,136 @@
+﻿2026-04-18T11:46:45.0625323Z ##[group]Run actions/checkout@v5
+2026-04-18T11:46:45.0625970Z with:
+2026-04-18T11:46:45.0626205Z   fetch-depth: 0
+2026-04-18T11:46:45.0626459Z   repository: Jingshiro/legado
+2026-04-18T11:46:45.0626977Z   token: ***
+2026-04-18T11:46:45.0627229Z   ssh-strict: true
+2026-04-18T11:46:45.0627450Z   ssh-user: git
+2026-04-18T11:46:45.0627688Z   persist-credentials: true
+2026-04-18T11:46:45.0627949Z   clean: true
+2026-04-18T11:46:45.0628182Z   sparse-checkout-cone-mode: true
+2026-04-18T11:46:45.0628465Z   fetch-tags: false
+2026-04-18T11:46:45.0628692Z   show-progress: true
+2026-04-18T11:46:45.0628938Z   lfs: false
+2026-04-18T11:46:45.0629163Z   submodules: false
+2026-04-18T11:46:45.0629401Z   set-safe-directory: true
+2026-04-18T11:46:45.0629819Z env:
+2026-04-18T11:46:45.0630031Z   product: app
+2026-04-18T11:46:45.0630243Z   type: release
+2026-04-18T11:46:45.0630468Z   VERSION: 3.26.041819
+2026-04-18T11:46:45.0630707Z   VERSIONL: 3.26.04181946
+2026-04-18T11:46:45.0630949Z ##[endgroup]
+2026-04-18T11:46:45.1511889Z Syncing repository: Jingshiro/legado
+2026-04-18T11:46:45.1513753Z ##[group]Getting Git version info
+2026-04-18T11:46:45.1514472Z Working directory is '/home/runner/work/legado/legado'
+2026-04-18T11:46:45.1515523Z [command]/usr/bin/git version
+2026-04-18T11:46:45.1529653Z git version 2.53.0
+2026-04-18T11:46:45.1547638Z ##[endgroup]
+2026-04-18T11:46:45.1561024Z Temporarily overriding HOME='/home/runner/work/_temp/1344a4a9-2a18-4d81-b6b5-ea447fcd4411' before making global git config changes
+2026-04-18T11:46:45.1562497Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-18T11:46:45.1566206Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/legado/legado
+2026-04-18T11:46:45.1595641Z Deleting the contents of '/home/runner/work/legado/legado'
+2026-04-18T11:46:45.1600419Z ##[group]Initializing the repository
+2026-04-18T11:46:45.1605210Z [command]/usr/bin/git init /home/runner/work/legado/legado
+2026-04-18T11:46:45.1693349Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-18T11:46:45.1694793Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-18T11:46:45.1695885Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-18T11:46:45.1696729Z hint: call:
+2026-04-18T11:46:45.1697137Z hint:
+2026-04-18T11:46:45.1697738Z hint: 	git config --global init.defaultBranch <name>
+2026-04-18T11:46:45.1698353Z hint:
+2026-04-18T11:46:45.1698934Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-18T11:46:45.1699917Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-18T11:46:45.1700742Z hint:
+2026-04-18T11:46:45.1701204Z hint: 	git branch -m <name>
+2026-04-18T11:46:45.1701635Z hint:
+2026-04-18T11:46:45.1702216Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-18T11:46:45.1703167Z Initialized empty Git repository in /home/runner/work/legado/legado/.git/
+2026-04-18T11:46:45.1706089Z [command]/usr/bin/git remote add origin https://github.com/Jingshiro/legado
+2026-04-18T11:46:45.1731965Z ##[endgroup]
+2026-04-18T11:46:45.1732718Z ##[group]Disabling automatic garbage collection
+2026-04-18T11:46:45.1736418Z [command]/usr/bin/git config --local gc.auto 0
+2026-04-18T11:46:45.1759109Z ##[endgroup]
+2026-04-18T11:46:45.1759827Z ##[group]Setting up auth
+2026-04-18T11:46:45.1766011Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-18T11:46:45.1790867Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-18T11:46:45.2021636Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-18T11:46:45.2046413Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-18T11:46:45.2213288Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-18T11:46:45.2237917Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-18T11:46:45.2405366Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-04-18T11:46:45.2432785Z ##[endgroup]
+2026-04-18T11:46:45.2433393Z ##[group]Fetching the repository
+2026-04-18T11:46:45.2441669Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-04-18T11:46:47.8050527Z From https://github.com/Jingshiro/legado
+2026-04-18T11:46:47.8054881Z  * [new branch]          dependabot/github_actions/gradle/actions-6 -> origin/dependabot/github_actions/gradle/actions-6
+2026-04-18T11:46:47.8056696Z  * [new branch]          dependabot/github_actions/softprops/action-gh-release-3 -> origin/dependabot/github_actions/softprops/action-gh-release-3
+2026-04-18T11:46:47.8058277Z  * [new branch]          dependabot/gradle/activity-1.13.0 -> origin/dependabot/gradle/activity-1.13.0
+2026-04-18T11:46:47.8059619Z  * [new branch]          dependabot/gradle/agp-9.1.0 -> origin/dependabot/gradle/agp-9.1.0
+2026-04-18T11:46:47.8060946Z  * [new branch]          dependabot/gradle/androidx.collection-collection-1.6.0 -> origin/dependabot/gradle/androidx.collection-collection-1.6.0
+2026-04-18T11:46:47.8062716Z  * [new branch]          dependabot/gradle/androidx.test.espresso-espresso-core-3.7.0 -> origin/dependabot/gradle/androidx.test.espresso-espresso-core-3.7.0
+2026-04-18T11:46:47.8064633Z  * [new branch]          dependabot/gradle/androidx.viewpager2-viewpager2-1.1.0 -> origin/dependabot/gradle/androidx.viewpager2-viewpager2-1.1.0
+2026-04-18T11:46:47.8066320Z  * [new branch]          dependabot/gradle/androidx.webkit-webkit-1.15.0 -> origin/dependabot/gradle/androidx.webkit-webkit-1.15.0
+2026-04-18T11:46:47.8067302Z  * [new branch]          dependabot/gradle/cn.hutool-hutool-crypto-5.8.44 -> origin/dependabot/gradle/cn.hutool-hutool-crypto-5.8.44
+2026-04-18T11:46:47.8068214Z  * [new branch]          dependabot/gradle/com.github.jenly1314-zxing-lite-3.4.1 -> origin/dependabot/gradle/com.github.jenly1314-zxing-lite-3.4.1
+2026-04-18T11:46:47.8069162Z  * [new branch]          dependabot/gradle/com.google.gms.google-services-4.4.4 -> origin/dependabot/gradle/com.google.gms.google-services-4.4.4
+2026-04-18T11:46:47.8070177Z  * [new branch]          dependabot/gradle/com.google.protobuf-protobuf-javalite-4.34.1 -> origin/dependabot/gradle/com.google.protobuf-protobuf-javalite-4.34.1
+2026-04-18T11:46:47.8070999Z  * [new branch]          dependabot/gradle/core-1.18.0 -> origin/dependabot/gradle/core-1.18.0
+2026-04-18T11:46:47.8071740Z  * [new branch]          dependabot/gradle/de.undercouch.download-5.7.0 -> origin/dependabot/gradle/de.undercouch.download-5.7.0
+2026-04-18T11:46:47.8072613Z  * [new branch]          dependabot/gradle/gsyvideoplayer-12.1.0 -> origin/dependabot/gradle/gsyvideoplayer-12.1.0
+2026-04-18T11:46:47.8073283Z  * [new branch]          dependabot/gradle/kotlin-2.3.20 -> origin/dependabot/gradle/kotlin-2.3.20
+2026-04-18T11:46:47.8074242Z  * [new branch]          dependabot/gradle/kotlin_ksp-f892d25a68 -> origin/dependabot/gradle/kotlin_ksp-f892d25a68
+2026-04-18T11:46:47.8074938Z  * [new branch]          dependabot/gradle/lifecycle-2.10.0 -> origin/dependabot/gradle/lifecycle-2.10.0
+2026-04-18T11:46:47.8075562Z  * [new branch]          dependabot/gradle/media3-1.10.0 -> origin/dependabot/gradle/media3-1.10.0
+2026-04-18T11:46:47.8076365Z  * [new branch]          dependabot/gradle/org.apache.commons-commons-text-1.15.0 -> origin/dependabot/gradle/org.apache.commons-commons-text-1.15.0
+2026-04-18T11:46:47.8077220Z  * [new branch]          dependabot/gradle/org.jsoup-jsoup-1.22.1 -> origin/dependabot/gradle/org.jsoup-jsoup-1.22.1
+2026-04-18T11:46:47.8078054Z  * [new branch]          dependabot/gradle/room-2.8.4 -> origin/dependabot/gradle/room-2.8.4
+2026-04-18T11:46:47.8078787Z  * [new branch]          dependabot/npm_and_yarn/modules/web/eslint-10.2.0 -> origin/dependabot/npm_and_yarn/modules/web/eslint-10.2.0
+2026-04-18T11:46:47.8079680Z  * [new branch]          dependabot/npm_and_yarn/modules/web/npm-run-all2-8.0.4 -> origin/dependabot/npm_and_yarn/modules/web/npm-run-all2-8.0.4
+2026-04-18T11:46:47.8080578Z  * [new branch]          dependabot/npm_and_yarn/modules/web/types/node-25.6.0 -> origin/dependabot/npm_and_yarn/modules/web/types/node-25.6.0
+2026-04-18T11:46:47.8081611Z  * [new branch]          dependabot/npm_and_yarn/modules/web/unplugin-auto-import-21.0.0 -> origin/dependabot/npm_and_yarn/modules/web/unplugin-auto-import-21.0.0
+2026-04-18T11:46:47.8082598Z  * [new branch]          dependabot/npm_and_yarn/modules/web/unplugin-icons-23.0.1 -> origin/dependabot/npm_and_yarn/modules/web/unplugin-icons-23.0.1
+2026-04-18T11:46:47.8083246Z  * [new branch]          main          -> origin/main
+2026-04-18T11:46:47.8083706Z  * [new tag]             1.1           -> 1.1
+2026-04-18T11:46:47.8084253Z  * [new tag]             1.2           -> 1.2
+2026-04-18T11:46:47.8084661Z  * [new tag]             1.2.1         -> 1.2.1
+2026-04-18T11:46:47.8084977Z  * [new tag]             1.2.2         -> 1.2.2
+2026-04-18T11:46:47.8085299Z  * [new tag]             1.2.3         -> 1.2.3
+2026-04-18T11:46:47.8085607Z  * [new tag]             1.2.4         -> 1.2.4
+2026-04-18T11:46:47.8085923Z  * [new tag]             1.2.5         -> 1.2.5
+2026-04-18T11:46:47.8086253Z  * [new tag]             3.26.031020   -> 3.26.031020
+2026-04-18T11:46:47.8086583Z  * [new tag]             3.26.032013   -> 3.26.032013
+2026-04-18T11:46:47.8086919Z  * [new tag]             3.26.032019   -> 3.26.032019
+2026-04-18T11:46:47.8087247Z  * [new tag]             3.26.032020   -> 3.26.032020
+2026-04-18T11:46:47.8087588Z  * [new tag]             3.26.04021738 -> 3.26.04021738
+2026-04-18T11:46:47.8087930Z  * [new tag]             3.26.04021740 -> 3.26.04021740
+2026-04-18T11:46:47.8088280Z  * [new tag]             3.26.04021752 -> 3.26.04021752
+2026-04-18T11:46:47.8088612Z  * [new tag]             3.26.04021812 -> 3.26.04021812
+2026-04-18T11:46:47.8088959Z  * [new tag]             3.26.04021818 -> 3.26.04021818
+2026-04-18T11:46:47.8089301Z  * [new tag]             3.26.04021821 -> 3.26.04021821
+2026-04-18T11:46:47.8089642Z  * [new tag]             3.26.04022003 -> 3.26.04022003
+2026-04-18T11:46:47.8089984Z  * [new tag]             3.26.04022012 -> 3.26.04022012
+2026-04-18T11:46:47.8090314Z  * [new tag]             3.26.04051749 -> 3.26.04051749
+2026-04-18T11:46:47.8090660Z  * [new tag]             3.26.04062119 -> 3.26.04062119
+2026-04-18T11:46:47.8090999Z  * [new tag]             3.26.04062140 -> 3.26.04062140
+2026-04-18T11:46:47.8091341Z  * [new tag]             3.26.04062215 -> 3.26.04062215
+2026-04-18T11:46:47.8091682Z  * [new tag]             3.26.04062226 -> 3.26.04062226
+2026-04-18T11:46:47.8092017Z  * [new tag]             3.26.04071729 -> 3.26.04071729
+2026-04-18T11:46:47.8092366Z  * [new tag]             3.26.04131149 -> 3.26.04131149
+2026-04-18T11:46:47.8092751Z  * [new tag]             3.26.04181815 -> 3.26.04181815
+2026-04-18T11:46:47.8093153Z  * [new tag]             beta          -> beta
+2026-04-18T11:46:47.8120854Z [command]/usr/bin/git branch --list --remote origin/main
+2026-04-18T11:46:47.8142992Z   origin/main
+2026-04-18T11:46:47.8150708Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+2026-04-18T11:46:47.8167185Z be46521ca87558d75a6ca9e346e39dbfacf1ab35
+2026-04-18T11:46:47.8170405Z ##[endgroup]
+2026-04-18T11:46:47.8171062Z ##[group]Determining the checkout info
+2026-04-18T11:46:47.8172127Z ##[endgroup]
+2026-04-18T11:46:47.8176172Z [command]/usr/bin/git sparse-checkout disable
+2026-04-18T11:46:47.8205550Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-04-18T11:46:47.8227624Z ##[group]Checking out the ref
+2026-04-18T11:46:47.8231680Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-04-18T11:46:47.9345926Z Switched to a new branch 'main'
+2026-04-18T11:46:47.9346678Z branch 'main' set up to track 'origin/main'.
+2026-04-18T11:46:47.9355930Z ##[endgroup]
+2026-04-18T11:46:47.9388061Z [command]/usr/bin/git log -1 --format=%H
+2026-04-18T11:46:47.9407558Z be46521ca87558d75a6ca9e346e39dbfacf1ab35

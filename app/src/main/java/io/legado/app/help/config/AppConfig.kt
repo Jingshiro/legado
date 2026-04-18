@@ -29,6 +29,9 @@ import java.net.InetAddress
 object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
     val isCronet = appCtx.getPrefBoolean(PreferKey.cronet)
     var useAntiAlias = appCtx.getPrefBoolean(PreferKey.antiAlias)
+    var thoughtShareStyle: Int
+        get() = appCtx.getPrefInt(PreferKey.thoughtShareStyle, 0)
+        set(value) = appCtx.putPrefInt(PreferKey.thoughtShareStyle, value)
     var userAgent: String = getPrefUserAgent()
     var customHosts = appCtx.getPrefString(PreferKey.customHosts)
     var editTheme = appCtx.getPrefInt(PreferKey.editTheme, 0)

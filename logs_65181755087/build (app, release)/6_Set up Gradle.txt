@@ -1,0 +1,80 @@
+﻿2026-04-18T11:46:48.1880438Z ##[group]Run gradle/actions/setup-gradle@v5
+2026-04-18T11:46:48.1880789Z with:
+2026-04-18T11:46:48.1881032Z   cache-disabled: false
+2026-04-18T11:46:48.1881342Z   cache-read-only: false
+2026-04-18T11:46:48.1881641Z   cache-write-only: false
+2026-04-18T11:46:48.1881908Z   cache-overwrite-existing: false
+2026-04-18T11:46:48.1882250Z   cache-cleanup: on-success
+2026-04-18T11:46:48.1882556Z   gradle-home-cache-includes: caches
+notifications
+
+2026-04-18T11:46:48.1882917Z   add-job-summary: always
+2026-04-18T11:46:48.1883189Z   add-job-summary-as-pr-comment: never
+2026-04-18T11:46:48.1883552Z   dependency-graph: disabled
+2026-04-18T11:46:48.1884081Z   dependency-graph-report-dir: dependency-graph-reports
+2026-04-18T11:46:48.1884548Z   dependency-graph-continue-on-failure: true
+2026-04-18T11:46:48.1884908Z   build-scan-publish: false
+2026-04-18T11:46:48.1885173Z   validate-wrappers: true
+2026-04-18T11:46:48.1885477Z   allow-snapshot-wrappers: false
+2026-04-18T11:46:48.1885800Z   gradle-home-cache-strict-match: false
+2026-04-18T11:46:48.1886276Z   workflow-job-context: {
+  "product": "app",
+  "type": "release"
+}
+2026-04-18T11:46:48.1887004Z   github-token: ***
+2026-04-18T11:46:48.1887261Z env:
+2026-04-18T11:46:48.1887462Z   product: app
+2026-04-18T11:46:48.1887758Z   type: release
+2026-04-18T11:46:48.1888011Z   VERSION: 3.26.041819
+2026-04-18T11:46:48.1888242Z   VERSIONL: 3.26.04181946
+2026-04-18T11:46:48.1888640Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:46:48.1889116Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:46:48.1889528Z ##[endgroup]
+2026-04-18T11:46:48.6749178Z Merged default JDK locations into /home/runner/.m2/toolchains.xml
+2026-04-18T11:46:48.6750809Z Preparing cache for cleanup.
+2026-04-18T11:46:48.6753970Z ##[group]Restore Gradle state from cache
+2026-04-18T11:46:48.7696640Z Cache hit for restore-key: gradle-home-v1|Linux-X64|build[15d57b40e51807bc8706dd6f1365181c]-14d5a1d86cb790422e754b56bca14c852f8a6382
+2026-04-18T11:46:49.5444957Z Received 65754965 of 65754965 (100.0%), 96.2 MBs/sec
+2026-04-18T11:46:49.5447258Z Cache Size: ~63 MB (65754965 B)
+2026-04-18T11:46:49.5476457Z [command]/usr/bin/tar -xf /home/runner/work/_temp/c532c144-4e5f-484b-b278-d2b141d153f0/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:49.6851812Z Cache restored successfully
+2026-04-18T11:46:49.6877893Z Restored cache entry with key gradle-home-v1|Linux-X64|build[15d57b40e51807bc8706dd6f1365181c]-be46521ca87558d75a6ca9e346e39dbfacf1ab35 to /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1011ms
+2026-04-18T11:46:49.7747906Z Cache hit for: gradle-transforms-v1-7c1aac24da7c5dfbeddddc9505cd92cd
+2026-04-18T11:46:49.7774295Z Cache hit for: gradle-groovy-dsl-v1-954c000c3a81218f0bb75011d6fc5a67
+2026-04-18T11:46:49.7828836Z Cache hit for: gradle-dependencies-v1-e16286db42cdcdcab552b0be1764a819
+2026-04-18T11:46:49.7858435Z Cache hit for: gradle-instrumented-jars-v1-567ca2baf42248876a7a5980b9b0af55
+2026-04-18T11:46:49.7865308Z Cache hit for: gradle-wrapper-zips-v1-b8bc683b7ad90698f6029bfbbde61640
+2026-04-18T11:46:50.0991712Z Received 168508 of 168508 (100.0%), 0.8 MBs/sec
+2026-04-18T11:46:50.0992326Z Cache Size: ~0 MB (168508 B)
+2026-04-18T11:46:50.1009322Z [command]/usr/bin/tar -xf /home/runner/work/_temp/f27acdde-f141-4d89-96bf-c9b557608d1c/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:50.1136215Z Cache restored successfully
+2026-04-18T11:46:50.1138658Z Restored cache entry with key gradle-instrumented-jars-v1-567ca2baf42248876a7a5980b9b0af55 to /home/runner/.gradle/caches/jars-*/*/ in 425ms
+2026-04-18T11:46:50.1384987Z Received 270516 of 270516 (100.0%), 1.0 MBs/sec
+2026-04-18T11:46:50.1385511Z Cache Size: ~0 MB (270516 B)
+2026-04-18T11:46:50.1407625Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8f89239e-6f6d-402c-aa21-9dbf1d4b3393/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:50.1674871Z Cache restored successfully
+2026-04-18T11:46:50.1737047Z Restored cache entry with key gradle-groovy-dsl-v1-954c000c3a81218f0bb75011d6fc5a67 to /home/runner/.gradle/caches/*/groovy-dsl/*/ in 481ms
+2026-04-18T11:46:50.8158791Z Received 130023424 of 136697511 (95.1%), 123.9 MBs/sec
+2026-04-18T11:46:50.8703126Z Received 125829120 of 143903032 (87.4%), 119.5 MBs/sec
+2026-04-18T11:46:50.8887840Z Received 113246208 of 435412118 (26.0%), 108.1 MBs/sec
+2026-04-18T11:46:51.0858635Z Received 143903032 of 143903032 (100.0%), 112.6 MBs/sec
+2026-04-18T11:46:51.0861145Z Cache Size: ~137 MB (143903032 B)
+2026-04-18T11:46:51.0925095Z Received 136697511 of 136697511 (100.0%), 102.1 MBs/sec
+2026-04-18T11:46:51.0954541Z Cache Size: ~130 MB (136697511 B)
+2026-04-18T11:46:51.1023580Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d1f38705-8092-494a-85ce-0e721bfb5ef4/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:51.1074331Z [command]/usr/bin/tar -xf /home/runner/work/_temp/eee95c70-c3dd-4680-aa3b-9f472de1b719/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:51.3700867Z Cache restored successfully
+2026-04-18T11:46:51.3770805Z Restored cache entry with key gradle-wrapper-zips-v1-b8bc683b7ad90698f6029bfbbde61640 to /home/runner/.gradle/wrapper/dists/gradle-8.14.4-bin/92wwslzcyst3phie3o264zltu in 1688ms
+2026-04-18T11:46:51.8912304Z Received 301989888 of 435412118 (69.4%), 144.1 MBs/sec
+2026-04-18T11:46:52.4414824Z Cache restored successfully
+2026-04-18T11:46:52.4558120Z Restored cache entry with key gradle-transforms-v1-7c1aac24da7c5dfbeddddc9505cd92cd to /home/runner/.gradle/caches/transforms-4/*/,/home/runner/.gradle/caches/*/transforms/*/ in 2764ms
+2026-04-18T11:46:52.7260940Z Received 435412118 of 435412118 (100.0%), 146.4 MBs/sec
+2026-04-18T11:46:52.7263555Z Cache Size: ~415 MB (435412118 B)
+2026-04-18T11:46:52.7288321Z [command]/usr/bin/tar -xf /home/runner/work/_temp/9a83e219-bfb4-421b-b950-d4beed2e27f1/cache.tzst -P -C /home/runner/work/legado/legado --use-compress-program unzstd
+2026-04-18T11:46:53.1489842Z Cache restored successfully
+2026-04-18T11:46:53.1633003Z Restored cache entry with key gradle-dependencies-v1-e16286db42cdcdcab552b0be1764a819 to /home/runner/.gradle/caches/modules-*/files-*/*/*/*/* in 3475ms
+2026-04-18T11:46:53.1714595Z ##[endgroup]
+2026-04-18T11:46:53.1966557Z ##[group]All Gradle Wrapper jars are valid
+2026-04-18T11:46:53.1967863Z ✓ Found known Gradle Wrapper JAR files:
+2026-04-18T11:46:53.1968955Z   381dff8aa434499aa93bc25572b049c8c586a67faff2c02f375e4f23e17e49de gradle/wrapper/gradle-wrapper.jar
+2026-04-18T11:46:53.1969877Z ##[endgroup]

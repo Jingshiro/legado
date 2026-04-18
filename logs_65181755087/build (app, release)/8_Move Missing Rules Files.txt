@@ -1,0 +1,24 @@
+﻿2026-04-18T11:47:02.0100605Z ##[group]Run echo "移动missing_rules.txt文件"
+2026-04-18T11:47:02.0100964Z [36;1mecho "移动missing_rules.txt文件"[0m
+2026-04-18T11:47:02.0101324Z [36;1mmkdir -p /home/runner/work/legado/legado/mapping/[0m
+2026-04-18T11:47:02.0101870Z [36;1mfor file in `ls /home/runner/work/legado/legado/app/build/outputs/mapping/*/missing_rules.txt`; do[0m
+2026-04-18T11:47:02.0102456Z [36;1m  mv "$file" /home/runner/work/legado/legado/mapping/missing_rules.txt[0m
+2026-04-18T11:47:02.0102848Z [36;1mdone[0m
+2026-04-18T11:47:02.0115900Z shell: /usr/bin/bash -e {0}
+2026-04-18T11:47:02.0116170Z env:
+2026-04-18T11:47:02.0116366Z   product: app
+2026-04-18T11:47:02.0116573Z   type: release
+2026-04-18T11:47:02.0116791Z   VERSION: 3.26.041819
+2026-04-18T11:47:02.0117011Z   VERSIONL: 3.26.04181946
+2026-04-18T11:47:02.0117365Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:47:02.0117847Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:47:02.0118270Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-04-18T11:47:02.0118680Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-04-18T11:47:02.0118986Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-04-18T11:47:02.0119289Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-04-18T11:47:02.0119730Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-04-18T11:47:02.0120328Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-04-18T11:47:02.0120647Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-04-18T11:47:02.0120927Z ##[endgroup]
+2026-04-18T11:47:02.0154769Z 移动missing_rules.txt文件
+2026-04-18T11:47:02.0174867Z ls: cannot access '/home/runner/work/legado/legado/app/build/outputs/mapping/*/missing_rules.txt': No such file or directory

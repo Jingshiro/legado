@@ -1,0 +1,6 @@
+﻿2026-04-18T11:46:38.1923950Z Evaluate and set job outputs
+2026-04-18T11:46:38.1934254Z Set output 'version'
+2026-04-18T11:46:38.1936103Z Set output 'versionL'
+2026-04-18T11:46:38.1937780Z Set output 'updateLog_content'
+2026-04-18T11:46:38.1938639Z Set output 'build_matrix'
+2026-04-18T11:46:38.1939711Z Cleaning up orphan processes

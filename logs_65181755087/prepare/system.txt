@@ -1,0 +1,9 @@
+2026-04-18T11:46:34.5540000Z Requested labels: ubuntu-latest
+2026-04-18T11:46:34.5540000Z Job defined at: Jingshiro/legado/.github/workflows/test.yml@refs/heads/main
+2026-04-18T11:46:34.5540000Z Waiting for a runner to pick up this job...
+2026-04-18T11:46:34.5520000Z Evaluating prepare.if
+2026-04-18T11:46:34.5520000Z Evaluating: (success() && (!startsWith(github.event.head_commit.message, 'Merge pull request')))
+2026-04-18T11:46:34.5520000Z Expanded: (true && !startsWith('回退', 'Merge pull request'))
+2026-04-18T11:46:34.5520000Z Result: true
+2026-04-18T11:46:34.5550000Z Job is waiting for a hosted runner to come online.
+2026-04-18T11:46:34.5560000Z Job is about to start running on the hosted runner: GitHub Actions 1000000347

@@ -1,0 +1,25 @@
+﻿2026-04-18T11:47:02.0226516Z ##[group]Run actions/upload-artifact@v7
+2026-04-18T11:47:02.0226820Z with:
+2026-04-18T11:47:02.0227060Z   name: legado.app.release.mapping.missing_rules
+2026-04-18T11:47:02.0227380Z   if-no-files-found: ignore
+2026-04-18T11:47:02.0227710Z   path: /home/runner/work/legado/legado/mapping/missing_rules.txt
+2026-04-18T11:47:02.0228052Z   compression-level: 6
+2026-04-18T11:47:02.0228278Z   overwrite: false
+2026-04-18T11:47:02.0228500Z   include-hidden-files: false
+2026-04-18T11:47:02.0228747Z   archive: true
+2026-04-18T11:47:02.0228938Z env:
+2026-04-18T11:47:02.0229118Z   product: app
+2026-04-18T11:47:02.0229336Z   type: release
+2026-04-18T11:47:02.0229533Z   VERSION: 3.26.041819
+2026-04-18T11:47:02.0229751Z   VERSIONL: 3.26.04181946
+2026-04-18T11:47:02.0230091Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:47:02.0230569Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-04-18T11:47:02.0230988Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-04-18T11:47:02.0231320Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-04-18T11:47:02.0231610Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-04-18T11:47:02.0231954Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-04-18T11:47:02.0232383Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-04-18T11:47:02.0232858Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-04-18T11:47:02.0233170Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-04-18T11:47:02.0233461Z ##[endgroup]
+2026-04-18T11:47:02.1516196Z No files were found with the provided path: /home/runner/work/legado/legado/mapping/missing_rules.txt. No artifacts will be uploaded.
