@@ -60,7 +60,7 @@ jobs:
           find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_release_${{ env.VERSION }}.apk \;
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.VERSION }}
           name: Legado ${{ env.VERSION }}
