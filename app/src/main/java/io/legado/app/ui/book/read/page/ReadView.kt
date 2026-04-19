@@ -325,8 +325,6 @@ class ReadView(context: Context, attrs: AttributeSet) :
                 val startPos = textPos.copy()
                 val endPos = textPos.copy()
                 val page = curPage.relativePage(textPos.relativePagePos)
-                val stringBuilder = StringBuilder()
-                var cIndex = textPos.columnIndex
                 var lineStart = textPos.lineIndex
                 var lineEnd = textPos.lineIndex
                 for (index in textPos.lineIndex - 1 downTo 0) {
@@ -334,53 +332,28 @@ class ReadView(context: Context, attrs: AttributeSet) :
                     if (textLine.isParagraphEnd) {
                         break
                     } else {
-                        stringBuilder.insert(0, textLine.text)
                         lineStart -= 1
-                        cIndex += textLine.charSize
                     }
                 }
                 for (index in textPos.lineIndex until page.lineSize) {
                     val textLine = page.getLine(index)
-                    stringBuilder.append(textLine.text)
                     lineEnd += 1
                     if (textLine.isParagraphEnd) {
                         break
                     }
                 }
-                var start: Int
-                var end: Int
-                boundary.setText(stringBuilder.toString())
-                start = boundary.first()
-                end = boundary.next()
-                while (end != BreakIterator.DONE) {
-                    if (cIndex in start until end) {
-                        break
-                    }
-                    start = end
-                    end = boundary.next()
-                }
-                kotlin.run {
-                    var ci = 0
-                    for (index in lineStart..lineEnd) {
-                        val textLine = page.getLine(index)
-                        for (j in textLine.columns.indices) {
-                            if (ci == start) {
-                                startPos.lineIndex = index
-                                startPos.columnIndex = j
-                            } else if (ci == end - 1) {
-                                endPos.lineIndex = index
-                                endPos.columnIndex = j
-                                return@run
-                            }
-                            val column = textLine.getColumn(j)
-                            if (column is TextBaseColumn) {
-                                ci += column.charData.length
-                            } else {
-                                ci++
-                            }
-                        }
-                    }
-                }
+                
+                // Set startPos to the first character of the first line in the paragraph
+                startPos.lineIndex = lineStart
+                startPos.columnIndex = 0
+                
+                // Set endPos to the last character of the last line in the paragraph
+                // lineEnd is exclusive here (points to the next line or equal to lineSize)
+                val lastLineIndexInParagraph = lineEnd - 1
+                endPos.lineIndex = lastLineIndexInParagraph
+                val lastLine = page.getLine(lastLineIndexInParagraph)
+                endPos.columnIndex = maxOf(0, lastLine.columns.lastIndex)
+
                 curPage.selectStartMoveIndex(startPos)
                 curPage.selectEndMoveIndex(endPos)
             }

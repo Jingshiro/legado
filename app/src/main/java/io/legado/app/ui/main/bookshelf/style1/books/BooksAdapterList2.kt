@@ -9,9 +9,12 @@ import io.legado.app.base.adapter.ItemViewHolder
 import io.legado.app.data.entities.Book
 import io.legado.app.databinding.ItemBookshelfList2Binding
 import io.legado.app.help.book.isLocal
+import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.help.config.AppConfig
+import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
 import io.legado.app.utils.toTimeAgo
+import io.legado.app.utils.visible
 import splitties.views.onLongClick
 
 /**
@@ -79,6 +82,7 @@ class BooksAdapterList2(
                 binding.bvUnread.invisible()
             }
         }
+        ReadIterationHelper.applyTagStyle(binding.tvReadTag, item.readIteration)
     }
 
     private fun upLastUpdateTime(binding: ItemBookshelfList2Binding, item: Book) {

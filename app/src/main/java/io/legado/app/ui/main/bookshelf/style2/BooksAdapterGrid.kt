@@ -11,6 +11,7 @@ import io.legado.app.databinding.ItemBookshelfGridBinding
 import io.legado.app.databinding.ItemBookshelfGridGroup2Binding
 import io.legado.app.databinding.ItemBookshelfGridGroupBinding
 import io.legado.app.help.book.isLocal
+import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.help.config.AppConfig
 import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
@@ -127,6 +128,7 @@ class BooksAdapterGrid(context: Context, callBack: CallBack) :
                     binding.bvUnread.invisible()
                 }
             }
+            ReadIterationHelper.applyTagStyle(binding.tvReadTag, item.readIteration)
         }
 
     }
@@ -183,6 +185,7 @@ class BooksAdapterGrid(context: Context, callBack: CallBack) :
                     binding.bvUnread.invisible()
                 }
             }
+            ReadIterationHelper.applyTagStyle(binding.tvReadTag, item.readIteration)
         }
 
     }

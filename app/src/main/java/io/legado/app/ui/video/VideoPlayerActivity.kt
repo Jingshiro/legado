@@ -92,6 +92,8 @@ import io.noties.markwon.image.glide.GlideImagesPlugin
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 
 class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlayerViewModel>(),
     SettingsDialog.CallBack,RssFavoritesDialog.Callback {
@@ -137,6 +139,12 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     private var isFullScreen = false
     private var orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     private var menuCustomBtn: MenuItem? = null
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { VideoPlay.videoTitle }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
+    }
     private val bookSourceEditResult =
         registerForActivityResult(StartActivityContract(BookSourceEditActivity::class.java)) {
             if (it.resultCode == RESULT_OK) {
@@ -175,6 +183,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
 
     @OptIn(UnstableApi::class)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        lifecycle.addObserver(detailedReadRecordObserver)
         playerView.enlargeImageRes = R.drawable.ic_fullscreen
         isNew = intent.getBooleanExtra("isNew", true)
         if (isNew) {
@@ -213,6 +222,7 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
             }
             finish()
         }
+        detailedReadRecordTracker.start()
     }
 
     private fun initView() {

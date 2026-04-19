@@ -1059,6 +1059,11 @@ object ReadBook : CoroutineScope by MainScope() {
         fun sureNewProgress(progress: BookProgress)
 
         fun cancelSelect()
+
+        /**
+         * 书籍读到末尾时回调
+         */
+        fun onBookEnd()
     }
 
 }

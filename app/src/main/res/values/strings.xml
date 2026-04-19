@@ -3,7 +3,7 @@
     <!--App-->
     <string name="app_name">Legado</string>
     <string name="app_name_a">Legado·A</string>
-    <string name="app_name_s" translatable="false">LegadoPlus</string>
+    <string name="app_name_s" translatable="false">LegadoBeta</string>
     <string name="receiving_shared_label">Legado·search</string>
     <string name="tip_perm_request_storage">Legado needs storage access to find and read books. please go "App Settings" to allow "Storage permission".</string>
 
@@ -278,6 +278,21 @@
     <string name="group_zg">Awaiting</string>
     <string name="group_yf">Awaiting more</string>
     <string name="bookmark">Bookmarks</string>
+    <string name="book_thought">Thoughts</string>
+    <string name="bookmark_and_thought">Bookmarks &amp; Thoughts</string>
+    <string name="write_thought">Write thought</string>
+    <string name="thought_hint">Write down your thought...</string>
+    <string name="thought_saved">Thought saved</string>
+    <string name="thought_deleted">Thought deleted</string>
+    <string name="thought_image_saved">Thought image saved: %1$s</string>
+    <string name="thought_image_save_failed">Failed to save thought image</string>
+    <string name="edit_thought">Edit thought</string>
+    <string name="delete_thought">Delete thought</string>
+    <string name="no_thoughts">No thoughts yet</string>
+    <string name="selected_text">Selected text</string>
+    <string name="new_thought">New thought</string>
+    <string name="select_thought">Select thought</string>
+    <string name="select_thought_item">Thought %1$d: %2$s</string>
     <string name="bookmark_add">Add to Bookmarks</string>
     <string name="action_del">Delete</string>
     <string name="load_over_time">Loading timeout</string>
@@ -398,6 +413,9 @@
     <string name="source_no_login">The current source has not configured with a login address</string>
     <string name="no_prev_page">No prior page</string>
     <string name="no_next_page">No next page</string>
+    <string name="mark_book_finished">标记已读完</string>
+    <string name="read_iteration_tag_color">阅读状态标签颜色</string>
+    <string name="read_iteration_tag_color_summary">书架封面右上角显示的读完/刷书标签背景色</string>
 
     <!-- source start-->
     <string name="source_name">Source Name(sourceName)</string>
@@ -976,6 +994,7 @@
     <string name="book_change_source">Change the source of the whole book</string>
     <string name="sort_by_time">Sort by time</string>
     <string name="enable_record">Enable record</string>
+    <string name="export_detail_record">Export detailed records</string>
     <string name="copy_all">Copy all</string>
     <string name="auto_complete">Automatic completion</string>
     <string name="sort_by_size">Sort by size</string>
@@ -1342,4 +1361,19 @@
     <string name="is_system_tts_no_export">无法导出系统tts</string>
     <string name="click_image_way">点击图片方式</string>
     <string name="auto_update_summary">每天自动检查软件是否更新</string>
+    <string name="template_style">Template Style</string>
+    <string name="ai_companion">阅读伴侣</string>
+    <string name="ai_input_hint">说点什么…</string>
+    <string name="ai_send">发送</string>
+    <string name="ai_save_config">保存配置</string>
+    <string name="ai_clear_memory">清空对话记忆</string>
+    <string name="ai_memory_length">聊天记忆长度（参考）：</string>
+    <string name="ai_hint_api_url">API URL（如 https://api.openai.com/v1/chat/completions）</string>
+    <string name="ai_hint_api_key">API Key</string>
+    <string name="ai_hint_model">模型（如 gpt-3.5-turbo）</string>
+    <string name="ai_hint_user_avatar">用户头像 URL（可选）</string>
+    <string name="ai_hint_ai_avatar">AI 头像 URL（可选）</string>
+    <string name="ai_hint_persona">基础人设与提示词</string>
+    <string name="ai_api_key_warning">⚠ API Key 以明文形式存储于本地，请勿在公共设备上使用。</string>
+    <string name="ai_summarize">归纳记忆</string>
 </resources>

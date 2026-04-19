@@ -822,5 +822,11 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     val autoUpdateVariant get() = appCtx.getPrefBoolean("autoUpdateVariant", true)
+    
+    var thoughtShareStyle: Int
+        get() = appCtx.getPrefInt(PreferKey.thoughtShareStyle, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.thoughtShareStyle, value)
+        }
 }
 

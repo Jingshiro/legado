@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.audio
 
 import android.annotation.SuppressLint
+import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -43,7 +44,6 @@ import io.legado.app.utils.sendToClip
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.startActivityForBook
-import io.legado.app.utils.toDurationTime
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.visible
 import kotlinx.coroutines.Dispatchers.IO
@@ -58,6 +58,8 @@ import io.legado.app.ui.book.audio.SliderPopup.Companion.SPEED
 import io.legado.app.ui.book.audio.SliderPopup.Companion.TIMER
 import io.legado.app.model.SourceCallBack
 import io.legado.app.utils.gone
+import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
+import io.legado.app.help.readrecord.DetailedReadRecordTracker
 
 /**
  * 音频播放
@@ -78,7 +80,20 @@ class AudioPlayActivity :
     private var lyricOn = false
     private var oldLyric: String? = null
     private var menuCustomBtn: MenuItem? = null
+    private val detailedReadRecordTracker by lazy {
+        DetailedReadRecordTracker { AudioPlay.book?.name }
+    }
+    private val detailedReadRecordObserver by lazy {
+        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
+    }
 
+    private val progressTimeFormat by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            SimpleDateFormat("mm:ss", Locale.getDefault())
+        } else {
+            java.text.SimpleDateFormat("mm:ss", Locale.getDefault())
+        }
+    }
     private val tocActivityResult = registerForActivityResult(TocActivityResult()) {
         it?.let {
             if (it[0] != AudioPlay.book?.durChapterIndex
@@ -96,6 +111,7 @@ class AudioPlayActivity :
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        lifecycle.addObserver(detailedReadRecordObserver)
         binding.titleBar.setBackgroundResource(R.color.transparent)
         AudioPlay.register(this)
         viewModel.titleData.observe(this) { name ->
@@ -108,6 +124,7 @@ class AudioPlayActivity :
         }
         viewModel.customBtnListData.observe(this) { menuCustomBtn?.isVisible = it }
         viewModel.initData(intent) {
+            detailedReadRecordTracker.start()
             initListener()
         }
         initView()
@@ -193,7 +210,7 @@ class AudioPlayActivity :
         }
         binding.playerProgress.setOnSeekBarChangeListener(object : SeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                binding.tvDurTime.text = progress.toDurationTime()
+                binding.tvDurTime.text = progressTimeFormat.format(progress.toLong())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -386,11 +403,11 @@ class AudioPlayActivity :
         }
         observeEventSticky<Int>(EventBus.AUDIO_SIZE) {
             binding.playerProgress.max = it
-            binding.tvAllTime.text = it.toDurationTime()
+            binding.tvAllTime.text = progressTimeFormat.format(it.toLong())
         }
         observeEventSticky<Int>(EventBus.AUDIO_PROGRESS) {
             if (!adjustProgress) binding.playerProgress.progress = it
-            binding.tvDurTime.text = it.toDurationTime()
+            binding.tvDurTime.text = progressTimeFormat.format(it.toLong())
         }
         observeEventSticky<Int>(EventBus.AUDIO_BUFFER_PROGRESS) {
             binding.playerProgress.secondaryProgress = it

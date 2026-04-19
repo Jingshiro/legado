@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import io.legado.app.R
+import io.legado.app.data.entities.BookThought
 import io.legado.app.constant.AppConst.timeFormat
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.databinding.ViewBookPageBinding
@@ -497,6 +498,10 @@ class PageView(context: Context) : FrameLayout(context) {
 
     fun createBookmark(): Bookmark? {
         return binding.contentTextView.createBookmark()
+    }
+
+    fun createThought(): BookThought? {
+        return binding.contentTextView.createThought()
     }
 
     fun relativePage(relativePagePos: Int): TextPage {

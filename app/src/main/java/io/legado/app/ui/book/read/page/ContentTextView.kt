@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import io.legado.app.R
+import io.legado.app.data.entities.BookThought
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.help.book.isOnLineTxt
 import io.legado.app.help.config.AppConfig
@@ -157,6 +158,12 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             val offset = (ChapterProvider.visibleHeight - textPage.height).toInt()
             pageOffset = min(0, offset)
             pageDelegate?.abortAnim()
+            // 滚动到末尾时触发读完回调（利用 noNext 防止重复触发）
+            val delegate = pageDelegate
+            if (delegate != null && !delegate.noNext) {
+                delegate.noNext = true
+                ReadBook.callBack?.onBookEnd()
+            }
         } else if (pageOffset > 0) {
             if (pageFactory.moveToPrev(true)) {
                 pageOffset -= textPage.height.toInt()
@@ -264,6 +271,13 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
                     handled = true
                 }
 
+                is TextColumn -> {
+                    column.thoughtText?.let {
+                        callBack.onThoughtClick(it)
+                        handled = true
+                    }
+                }
+
                 is ImageColumn -> when (AppConfig.clickImgWay) {
                     "1" -> { //预览图片
                         activity?.showDialogFragment(PhotoDialog(column.src, isBook = true))
@@ -308,11 +322,16 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
                     }
                 }
                 is TextHtmlColumn -> {
-                    column.linkUrl?.let {
+                    column.linkUrl?.let { url ->
                         activity?.startActivity<OpenUrlConfirmActivity> {
-                            putExtra("uri", it)
+                            putExtra("uri", url)
                         }
                         handled = true
+                    } ?: run {
+                        column.thoughtText?.let {
+                            callBack.onThoughtClick(it)
+                            handled = true
+                        }
                     }
                 }
             }
@@ -717,6 +736,29 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
         return null
     }
 
+    fun createThought(): BookThought? {
+        val page = relativePage(selectStart.relativePagePos)
+        page.getTextChapter().let { chapter ->
+            val selectedText = getSelectedText().trimEnd('\r', '\n')
+            if (selectedText.isBlank()) {
+                return null
+            }
+            ReadBook.book?.let { book ->
+                return BookThought(
+                    bookName = book.name,
+                    bookAuthor = book.author,
+                    chapterIndex = page.chapterIndex,
+                    chapterPos = chapter.getReadLength(page.index) +
+                            page.getPosByLineColumn(selectStart.lineIndex, selectStart.columnIndex),
+                    chapterName = chapter.title,
+                    selectedText = selectedText,
+                    textHash = selectedText.hashCode().toString()
+                )
+            }
+        }
+        return null
+    }
+
     private fun relativeOffset(relativePos: Int): Float {
         return when (relativePos) {
             0 -> pageOffset.toFloat()
@@ -783,5 +825,6 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
         fun onLongScreenshotTouchEvent(event: MotionEvent): Boolean
         fun oldClickImg(src: String): Boolean
         fun clickImg(click: String, src: String)
+        fun onThoughtClick(selectedText: String)
     }
 }
