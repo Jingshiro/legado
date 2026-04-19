@@ -1,0 +1,71 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Generate Version Name
+        id: version
+        run: |
+          VERSION=$(date -d "8 hour" -u +3.%y.%m%d%H)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Clear 18PlusList.txt
+        run: |
+          echo "" > app/src/main/assets/18PlusList.txt
+
+      - name: Configure Keystore
+        run: |
+          cp .github/workflows/legado.jks app/legado.jks
+          cat >> gradle.properties << EOF
+          RELEASE_STORE_FILE=./legado.jks
+          RELEASE_KEY_ALIAS=legado
+          RELEASE_STORE_PASSWORD=gedoor_legado
+          RELEASE_KEY_PASSWORD=gedoor_legado
+          EOF
+
+      - name: Build Beta Package
+        run: |
+          sed "/def version/c def version = \"${{ env.VERSION }}\"" app/build.gradle -i
+          chmod +x gradlew
+          ./gradlew assembleAppRelease --build-cache --parallel --daemon --warning-mode all
+          mkdir -p apk_output
+          find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_beta_${{ env.VERSION }}.apk \;
+
+      - name: Build Formal Release Package
+        run: |
+          ./gradlew clean
+          sed "s/applicationIdSuffix '.release'/applicationIdSuffix '.releaseS'/" app/build.gradle -i
+          ./gradlew assembleAppRelease --build-cache --parallel --daemon --warning-mode all
+          find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_release_${{ env.VERSION }}.apk \;
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Legado ${{ env.VERSION }}
+          files: apk_output/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
