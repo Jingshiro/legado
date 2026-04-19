@@ -8,6 +8,7 @@ import io.legado.app.help.http.okHttpClient
 import io.legado.app.model.ReadBook
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.legado.app.data.appDb
@@ -21,6 +22,7 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
 
     val messagesLiveData = MutableLiveData<List<ChatMessage>>()
     val wordCountLiveData = MutableLiveData<Int>()
+    val isGeneratingLiveData = MutableLiveData<Boolean>()
 
     // 私有可变列表，外部只能读取快照
     private val _messages = mutableListOf<ChatMessage>()
@@ -28,6 +30,11 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
 
     // 使用 AtomicBoolean 保证并发安全
     private val isGenerating = AtomicBoolean(false)
+
+    private fun setGenerating(generating: Boolean) {
+        isGenerating.set(generating)
+        isGeneratingLiveData.postValue(generating)
+    }
 
     // 防止 calculateWordCount 高频触发：用最新的请求结果覆盖旧结果
     private val wordCountJobVersion = java.util.concurrent.atomic.AtomicLong(0L)
@@ -120,8 +127,9 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
 
     fun sendMessage(userText: String, start: Int, end: Int) {
         if (!isGenerating.compareAndSet(false, true)) return
+        isGeneratingLiveData.postValue(true)
         if (userText.isBlank()) {
-            isGenerating.set(false)
+            setGenerating(false)
             return
         }
 
@@ -151,17 +159,18 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
                     _messages.add(ChatMessage("assistant", "请求失败: ${e.message}"))
                 }
             } finally {
-                isGenerating.set(false)
+                setGenerating(false)
                 syncCache()
                 messagesLiveData.postValue(_messages.toList())
             }
         }
     }
 
-    fun summarizeAndMemory() {
+    fun summarizeAndMemory(start: Int, end: Int) {
         if (!isGenerating.compareAndSet(false, true)) return
+        isGeneratingLiveData.postValue(true)
         if (_messages.isEmpty()) {
-            isGenerating.set(false)
+            setGenerating(false)
             return
         }
 
@@ -176,12 +185,18 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
                 )
 
                 val responseText = requestOpenAi(tempMessages)
-                AiConfig.memory = responseText
+                
+                val rangeStr = if (start == end) "第${start}章" else "第${start}-${end}章"
+                val currentList = io.legado.app.help.config.AiConfig.memoryList.toMutableList()
+                currentList.add(io.legado.app.help.config.AiMemoryItem(chapterRange = rangeStr, content = responseText))
+                io.legado.app.help.config.AiConfig.memoryList = currentList
+
                 _messages.add(ChatMessage("assistant", "【系统提示】记忆已更新。\n\n新记忆内容：\n$responseText"))
+                getApplication<Application>().toastOnUi("本次交流已保存")
             } catch (e: Exception) {
                 _messages.add(ChatMessage("assistant", "记忆提取失败: ${e.message}"))
             } finally {
-                isGenerating.set(false)
+                setGenerating(false)
                 syncCache()
                 messagesLiveData.postValue(_messages.toList())
             }

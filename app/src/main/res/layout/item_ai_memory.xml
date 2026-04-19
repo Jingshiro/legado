@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="?selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_chapter_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_content_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:maxLines="2"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_delete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_outline_delete"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/delete" />
+
+</LinearLayout>

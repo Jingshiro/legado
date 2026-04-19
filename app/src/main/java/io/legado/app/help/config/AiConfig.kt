@@ -1,8 +1,20 @@
 package io.legado.app.help.config
 
+import androidx.annotation.Keep
+import io.legado.app.utils.GSON
+import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.putPrefString
 import splitties.init.appCtx
+
+@Keep
+data class AiMemoryItem(
+    val id: Long = System.currentTimeMillis(),
+    val chapterRange: String,
+    val content: String
+) {
+    val preview: String get() = content.take(15) + if (content.length > 15) "..." else ""
+}
 
 /**
  * AI 阅读伴侣相关配置
@@ -40,8 +52,30 @@ object AiConfig {
             appCtx.putPrefString(KEY_AI_PERSONA, value)
         }
 
+    var memoryList: List<AiMemoryItem>
+        get() {
+            val raw = appCtx.getPrefString(KEY_AI_MEMORY, "") ?: ""
+            if (raw.isBlank()) return emptyList()
+            return try {
+                if (raw.trimStart().startsWith("[")) {
+                    GSON.fromJsonArray<AiMemoryItem>(raw).getOrNull() ?: emptyList()
+                } else {
+                    listOf(AiMemoryItem(id = 0L, chapterRange = "未知章节", content = raw))
+                }
+            } catch (e: Exception) {
+                listOf(AiMemoryItem(id = 0L, chapterRange = "未知章节", content = raw))
+            }
+        }
+        set(value) {
+            appCtx.putPrefString(KEY_AI_MEMORY, GSON.toJson(value))
+        }
+
     var memory: String
-        get() = appCtx.getPrefString(KEY_AI_MEMORY, "") ?: ""
+        get() {
+            val list = memoryList
+            if (list.isEmpty()) return ""
+            return list.joinToString("\n\n") { "【${it.chapterRange}】\n${it.content}" }
+        }
         set(value) {
             appCtx.putPrefString(KEY_AI_MEMORY, value)
         }

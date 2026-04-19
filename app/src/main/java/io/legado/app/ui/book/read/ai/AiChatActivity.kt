@@ -16,6 +16,7 @@ import io.legado.app.databinding.ActivityAiChatBinding
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.config.AiConfigDialog
 import io.legado.app.utils.showDialogFragment
+import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 
 class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
@@ -71,6 +72,10 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
         binding.etChapterEnd.addTextChangedListener(textWatcher)
 
         binding.btnSend.setOnClickListener {
+            if (viewModel.isGeneratingLiveData.value == true) {
+                toastOnUi("正在生成中...")
+                return@setOnClickListener
+            }
             val text = binding.etInput.text.toString()
             if (text.isNotBlank()) {
                 val start = binding.etChapterStart.text.toString().toIntOrNull() ?: (ReadBook.durChapterIndex + 1)
@@ -109,6 +114,14 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
                 binding.tvWordCount.setTextColor(Color.parseColor("#888888")) // Secondary color approximation
             }
         }
+
+        viewModel.isGeneratingLiveData.observe(this) { isGenerating ->
+            if (isGenerating) {
+                binding.btnSend.setImageResource(R.drawable.ic_stop_black_24dp)
+            } else {
+                binding.btnSend.setImageResource(R.drawable.ic_send)
+            }
+        }
     }
 
     override fun onCompatCreateOptionsMenu(menu: Menu): Boolean {
@@ -123,7 +136,9 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
                 return true
             }
             R.id.menu_ai_summarize -> {
-                viewModel.summarizeAndMemory()
+                val start = binding.etChapterStart.text.toString().toIntOrNull() ?: (ReadBook.durChapterIndex + 1)
+                val end = binding.etChapterEnd.text.toString().toIntOrNull() ?: (ReadBook.durChapterIndex + 1)
+                viewModel.summarizeAndMemory(start, end)
                 return true
             }
         }

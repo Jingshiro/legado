@@ -7,6 +7,7 @@ import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogAiConfigBinding
 import io.legado.app.help.config.AiConfig
+import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
@@ -25,6 +26,10 @@ class AiConfigDialog : BaseDialogFragment(R.layout.dialog_ai_config) {
         bindEvent()
     }
 
+    fun updateMemoryLength() {
+        binding.tvMemoryLength.text = AiConfig.memory.length.toString()
+    }
+
     private fun initData() {
         binding.etApiUrl.setText(AiConfig.apiUrl)
         binding.etApiKey.setText(AiConfig.apiKey)
@@ -32,7 +37,7 @@ class AiConfigDialog : BaseDialogFragment(R.layout.dialog_ai_config) {
         binding.etPersona.setText(AiConfig.persona)
         binding.etUserAvatar.setText(AiConfig.userAvatar)
         binding.etAiAvatar.setText(AiConfig.aiAvatar)
-        binding.tvMemoryLength.text = AiConfig.memory.length.toString()
+        updateMemoryLength()
     }
 
     private fun bindEvent() {
@@ -47,9 +52,13 @@ class AiConfigDialog : BaseDialogFragment(R.layout.dialog_ai_config) {
             dismiss()
         }
 
+        binding.btnViewMemory.setOnClickListener {
+            showDialogFragment(AiMemoryDialog())
+        }
+
         binding.btnClearMemory.setOnClickListener {
-            AiConfig.memory = ""
-            binding.tvMemoryLength.text = "0"
+            AiConfig.memoryList = emptyList()
+            updateMemoryLength()
             toastOnUi("记忆已清空")
         }
     }
