@@ -101,8 +101,7 @@ import java.lang.ref.WeakReference
 import splitties.systemservices.powerManager
 import java.net.URLDecoder
 import androidx.core.graphics.createBitmap
-import io.legado.app.help.readrecord.DetailedReadRecordLifecycleObserver
-import io.legado.app.help.readrecord.DetailedReadRecordTracker
+
 
 /**
  * rss阅读界面
@@ -123,12 +122,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
     private var customWebViewCallback: WebChromeClient.CustomViewCallback? = null
     private var interfaceInjected: String? = null
     private var needClearHistory = true
-    private val detailedReadRecordTracker by lazy {
-        DetailedReadRecordTracker { viewModel.rssSource?.sourceName ?: binding.titleBar.title.toString() }
-    }
-    private val detailedReadRecordObserver by lazy {
-        DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)
-    }
+
     private val selectImageDir = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
             ACache.get().put(imagePathKey, uri.toString())
@@ -161,7 +155,6 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        lifecycle.addObserver(detailedReadRecordObserver)
         pooledWebView = WebViewPool.acquire(this)
         currentWebView = pooledWebView.realWebView
         binding.webViewContainer.addView(currentWebView)
@@ -171,9 +164,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         initView()
         initWebView()
         initLiveData()
-        viewModel.initData(intent) {
-            detailedReadRecordTracker.start()
-        }
+        viewModel.initData(intent)
         currentWebView.clearHistory()
         onBackPressedDispatcher.addCallback(this) {
             if (binding.customWebView.size > 0) { //关闭全屏
@@ -231,9 +222,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         binding.progressBar.visible()
         binding.progressBar.setDurProgress(30)
         setIntent(intent)
-        viewModel.initData(intent) {
-            detailedReadRecordTracker.start()
-        }
+        viewModel.initData(intent)
     }
 
     @Suppress("DEPRECATION")

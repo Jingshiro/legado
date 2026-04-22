@@ -140,7 +140,10 @@ class VideoPlayerActivity : VMBaseActivity<ActivityVideoPlayerBinding, VideoPlay
     private var orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     private var menuCustomBtn: MenuItem? = null
     private val detailedReadRecordTracker by lazy {
-        DetailedReadRecordTracker { VideoPlay.videoTitle }
+        DetailedReadRecordTracker {
+            if (VideoPlay.source is RssSource) null
+            else VideoPlay.videoTitle
+        }
     }
     private val detailedReadRecordObserver by lazy {
         DetailedReadRecordLifecycleObserver(detailedReadRecordTracker)

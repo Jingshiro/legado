@@ -135,6 +135,7 @@ class ReadRecordActivity : BaseActivity<ActivityReadRecordBinding>() {
             alert(R.string.delete, R.string.sure_del) {
                 yesButton {
                     appDb.readRecordDao.clear()
+                    appDb.detailedReadRecordDao.clear()
                     initData()
                 }
                 noButton()
@@ -241,6 +242,7 @@ class ReadRecordActivity : BaseActivity<ActivityReadRecordBinding>() {
                 setMessage(getString(R.string.sure_del_any, item.bookName))
                 yesButton {
                     appDb.readRecordDao.deleteByName(item.bookName)
+                    appDb.detailedReadRecordDao.deleteByBookName(item.bookName)
                     initData()
                 }
                 noButton()
