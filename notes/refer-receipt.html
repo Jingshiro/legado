@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+  .receipt {
+    background-color: #fcfcfa;
+    width: 280px;
+    padding: 20px;
+    font-family: "Courier New", Courier, monospace;
+    color: #222;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    /* 模拟热敏纸上下边缘的虚线截断感 */
+    border-top: 3px dashed #b0b0b0;
+    border-bottom: 3px dashed #b0b0b0;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .header h2 {
+    font-size: 18px;
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .divider {
+    border-top: 1px dashed #666;
+    margin: 12px 0;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .text-block {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .text-block .title {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .text-block .content {
+    display: block;
+    border-bottom: 1px solid #aaa;
+    min-height: 22px;
+    color: #555;
+  }
+  .footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 9px;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+
+<div class="receipt">
+  <div class="header">
+    <h2>Reading Certificate</h2>
+    <div>=== 阅 读 凭 证 ===</div>
+  </div>
+
+  <div class="row">
+    <span>【开始时间】</span>
+    <span>____年__月__日</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="text-block">
+    <span class="title">【读前记录】</span>
+    <span class="content"></span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="row">
+    <span>【完读时间】</span>
+    <span>____年__月__日</span>
+  </div>
+  <div class="row">
+    <span>【笔记条数】</span>
+    <span>______ 条</span>
+  </div>
+
+  <div class="text-block" style="margin-top: 12px;">
+    <span class="title">【完读感想】</span>
+    <span class="content"></span>
+    <span class="content" style="margin-top: 6px;"></span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="row" style="font-weight: bold;">
+    <span>【阅读打分】</span>
+    <span>[ ☆ ☆ ☆ ☆ ☆ ]</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="footer">
+    BAD READS, NO RECEIPTS; GOOD READS, ON REPEAT.<br>
+    烂书不退款，好书请多读。
+  </div>
+</div>
+
+</body>
+</html>

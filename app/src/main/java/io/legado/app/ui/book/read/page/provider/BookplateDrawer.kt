@@ -28,7 +28,7 @@ object BookplateDrawer {
         val height = ChapterProvider.visibleHeight.toFloat()
         
         val bpWidth = width * 0.8f
-        val bpHeight = 320.dpToPx().toFloat()
+        val bpHeight = 360.dpToPx().toFloat()
         val left = (width - bpWidth) / 2f + ChapterProvider.paddingLeft
         val top = (height - bpHeight) / 2f + ChapterProvider.paddingTop
         val right = left + bpWidth
@@ -104,18 +104,66 @@ object BookplateDrawer {
         drawDivider(currentY)
         currentY += 30.dpToPx()
         
-        // Finish Time
-        val finishTimeStr = if (book.finishTime > 0) dateFormat.format(Date(book.finishTime)) else "____年__月__日"
-        drawRow("【完读时间】", finishTimeStr, currentY, false)
-        
+        // 结算清单
+        paint.isFakeBoldText = true
+        val listTitle = "- 结 算 清 单 -"
+        val listTitleWidth = paint.measureText(listTitle)
+        canvas.drawText(listTitle, left + (bpWidth - listTitleWidth) / 2f, currentY, paint)
         currentY += 25.dpToPx()
+        
+        paint.isFakeBoldText = false
+        
+        val drawListRow = { title: String, value: String, y: Float ->
+            canvas.drawText(title, left + 20.dpToPx(), y, paint)
+            val valWidth = paint.measureText(value)
+            val valueX = right - 20.dpToPx() - valWidth
+            canvas.drawText(value, valueX, y, paint)
+            
+            val titleWidth = paint.measureText(title)
+            val dashStartX = left + 20.dpToPx() + titleWidth + 5.dpToPx()
+            val dashEndX = valueX - 5.dpToPx()
+            if (dashEndX > dashStartX) {
+                val oldStyle = paint.style
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 1.dpToPx().toFloat()
+                paint.pathEffect = DashPathEffect(floatArrayOf(5f, 5f), 0f)
+                val textMiddleY = y - paint.textSize / 3f
+                canvas.drawLine(dashStartX, textMiddleY, dashEndX, textMiddleY, paint)
+                paint.pathEffect = null
+                paint.style = oldStyle
+            }
+        }
+        
+        // Book Name
+        var displayBookName = book.name
+        val maxNameWidth = bpWidth - 40.dpToPx() - paint.measureText("书名  ") - 20.dpToPx()
+        if (paint.measureText(displayBookName) > maxNameWidth) {
+            val ellipsizeWidth = paint.measureText("...")
+            while (displayBookName.isNotEmpty() && paint.measureText(displayBookName) + ellipsizeWidth > maxNameWidth) {
+                displayBookName = displayBookName.substring(0, displayBookName.length - 1)
+            }
+            displayBookName += "..."
+        }
+        drawListRow("书名", displayBookName, currentY)
+        currentY += 20.dpToPx()
         
         // Note count
         val noteCount = appDb.bookmarkDao.getByBook(book.name, book.author).size
         val thoughtCount = appDb.bookThoughtDao.getByBook(book.name, book.author).size
         val totalNotes = noteCount + thoughtCount
-        val noteStr = if (totalNotes > 0) "$totalNotes 条" else "______ 条"
-        drawRow("【笔记条数】", noteStr, currentY, false)
+        val noteStr = if (totalNotes > 0) "$totalNotes" else "?"
+        drawListRow("笔记条数", noteStr, currentY)
+        currentY += 20.dpToPx()
+        
+        // Reading time
+        val readingTimeStr = if (book.finishTime > 0 && book.addTime > 0) {
+            val diff = book.finishTime - book.addTime
+            val days = kotlin.math.max(0L, diff / (1000 * 60 * 60 * 24))
+            "${days} 天"
+        } else {
+            "? 天"
+        }
+        drawListRow("阅读时间", readingTimeStr, currentY)
         
         currentY += 20.dpToPx()
         drawDivider(currentY)
