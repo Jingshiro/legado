@@ -105,14 +105,6 @@ object BookplateDrawer {
         val addTimeStr = if (trueStartTime > 0) dateFormat.format(Date(trueStartTime)) else "____/__/__"
         drawRow("开始时间", addTimeStr, currentY, false)
         
-        currentY += 20.dpToPx()
-        drawDivider(currentY)
-        currentY += 30.dpToPx()
-        
-        // Finish Time
-        val finishTimeStr = if (book.finishTime > 0) dateFormat.format(Date(book.finishTime)) else "____/__/__"
-        drawRow("完读时间", finishTimeStr, currentY, false)
-        
         currentY += 25.dpToPx()
         
         paint.textSize = 14.dpToPx().toFloat()
