@@ -17,6 +17,9 @@ interface DetailedReadRecordDao {
     @Query("select * from detailedReadRecord order by bookName asc, startTime asc")
     fun all(): List<DetailedReadRecord>
 
+    @Query("select min(startTime) from detailedReadRecord where bookName = :bookName")
+    fun getEarliestStartTime(bookName: String): Long?
+
     @Query("delete from detailedReadRecord")
     fun clear()
 

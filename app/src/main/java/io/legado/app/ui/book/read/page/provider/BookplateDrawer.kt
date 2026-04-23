@@ -20,7 +20,7 @@ import java.util.Locale
 
 object BookplateDrawer {
 
-    private val dateFormat = SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
     private var ratingRect = RectF()
 
     fun draw(canvas: Canvas, textPage: TextPage, book: Book) {
@@ -96,13 +96,26 @@ object BookplateDrawer {
             paint.color = Color.parseColor("#222222")
         }
         
+        paint.textSize = 12.dpToPx().toFloat()
+        
         // Add Time
-        val addTimeStr = if (book.addTime > 0) dateFormat.format(Date(book.addTime)) else "____年__月__日"
-        drawRow("【开始时间】", addTimeStr, currentY, false)
+        val earliestStartTime = appDb.detailedReadRecordDao.getEarliestStartTime(book.name) ?: book.addTime
+        val trueStartTime = if (earliestStartTime > 0) earliestStartTime else book.addTime
+        
+        val addTimeStr = if (trueStartTime > 0) dateFormat.format(Date(trueStartTime)) else "____/__/__"
+        drawRow("开始时间", addTimeStr, currentY, false)
         
         currentY += 20.dpToPx()
         drawDivider(currentY)
         currentY += 30.dpToPx()
+        
+        // Finish Time
+        val finishTimeStr = if (book.finishTime > 0) dateFormat.format(Date(book.finishTime)) else "____/__/__"
+        drawRow("完读时间", finishTimeStr, currentY, false)
+        
+        currentY += 25.dpToPx()
+        
+        paint.textSize = 14.dpToPx().toFloat()
         
         // 结算清单
         paint.isFakeBoldText = true
@@ -156,8 +169,8 @@ object BookplateDrawer {
         currentY += 20.dpToPx()
         
         // Reading time
-        val readingTimeStr = if (book.finishTime > 0 && book.addTime > 0) {
-            val diff = book.finishTime - book.addTime
+        val readingTimeStr = if (book.finishTime > 0 && trueStartTime > 0) {
+            val diff = book.finishTime - trueStartTime
             val days = kotlin.math.max(0L, diff / (1000 * 60 * 60 * 24))
             "${days} 天"
         } else {
@@ -170,8 +183,8 @@ object BookplateDrawer {
         currentY += 30.dpToPx()
         
         // Rating
-        paint.isFakeBoldText = true
-        canvas.drawText("【阅读打分】", left + 20.dpToPx(), currentY, paint)
+        paint.isFakeBoldText = false
+        canvas.drawText("阅读打分", left + 20.dpToPx(), currentY, paint)
         
         val starsStr = "[ ☆ ☆ ☆ ☆ ☆ ]"
         val starsWidth = paint.measureText(starsStr)
@@ -223,7 +236,7 @@ object BookplateDrawer {
                 val paint = PaintPool.obtain()
                 paint.typeface = Typeface.MONOSPACE
                 paint.textSize = 14.dpToPx().toFloat()
-                paint.isFakeBoldText = true
+                paint.isFakeBoldText = false
                 val bracketWidth = paint.measureText("[ ")
                 val starWidth = paint.measureText("☆ ")
                 PaintPool.recycle(paint)
