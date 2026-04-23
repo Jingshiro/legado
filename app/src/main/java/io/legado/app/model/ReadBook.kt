@@ -110,6 +110,7 @@ object ReadBook : CoroutineScope by MainScope() {
         contentProcessor = ContentProcessor.get(book)
         durChapterIndex = book.durChapterIndex
         durChapterPos = book.durChapterPos
+        showBookplate = if (durChapterIndex == 0 && durChapterPos == 0) -1 else 0
         isLocalBook = book.isLocal
         clearTextChapter()
         callBack?.upContent()

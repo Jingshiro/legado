@@ -5,14 +5,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
-import android.view.View
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.help.PaintPool
-import io.legado.app.help.book.update
 import io.legado.app.ui.book.read.page.entities.TextPage
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.longToastOnUi
@@ -23,19 +20,15 @@ import java.util.Locale
 
 object BookplateDrawer {
 
-    private val dateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
-    private var preNoteRect = RectF()
-    private var postNoteRect = RectF()
+    private val dateFormat = SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault())
     private var ratingRect = RectF()
 
     fun draw(canvas: Canvas, textPage: TextPage, book: Book) {
         val width = ChapterProvider.visibleWidth.toFloat()
         val height = ChapterProvider.visibleHeight.toFloat()
         
-        val isStart = textPage.isBookplateStart
-        
         val bpWidth = width * 0.8f
-        val bpHeight = height * 0.75f
+        val bpHeight = 320.dpToPx().toFloat()
         val left = (width - bpWidth) / 2f + ChapterProvider.paddingLeft
         val top = (height - bpHeight) / 2f + ChapterProvider.paddingTop
         val right = left + bpWidth
@@ -44,134 +37,120 @@ object BookplateDrawer {
         val paint = PaintPool.obtain()
         paint.isAntiAlias = true
         
-        // Draw background
-        paint.color = Color.parseColor("#FFFDF6E3") // A slight paper color
+        // Draw shadow
+        paint.color = Color.parseColor("#22000000")
         paint.style = Paint.Style.FILL
+        canvas.drawRect(left + 4.dpToPx(), top + 4.dpToPx(), right + 4.dpToPx(), bottom + 4.dpToPx(), paint)
         
-        // Create jagged edge path
-        val path = Path()
-        val toothSize = 8.dpToPx().toFloat()
-        path.moveTo(left, top)
-        var currentX = left
-        while (currentX < right) {
-            currentX += toothSize
-            if (currentX > right) currentX = right
-            path.lineTo(currentX - toothSize / 2, top + toothSize / 2)
-            path.lineTo(currentX, top)
-        }
-        path.lineTo(right, bottom)
-        var currentXBottom = right
-        while (currentXBottom > left) {
-            currentXBottom -= toothSize
-            if (currentXBottom < left) currentXBottom = left
-            path.lineTo(currentXBottom + toothSize / 2, bottom - toothSize / 2)
-            path.lineTo(currentXBottom, bottom)
-        }
-        path.lineTo(left, top)
-        canvas.drawPath(path, paint)
+        // Draw background
+        paint.color = Color.parseColor("#FCFCFA")
+        canvas.drawRect(left, top, right, bottom, paint)
         
-        // Draw border
-        paint.color = Color.parseColor("#88000000")
+        // Draw dashed top/bottom borders
+        paint.color = Color.parseColor("#B0B0B0")
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1.dpToPx().toFloat()
-        canvas.drawPath(path, paint)
+        paint.strokeWidth = 3.dpToPx().toFloat()
+        paint.pathEffect = DashPathEffect(floatArrayOf(15f, 15f), 0f)
+        canvas.drawLine(left, top, right, top, paint)
+        canvas.drawLine(left, bottom, right, bottom, paint)
+        paint.pathEffect = null
 
         // Draw content
         paint.style = Paint.Style.FILL
-        paint.color = Color.BLACK
+        paint.color = Color.parseColor("#222222")
         paint.typeface = Typeface.MONOSPACE
         
         var currentY = top + 40.dpToPx()
         
         // Title
-        paint.textSize = 24.dpToPx().toFloat()
-        val titleText = if (isStart) "- 卷 首 票 -" else "- 卷 尾 票 -"
+        paint.textSize = 18.dpToPx().toFloat()
+        paint.isFakeBoldText = true
+        val titleText = "Reading Certificate"
         val titleWidth = paint.measureText(titleText)
         canvas.drawText(titleText, left + (bpWidth - titleWidth) / 2f, currentY, paint)
         
-        currentY += 40.dpToPx()
+        currentY += 25.dpToPx()
         paint.textSize = 14.dpToPx().toFloat()
+        paint.isFakeBoldText = false
+        val subtitleText = "=== 阅 读 凭 证 ==="
+        val subtitleWidth = paint.measureText(subtitleText)
+        canvas.drawText(subtitleText, left + (bpWidth - subtitleWidth) / 2f, currentY, paint)
+        
+        currentY += 30.dpToPx()
+        
+        val drawRow = { title: String, value: String, y: Float, isBold: Boolean ->
+            paint.isFakeBoldText = isBold
+            canvas.drawText(title, left + 20.dpToPx(), y, paint)
+            val valWidth = paint.measureText(value)
+            canvas.drawText(value, right - 20.dpToPx() - valWidth, y, paint)
+        }
+        
+        val drawDivider = { y: Float ->
+            paint.color = Color.parseColor("#666666")
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1.dpToPx().toFloat()
+            paint.pathEffect = DashPathEffect(floatArrayOf(5f, 5f), 0f)
+            canvas.drawLine(left + 20.dpToPx(), y, right - 20.dpToPx(), y, paint)
+            paint.pathEffect = null
+            paint.style = Paint.Style.FILL
+            paint.color = Color.parseColor("#222222")
+        }
         
         // Add Time
-        val addTimeStr = "入库: " + (if (book.addTime > 0) dateFormat.format(Date(book.addTime)) else "未知")
-        canvas.drawText(addTimeStr, left + 20.dpToPx(), currentY, paint)
+        val addTimeStr = if (book.addTime > 0) dateFormat.format(Date(book.addTime)) else "____年__月__日"
+        drawRow("【开始时间】", addTimeStr, currentY, false)
         
-        currentY += 30.dpToPx()
-        val preNoteTitle = "读前记录:"
-        canvas.drawText(preNoteTitle, left + 20.dpToPx(), currentY, paint)
         currentY += 20.dpToPx()
-        
-        val preNote = if (book.preReadNote.isNullOrEmpty()) "点击记录你的期待..." else book.preReadNote!!
-        paint.color = if (book.preReadNote.isNullOrEmpty()) Color.GRAY else Color.BLACK
-        canvas.drawText(preNote, left + 20.dpToPx(), currentY, paint)
-        
-        preNoteRect.set(left + 20.dpToPx(), currentY - 30.dpToPx(), right - 20.dpToPx(), currentY + 10.dpToPx())
-        
-        currentY += 40.dpToPx()
-        
-        // Divider
-        paint.color = Color.parseColor("#44000000")
-        paint.style = Paint.Style.STROKE
-        paint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-        canvas.drawLine(left + 20.dpToPx(), currentY, right - 20.dpToPx(), currentY, paint)
-        paint.pathEffect = null
-        paint.style = Paint.Style.FILL
-        
-        currentY += 40.dpToPx()
-        paint.color = Color.BLACK
+        drawDivider(currentY)
+        currentY += 30.dpToPx()
         
         // Finish Time
-        val finishTimeStr = "完读: " + (if (book.finishTime > 0) dateFormat.format(Date(book.finishTime)) else "未完读")
-        canvas.drawText(finishTimeStr, left + 20.dpToPx(), currentY, paint)
+        val finishTimeStr = if (book.finishTime > 0) dateFormat.format(Date(book.finishTime)) else "____年__月__日"
+        drawRow("【完读时间】", finishTimeStr, currentY, false)
         
-        currentY += 30.dpToPx()
+        currentY += 25.dpToPx()
         
         // Note count
         val noteCount = appDb.bookmarkDao.getByBook(book.name, book.author).size
         val thoughtCount = appDb.bookThoughtDao.getByBook(book.name, book.author).size
-        val noteStr = "笔记: ${noteCount + thoughtCount} 条"
-        canvas.drawText(noteStr, left + 20.dpToPx(), currentY, paint)
+        val totalNotes = noteCount + thoughtCount
+        val noteStr = if (totalNotes > 0) "$totalNotes 条" else "______ 条"
+        drawRow("【笔记条数】", noteStr, currentY, false)
         
-        currentY += 30.dpToPx()
-        val postNoteTitle = "读后感想:"
-        canvas.drawText(postNoteTitle, left + 20.dpToPx(), currentY, paint)
         currentY += 20.dpToPx()
-        
-        val postNote = if (book.postReadNote.isNullOrEmpty()) "点击记录你的感想..." else book.postReadNote!!
-        paint.color = if (book.postReadNote.isNullOrEmpty()) Color.GRAY else Color.BLACK
-        canvas.drawText(postNote, left + 20.dpToPx(), currentY, paint)
-        
-        postNoteRect.set(left + 20.dpToPx(), currentY - 30.dpToPx(), right - 20.dpToPx(), currentY + 10.dpToPx())
-        
-        currentY += 50.dpToPx()
-        paint.color = Color.BLACK
+        drawDivider(currentY)
+        currentY += 30.dpToPx()
         
         // Rating
-        val ratingTitle = "评分:"
-        canvas.drawText(ratingTitle, left + 20.dpToPx(), currentY, paint)
-        val startX = left + 20.dpToPx() + paint.measureText(ratingTitle) + 10.dpToPx()
+        paint.isFakeBoldText = true
+        canvas.drawText("【阅读打分】", left + 20.dpToPx(), currentY, paint)
         
-        ratingRect.set(startX, currentY - 20.dpToPx(), startX + 5 * 30.dpToPx(), currentY + 10.dpToPx())
+        val starsStr = "[ ☆ ☆ ☆ ☆ ☆ ]"
+        val starsWidth = paint.measureText(starsStr)
+        val starsX = right - 20.dpToPx() - starsWidth
+        canvas.drawText(starsStr, starsX, currentY, paint)
         
+        ratingRect.set(starsX, currentY - 20.dpToPx(), starsX + starsWidth, currentY + 10.dpToPx())
+        
+        // Draw filled stars
+        paint.color = Color.parseColor("#222222")
+        val starWidth = paint.measureText("☆ ")
+        val bracketWidth = paint.measureText("[ ")
         for (i in 0 until 5) {
-            val starColor = if (book.bookRating >= i + 1) Color.parseColor("#FFD700") else Color.LTGRAY
-            paint.color = starColor
-            canvas.drawText("★", startX + i * 30.dpToPx(), currentY, paint)
+            if (book.bookRating >= i + 1) {
+                canvas.drawText("★", starsX + bracketWidth + i * starWidth, currentY, paint)
+            }
         }
-
-        currentY += 40.dpToPx()
+        paint.color = Color.parseColor("#222222")
         
-        // Footer Divider
-        paint.color = Color.parseColor("#44000000")
-        paint.style = Paint.Style.STROKE
-        paint.pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-        canvas.drawLine(left + 20.dpToPx(), currentY, right - 20.dpToPx(), currentY, paint)
-        paint.pathEffect = null
-        paint.style = Paint.Style.FILL
-        
+        currentY += 20.dpToPx()
+        drawDivider(currentY)
         currentY += 30.dpToPx()
+        
+        // Footer
         paint.color = Color.parseColor("#444444")
-        paint.textSize = 10.dpToPx().toFloat()
+        paint.textSize = 9.dpToPx().toFloat()
+        paint.isFakeBoldText = false
         
         val footer1 = "BAD READS, NO RECEIPTS; GOOD READS, ON REPEAT."
         val footer2 = "烂书不退款，好书请多读。"
@@ -189,23 +168,19 @@ object BookplateDrawer {
         
         val realY = y - relativeOffset
         
-        if (preNoteRect.contains(x, realY)) {
-            appCtx.longToastOnUi("点击了读前记录")
-            return true
-        } else if (postNoteRect.contains(x, realY)) {
+        if (ratingRect.contains(x, realY)) {
             if (textPage.isBookplateStart && book.finishTime <= 0) {
-                appCtx.longToastOnUi("请完读后再记录")
+                appCtx.longToastOnUi("请完读后再打分")
             } else {
-                appCtx.longToastOnUi("点击了读后感想")
-            }
-            return true
-        } else if (ratingRect.contains(x, realY)) {
-            if (textPage.isBookplateStart && book.finishTime <= 0) {
-                appCtx.longToastOnUi("请完读后再记录")
-            } else {
-                // Calculate star index
-                val starWidth = 30.dpToPx()
-                val offset = x - ratingRect.left
+                val paint = PaintPool.obtain()
+                paint.typeface = Typeface.MONOSPACE
+                paint.textSize = 14.dpToPx().toFloat()
+                paint.isFakeBoldText = true
+                val bracketWidth = paint.measureText("[ ")
+                val starWidth = paint.measureText("☆ ")
+                PaintPool.recycle(paint)
+                
+                val offset = x - ratingRect.left - bracketWidth
                 var rating = (offset / starWidth).toInt() + 1
                 if (rating > 5) rating = 5
                 if (rating < 1) rating = 1

@@ -53,24 +53,24 @@ class TextPageFactory(dataSource: DataSource) : PageFactory<TextPage>(dataSource
             }
             val pageIndex = pageIndex
             if (currentChapter == null || currentChapter?.isLastIndex(pageIndex) == true) {
-                if ((currentChapter == null || isScroll) && nextChapter == null) {
-                    val isLastChapter = currentChapter?.chapter?.index == (currentChapter?.chaptersSize?.minus(1) ?: 0)
-                    if (isLastChapter && ReadBook.showBookplate == 0) {
-                        val book = ReadBook.book
-                        if (book != null && book.readIteration % 2 == 0 && ReadBook.inBookshelf) {
-                            ReadBook.callBack?.onBookEnd()
-                            return@with false
-                        }
-                        ReadBook.showBookplate = 1
-                        book?.let {
-                            if (it.finishTime <= 0) {
-                                it.finishTime = System.currentTimeMillis()
-                                io.legado.app.data.appDb.bookDao.update(it)
-                            }
-                        }
-                        if (upContent) upContent(resetPageOffset = false)
-                        return@with true
+                val isLastChapter = currentChapter?.chapter?.index == (currentChapter?.chaptersSize?.minus(1) ?: 0)
+                if (isLastChapter && ReadBook.showBookplate == 0) {
+                    val book = ReadBook.book
+                    if (book != null && book.readIteration % 2 == 0 && ReadBook.inBookshelf) {
+                        ReadBook.callBack?.onBookEnd()
+                        return@with false
                     }
+                    ReadBook.showBookplate = 1
+                    book?.let {
+                        if (it.finishTime <= 0) {
+                            it.finishTime = System.currentTimeMillis()
+                            io.legado.app.data.appDb.bookDao.update(it)
+                        }
+                    }
+                    if (upContent) upContent(resetPageOffset = false)
+                    return@with true
+                }
+                if ((currentChapter == null || isScroll) && nextChapter == null) {
                     return@with false
                 }
                 ReadBook.moveToNextChapter(upContent, false)
