@@ -66,6 +66,7 @@ object ReadBook : CoroutineScope by MainScope() {
     var simulatedChapterSize = 0
     var durChapterIndex = 0
     var durChapterPos = 0
+    var showBookplate = 0 // -1 for start, 1 for end, 0 for none
     var isLocalBook = true
     var chapterChanged = false
     var prevTextChapter: TextChapter? = null

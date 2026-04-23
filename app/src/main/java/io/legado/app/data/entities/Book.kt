@@ -126,7 +126,20 @@ data class Book(
     var syncTime: Long = 0L,
     // 阅读轮次(0=未读完, 1=读完, 2=二刷, 3=二刷完, 依此类推)
     @ColumnInfo(defaultValue = "0")
-    var readIteration: Int = 0
+    var readIteration: Int = 0,
+    // 加入书架时间
+    @ColumnInfo(defaultValue = "0")
+    var addTime: Long = System.currentTimeMillis(),
+    // 阅读前记录
+    var preReadNote: String? = null,
+    // 完读时间
+    @ColumnInfo(defaultValue = "0")
+    var finishTime: Long = 0L,
+    // 完读感想
+    var postReadNote: String? = null,
+    // 阅读打分(0-5星)
+    @ColumnInfo(defaultValue = "0.0")
+    var bookRating: Float = 0f
 ) : Parcelable, BaseBook {
 
     override fun equals(other: Any?): Boolean {

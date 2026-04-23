@@ -250,6 +250,19 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
      */
     @Suppress("UNUSED_ANONYMOUS_PARAMETER")
     fun click(x: Float, y: Float): Boolean {
+        for (relativePos in 0..2) {
+            val relativeOffset = relativeOffset(relativePos)
+            if (relativePos > 0 && (!callBack.isScroll || relativeOffset >= ChapterProvider.visibleHeight)) break
+            val textPage = relativePage(relativePos)
+            if (textPage.isBookplateStart || textPage.isBookplateEnd) {
+                ReadBook.book?.let { book ->
+                    if (io.legado.app.ui.book.read.page.provider.BookplateDrawer.onClick(context, x, y, textPage, book, relativeOffset)) {
+                        return true
+                    }
+                }
+            }
+        }
+
         val currentTime = System.currentTimeMillis()
         val debounceClick = currentTime - lastClickTime < 300L //300毫秒防抖和双击
         lastClickTime = currentTime

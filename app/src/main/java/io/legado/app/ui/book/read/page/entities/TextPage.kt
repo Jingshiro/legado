@@ -39,7 +39,9 @@ data class TextPage(
     var chapterIndex: Int = 0,
     var height: Float = 0f,
     var leftLineSize: Int = 0,
-    var renderHeight: Int = 0
+    var renderHeight: Int = 0,
+    var isBookplateStart: Boolean = false,
+    var isBookplateEnd: Boolean = false
 ) {
 
     companion object {
@@ -299,6 +301,12 @@ data class TextPage(
     }
 
     fun draw(view: ContentTextView, canvas: Canvas, relativeOffset: Float) {
+        if (isBookplateStart || isBookplateEnd) {
+            io.legado.app.model.ReadBook.book?.let {
+                io.legado.app.ui.book.read.page.provider.BookplateDrawer.draw(canvas, this, it)
+            }
+            return
+        }
         if (AppConfig.optimizeRender) {
             render(view)
             canvas.withTranslation(0f, relativeOffset) {
