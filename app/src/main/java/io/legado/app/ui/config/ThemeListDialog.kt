@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
@@ -14,16 +16,15 @@ import io.legado.app.base.adapter.RecyclerAdapter
 import io.legado.app.databinding.DialogRecyclerViewBinding
 import io.legado.app.databinding.ItemThemeConfigBinding
 import io.legado.app.help.config.ThemeConfig
+import io.legado.app.help.config.ThemeExportHelper
 import io.legado.app.lib.dialogs.alert
+import io.legado.app.lib.dialogs.selector
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.widget.recycler.VerticalDivider
 import io.legado.app.utils.*
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
-import io.legado.app.help.config.ThemeExportHelper
-import io.legado.app.lib.dialogs.selector
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.launch
+
 class ThemeListDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     Toolbar.OnMenuItemClickListener {
 
@@ -82,7 +83,7 @@ class ThemeListDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
         when (item?.itemId) {
             R.id.menu_import -> {
                 val actions = listOf(getString(R.string.import_from_clipboard), getString(R.string.import_from_file))
-                requireContext().selector(getString(R.string.import_theme), actions) { _, i ->
+                requireContext().selector(getString(R.string.action_import_theme), actions) { _, i ->
                     if (i == 0) {
                         requireContext().getClipText()?.let {
                             if (ThemeConfig.addConfig(it)) {
