@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/menu_import"
-        android:title="剪贴板导入"
+        android:title="导入"
         app:showAsAction="always" />
 
 </menu>

@@ -18,13 +18,36 @@ import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.widget.recycler.VerticalDivider
 import io.legado.app.utils.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import io.legado.app.help.config.ThemeExportHelper
+import io.legado.app.lib.dialogs.selector
 import io.legado.app.utils.viewbindingdelegate.viewBinding
-
+import kotlinx.coroutines.launch
 class ThemeListDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     Toolbar.OnMenuItemClickListener {
 
     private val binding by viewBinding(DialogRecyclerViewBinding::bind)
     private val adapter by lazy { Adapter(requireContext()) }
+    private var exportIndex = 0
+
+    private val createThemeDoc = registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        uri?.let {
+            val themeConfig = ThemeConfig.configList[exportIndex]
+            lifecycleScope.launch {
+                ThemeExportHelper.exportFullTheme(requireContext(), it, themeConfig)
+            }
+        }
+    }
+
+    private val openThemeDoc = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            lifecycleScope.launch {
+                ThemeExportHelper.importFullTheme(requireContext(), it)
+                initData()
+            }
+        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -58,11 +81,18 @@ class ThemeListDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_import -> {
-                requireContext().getClipText()?.let {
-                    if (ThemeConfig.addConfig(it)) {
-                        initData()
+                val actions = listOf(getString(R.string.import_from_clipboard), getString(R.string.import_from_file))
+                requireContext().selector(getString(R.string.import_theme), actions) { _, i ->
+                    if (i == 0) {
+                        requireContext().getClipText()?.let {
+                            if (ThemeConfig.addConfig(it)) {
+                                initData()
+                            } else {
+                                toastOnUi("格式不对,添加失败")
+                            }
+                        }
                     } else {
-                        toastOnUi("格式不对,添加失败")
+                        openThemeDoc.launch(arrayOf("application/zip", "application/octet-stream", "*/*"))
                     }
                 }
             }
@@ -81,8 +111,17 @@ class ThemeListDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     }
 
     fun share(index: Int) {
-        val json = GSON.toJson(ThemeConfig.configList[index])
-        requireContext().share(json, "主题分享")
+        val actions = listOf(getString(R.string.theme_export_full), getString(R.string.theme_export_color_only))
+        requireContext().selector(getString(R.string.theme_export_type_title), actions) { _, i ->
+            if (i == 0) {
+                exportIndex = index
+                val themeName = ThemeConfig.configList[index].themeName
+                createThemeDoc.launch("$themeName.zip")
+            } else {
+                val json = GSON.toJson(ThemeConfig.configList[index])
+                requireContext().share(json, "主题分享")
+            }
+        }
     }
 
     inner class Adapter(context: Context) :

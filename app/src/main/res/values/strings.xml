@@ -1376,4 +1376,10 @@
     <string name="ai_hint_persona">基础人设与提示词</string>
     <string name="ai_api_key_warning">⚠ API Key 以明文形式存储于本地，请勿在公共设备上使用。</string>
     <string name="ai_summarize">归纳记忆</string>
+    <string name="theme_export_type_title">导出主题</string>
+    <string name="theme_export_full">全量导出</string>
+    <string name="theme_export_color_only">仅导出配色</string>
+    <string name="import_from_clipboard">剪贴板导入</string>
+    <string name="import_from_file">文件导入</string>
+    <string name="import_theme">导入主题</string>
 </resources>
