@@ -45,6 +45,7 @@ import io.legado.app.utils.toEditable
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx

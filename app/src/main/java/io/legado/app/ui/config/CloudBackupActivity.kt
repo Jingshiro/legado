@@ -108,8 +108,7 @@ class CloudBackupActivity :
             getString(R.string.rename),
             getString(R.string.delete)
         )
-        alert {
-            setTitle(item.displayName)
+        alert(title = item.displayName) {
             items(items) { _, index ->
                 when (index) {
                     0 -> confirmRestore(item)
