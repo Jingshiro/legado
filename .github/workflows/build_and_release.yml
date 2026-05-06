@@ -56,7 +56,6 @@ jobs:
 
       - name: Build Formal Release Package
         run: |
-          ./gradlew clean
           sed "s/applicationIdSuffix '.release'/applicationIdSuffix '.releaseS'/" app/build.gradle -i
           ./gradlew assembleAppRelease --build-cache --parallel --daemon --warning-mode all
           find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_release_${{ env.VERSION }}.apk \;
