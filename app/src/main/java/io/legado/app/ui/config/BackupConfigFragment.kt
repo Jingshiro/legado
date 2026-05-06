@@ -1,6 +1,6 @@
 package io.legado.app.ui.config
 
-import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.InputType
@@ -17,8 +17,6 @@ import androidx.preference.Preference
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.PreferKey
-import io.legado.app.exception.NoStackTraceException
-import io.legado.app.help.AppWebDav
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.coroutine.Coroutine
@@ -27,7 +25,6 @@ import io.legado.app.help.storage.BackupConfig
 import io.legado.app.help.storage.ImportOldData
 import io.legado.app.help.storage.Restore
 import io.legado.app.lib.dialogs.alert
-import io.legado.app.lib.dialogs.selector
 import io.legado.app.lib.permission.Permissions
 import io.legado.app.lib.permission.PermissionsCompat
 import io.legado.app.lib.prefs.fragment.PreferenceFragment
@@ -47,10 +44,7 @@ import io.legado.app.utils.showHelp
 import io.legado.app.utils.toEditable
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx
@@ -62,7 +56,6 @@ class BackupConfigFragment : PreferenceFragment(),
     private val viewModel by activityViewModels<ConfigViewModel>()
     private val waitDialog by lazy { WaitDialog(requireContext()) }
     private var backupJob: Job? = null
-    private var restoreJob: Job? = null
 
     private val selectBackupPath = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
@@ -318,70 +311,7 @@ class BackupConfigFragment : PreferenceFragment(),
     }
 
     fun restore() {
-        waitDialog.setText(R.string.loading)
-        waitDialog.setOnCancelListener {
-            restoreJob?.cancel()
-        }
-        waitDialog.show()
-        Coroutine.async {
-            restoreJob = coroutineContext[Job]
-            showRestoreDialog(requireContext())
-        }.onError {
-            AppLog.put("恢复备份出错WebDavError\n${it.localizedMessage}", it)
-            if (context == null) {
-                return@onError
-            }
-            alert {
-                setTitle(R.string.restore)
-                setMessage("WebDavError\n${it.localizedMessage}\n将从本地备份恢复。")
-                okButton {
-                    restoreFromLocal()
-                }
-                cancelButton()
-            }
-        }.onFinally {
-            waitDialog.dismiss()
-        }
-    }
-
-    private suspend fun showRestoreDialog(context: Context) {
-        val names = withContext(IO) { AppWebDav.getBackupNames() }
-        if (AppWebDav.isJianGuoYun && names.size > 700) {
-            context.toastOnUi("由于坚果云限制列出文件数量，部分备份可能未显示，请及时清理旧备份")
-        }
-        if (names.isNotEmpty()) {
-            currentCoroutineContext().ensureActive()
-            withContext(Main) {
-                context.selector(
-                    title = context.getString(R.string.select_restore_file),
-                    items = names
-                ) { _, index ->
-                    if (index in 0 until names.size) {
-                        listView.post {
-                            restoreWebDav(names[index])
-                        }
-                    }
-                }
-            }
-        } else {
-            throw NoStackTraceException("Web dav no back up file")
-        }
-    }
-
-    private fun restoreWebDav(name: String) {
-        waitDialog.setText("恢复中…")
-        waitDialog.show()
-        val task = Coroutine.async {
-            AppWebDav.restoreWebDav(name)
-        }.onError {
-            AppLog.put("WebDav恢复出错\n${it.localizedMessage}", it)
-            appCtx.toastOnUi("WebDav恢复出错\n${it.localizedMessage}")
-        }.onFinally {
-            waitDialog.dismiss()
-        }
-        waitDialog.setOnCancelListener {
-            task.cancel()
-        }
+        startActivity(Intent(requireContext(), CloudBackupActivity::class.java))
     }
 
     private fun restoreFromLocal() {

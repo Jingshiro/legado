@@ -753,6 +753,17 @@
     <string name="replace_enable_default_t">默認啟用替換淨化</string>
     <string name="replace_enable_default_s">新加入書架的書是否啟用替換淨化</string>
     <string name="select_restore_file">選擇恢復文件</string>
+    <string name="cloud_backup_manage">雲端備份管理</string>
+    <string name="rename">重命名</string>
+    <string name="rename_backup">重命名備份</string>
+    <string name="input_new_name">請輸入新的文件名</string>
+    <string name="sure_delete_backups">確定刪除選中的 %d 個備份文件嗎？</string>
+    <string name="delete_backups_success">成功刪除 %d 個備份文件</string>
+    <string name="rename_backup_fail">重命名失敗：%s</string>
+    <string name="rename_success">重命名成功</string>
+    <string name="webdav_move_not_supported">WebDAV 服務器不支持 MOVE 方法，無法重命名</string>
+    <string name="restore_backup">恢復備份</string>
+    <string name="sure_restore_backup">確定恢復此備份嗎？當前數據將被覆蓋。</string>
     <string name="day_background_too_dark">白天背景不能太暗</string>
     <string name="day_bottom_bar_too_dark">白天底欄不能太暗</string>
     <string name="night_background_too_light">夜間背景不能太亮</string>

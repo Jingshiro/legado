@@ -787,6 +787,17 @@
     <string name="replace_enable_default_t">Enable replace rule by default</string>
     <string name="replace_enable_default_s">For new added books</string>
     <string name="select_restore_file">Select restore file</string>
+    <string name="cloud_backup_manage">Cloud backup management</string>
+    <string name="rename">Rename</string>
+    <string name="rename_backup">Rename backup</string>
+    <string name="input_new_name">Please enter a new file name</string>
+    <string name="sure_delete_backups">Are you sure to delete the selected %d backup files?</string>
+    <string name="delete_backups_success">Successfully deleted %d backup files</string>
+    <string name="rename_backup_fail">Rename failed: %s</string>
+    <string name="rename_success">Renamed successfully</string>
+    <string name="webdav_move_not_supported">WebDAV server does not support MOVE method, cannot rename</string>
+    <string name="restore_backup">Restore backup</string>
+    <string name="sure_restore_backup">Are you sure to restore this backup? Current data will be overwritten.</string>
     <string name="day_background_too_dark">Day background can not be too dark!</string>
     <string name="day_bottom_bar_too_dark">Day bottom can not be too dark!</string>
     <string name="night_background_too_light">Night background can not be too bright!</string>

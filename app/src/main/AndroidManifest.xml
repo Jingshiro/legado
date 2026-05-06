@@ -237,6 +237,10 @@
         <activity
             android:name=".ui.config.ConfigActivity"
             android:launchMode="standard" />
+        <!-- 云端备份管理 -->
+        <activity
+            android:name=".ui.config.CloudBackupActivity"
+            android:launchMode="standard" />
         <!-- 搜索界面 -->
         <activity
             android:name=".ui.book.search.SearchActivity"

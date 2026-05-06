@@ -424,6 +424,33 @@ open class WebDav(
     }
 
     /**
+     * 移动/重命名文件
+     * @param destUrl 目标完整 URL
+     * @throws WebDavException 服务器不支持 MOVE 方法时抛出
+     */
+    @Throws(WebDavException::class)
+    suspend fun move(destUrl: String): Boolean {
+        val url = httpUrl ?: throw WebDavException("url为空")
+        //将 dav:// 或 davs:// 转换为 http:// 或 https://
+        val destHttpUrl = destUrl
+            .replace("davs://", "https://")
+            .replace("dav://", "http://")
+        return kotlin.runCatching {
+            webDavClient.newCallResponse {
+                url(url)
+                method("MOVE", null)
+                addHeader("Destination", destHttpUrl)
+                addHeader("Overwrite", "F")
+            }.use {
+                checkResult(it)
+            }
+        }.onFailure {
+            currentCoroutineContext().ensureActive()
+            AppLog.put("WebDav移动失败\n${it.localizedMessage}", it)
+        }.isSuccess
+    }
+
+    /**
      * 检测返回结果是否正确
      */
     private fun checkResult(response: Response) {

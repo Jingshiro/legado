@@ -118,6 +118,44 @@ object AppWebDav {
         return names
     }
 
+    /**
+     * 获取云端所有备份文件的详细信息
+     */
+    @Throws(Exception::class)
+    suspend fun getBackupFileList(): List<WebDavFile> {
+        authorization?.let {
+            var files = WebDav(rootWebDavUrl, it).listFiles()
+            files = files.sortedWith { o1, o2 ->
+                AlphanumComparator.compare(o1.displayName, o2.displayName)
+            }.reversed()
+            return files.filter { it.displayName.startsWith("backup") }
+        } ?: throw NoStackTraceException("webDav没有配置")
+    }
+
+    /**
+     * 删除云端备份文件
+     */
+    suspend fun deleteBackup(name: String): Boolean {
+        authorization?.let {
+            return WebDav(rootWebDavUrl + name, it).delete()
+        }
+        return false
+    }
+
+    /**
+     * 重命名云端备份文件
+     * @throws WebDavException 服务器不支持 MOVE 方法时抛出
+     */
+    @Throws(WebDavException::class)
+    suspend fun renameBackup(oldName: String, newName: String): Boolean {
+        authorization?.let {
+            val oldUrl = rootWebDavUrl + oldName
+            val newUrl = rootWebDavUrl + newName
+            return WebDav(oldUrl, it).move(newUrl)
+        }
+        return false
+    }
+
     @Throws(WebDavException::class)
     suspend fun restoreWebDav(name: String) {
         authorization?.let {
