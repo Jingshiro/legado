@@ -66,7 +66,7 @@ object ThoughtObsidianExporter {
     private fun generateUniqueFileName(bookName: String): String {
         val sanitized = bookName.replace(Regex("[/\\\\:*?\"<>|]"), "_")
         val timestamp = timestampFormat.format(Date())
-        val baseName = "《${sanitized}》_${timestamp}"
+        val baseName = "${sanitized}_${timestamp}"
         var fileName = "$baseName.md"
 
         if (AppConfig.obsidianExportMethod == 1) {
