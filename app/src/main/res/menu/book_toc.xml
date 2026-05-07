@@ -64,6 +64,11 @@
             android:title="@string/export_md"
             app:showAsAction="never" />
 
+        <item
+            android:id="@+id/menu_export_obsidian"
+            android:title="@string/export_to_obsidian"
+            app:showAsAction="never" />
+
     </group>
 
     <item

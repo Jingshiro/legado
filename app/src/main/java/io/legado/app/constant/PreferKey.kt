@@ -210,5 +210,10 @@ object PreferKey {
     const val editAutoComplete = "editAutoComplete"
     const val showBoardLine = "showBoardLine"
     const val thoughtShareStyle = "thoughtShareStyle"
+    const val obsidianExportMethod = "obsidianExportMethod"
+    const val obsidianApiUrl = "obsidianApiUrl"
+    const val obsidianApiKey = "obsidianApiKey"
+    const val obsidianVaultSubPath = "obsidianVaultSubPath"
+    const val obsidianLocalDirUri = "obsidianLocalDirUri"
     const val readIterationTagColor = "readIterationTagColor"
 }

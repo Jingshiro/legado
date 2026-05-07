@@ -22,6 +22,7 @@ import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.about.AppLogDialog
 import io.legado.app.ui.book.toc.rule.TxtTocRuleDialog
+import io.legado.app.ui.book.thought.ObsidianExportDialog
 import io.legado.app.ui.file.HandleFileContract
 import io.legado.app.ui.widget.dialog.WaitDialog
 import io.legado.app.utils.applyTint
@@ -165,6 +166,10 @@ class TocActivity : VMBaseActivity<ActivityChapterListBinding, TocViewModel>(),
 
             R.id.menu_export_md -> exportDir.launch {
                 requestCode = 2
+            }
+
+            R.id.menu_export_obsidian -> viewModel.bookData.value?.let {
+                showDialogFragment(ObsidianExportDialog.newInstance(it.name, it.author))
             }
 
             R.id.menu_log -> showDialogFragment<AppLogDialog>()

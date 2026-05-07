@@ -828,5 +828,36 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         set(value) {
             appCtx.putPrefInt(PreferKey.thoughtShareStyle, value)
         }
+
+    var obsidianExportMethod: Int
+        get() = appCtx.getPrefInt(PreferKey.obsidianExportMethod, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.obsidianExportMethod, value)
+        }
+
+    var obsidianApiUrl: String
+        get() = appCtx.getPrefString(PreferKey.obsidianApiUrl, "http://localhost:27124") ?: "http://localhost:27124"
+        set(value) {
+            appCtx.putPrefString(PreferKey.obsidianApiUrl, value)
+        }
+
+    var obsidianApiKey: String
+        get() = appCtx.getPrefString(PreferKey.obsidianApiKey, "") ?: ""
+        set(value) {
+            appCtx.putPrefString(PreferKey.obsidianApiKey, value)
+        }
+
+    var obsidianVaultSubPath: String
+        get() = appCtx.getPrefString(PreferKey.obsidianVaultSubPath, "") ?: ""
+        set(value) {
+            appCtx.putPrefString(PreferKey.obsidianVaultSubPath, value)
+        }
+
+    var obsidianLocalDirUri: String?
+        get() = appCtx.getPrefString(PreferKey.obsidianLocalDirUri)
+        set(value) {
+            if (value.isNullOrEmpty()) appCtx.removePref(PreferKey.obsidianLocalDirUri)
+            else appCtx.putPrefString(PreferKey.obsidianLocalDirUri, value)
+        }
 }
 
