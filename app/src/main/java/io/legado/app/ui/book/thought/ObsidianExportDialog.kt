@@ -10,6 +10,7 @@ import io.legado.app.databinding.DialogObsidianExportBinding
 import io.legado.app.help.config.AppConfig
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.file.HandleFileContract
+import io.legado.app.utils.applyTint
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.showHelp
 import io.legado.app.utils.toastOnUi
@@ -35,7 +36,7 @@ class ObsidianExportDialog : BaseDialogFragment(R.layout.dialog_obsidian_export)
 
     override fun onStart() {
         super.onStart()
-        setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        setLayout(ViewGroup.LayoutParams.MATCH_PARENT, 0.9f)
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,10 +47,18 @@ class ObsidianExportDialog : BaseDialogFragment(R.layout.dialog_obsidian_export)
     private fun initView() {
         binding.toolBar.apply {
             setBackgroundColor(primaryColor)
+            inflateMenu(R.menu.obsidian_export)
+            menu.applyTint(requireContext())
             setNavigationIcon(R.drawable.ic_back)
             setNavigationOnClickListener { dismiss() }
             if (!bookName.isNullOrEmpty()) {
                 title = getString(R.string.export_book_to_obsidian, bookName)
+            }
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_help -> showHelp("obsidian_api_tutorial")
+                }
+                true
             }
         }
 
@@ -67,10 +76,6 @@ class ObsidianExportDialog : BaseDialogFragment(R.layout.dialog_obsidian_export)
 
         binding.btnTestConnection.setOnClickListener {
             testConnection()
-        }
-
-        binding.btnTutorial.setOnClickListener {
-            showHelp("obsidian_api_tutorial")
         }
 
         binding.btnExport.setOnClickListener {

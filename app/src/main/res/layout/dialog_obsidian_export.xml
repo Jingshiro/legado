@@ -1,153 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@color/background">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tool_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/shape_card_view"
-        android:orientation="vertical"
-        tools:ignore="UselessParent">
+        android:theme="?attr/actionBarStyle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:title="@string/export_to_obsidian"
+        app:titleTextAppearance="@style/ToolbarTitle" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/tool_bar"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/progress_bar"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="?attr/actionBarStyle"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="@string/export_to_obsidian"
-            app:titleTextAppearance="@style/ToolbarTitle" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:overScrollMode="ifContentScrolls">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/export_method"
+                android:textColor="@color/primaryText"
+                android:textStyle="bold" />
 
-            <LinearLayout
+            <RadioGroup
+                android:id="@+id/rg_export_method"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rb_rest_api"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/export_method"
-                    android:textColor="@color/primaryText"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:text="@string/obsidian_rest_api" />
 
-                <RadioGroup
-                    android:id="@+id/rg_export_method"
-                    android:layout_width="match_parent"
+                <RadioButton
+                    android:id="@+id/rb_local_file"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    android:text="@string/obsidian_local_file" />
 
-                    <RadioButton
-                        android:id="@+id/rb_rest_api"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/obsidian_rest_api" />
+            </RadioGroup>
 
-                    <RadioButton
-                        android:id="@+id/rb_local_file"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/obsidian_local_file" />
-
-                </RadioGroup>
-
-                <LinearLayout
-                    android:id="@+id/layout_api_config"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <io.legado.app.ui.widget.text.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
-
-                        <io.legado.app.lib.theme.view.ThemeEditText
-                            android:id="@+id/edit_api_url"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/obsidian_api_url_hint"
-                            android:inputType="textUri"
-                            android:singleLine="true" />
-
-                    </io.legado.app.ui.widget.text.TextInputLayout>
-
-                    <io.legado.app.ui.widget.text.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
-
-                        <io.legado.app.lib.theme.view.ThemeEditText
-                            android:id="@+id/edit_api_key"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/obsidian_api_key_hint"
-                            android:inputType="textPassword"
-                            android:singleLine="true" />
-
-                    </io.legado.app.ui.widget.text.TextInputLayout>
-
-                    <io.legado.app.ui.widget.text.AccentTextView
-                        android:id="@+id/btn_test_connection"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/obsidian_test_connection" />
-
-                    <io.legado.app.ui.widget.text.AccentTextView
-                        android:id="@+id/btn_tutorial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/user_tutorial" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_local_config"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <io.legado.app.ui.widget.text.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
-
-                        <io.legado.app.lib.theme.view.ThemeEditText
-                            android:id="@+id/edit_local_path"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:enabled="false"
-                            android:hint="@string/obsidian_local_path_hint"
-                            android:singleLine="true" />
-
-                    </io.legado.app.ui.widget.text.TextInputLayout>
-
-                    <io.legado.app.ui.widget.text.AccentTextView
-                        android:id="@+id/btn_select_dir"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/select_obsidian_dir" />
-
-                </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_api_config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <io.legado.app.ui.widget.text.TextInputLayout
                     android:layout_width="match_parent"
@@ -155,43 +71,114 @@
                     android:layout_marginBottom="8dp">
 
                     <io.legado.app.lib.theme.view.ThemeEditText
-                        android:id="@+id/edit_vault_path"
+                        android:id="@+id/edit_api_url"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/obsidian_vault_path_hint"
-                        android:inputType="text"
+                        android:hint="@string/obsidian_api_url_hint"
+                        android:inputType="textUri"
                         android:singleLine="true" />
 
                 </io.legado.app.ui.widget.text.TextInputLayout>
 
+                <io.legado.app.ui.widget.text.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+
+                    <io.legado.app.lib.theme.view.ThemeEditText
+                        android:id="@+id/edit_api_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/obsidian_api_key_hint"
+                        android:inputType="textPassword"
+                        android:singleLine="true" />
+
+                </io.legado.app.ui.widget.text.TextInputLayout>
+
+                <io.legado.app.ui.widget.text.AccentTextView
+                    android:id="@+id/btn_test_connection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/obsidian_test_connection" />
+
             </LinearLayout>
 
-        </androidx.core.widget.NestedScrollView>
+            <LinearLayout
+                android:id="@+id/layout_local_config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone" />
+                <io.legado.app.ui.widget.text.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
 
-        <com.google.android.flexbox.FlexboxLayout
-            android:layout_width="match_parent"
+                    <io.legado.app.lib.theme.view.ThemeEditText
+                        android:id="@+id/edit_local_path"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:hint="@string/obsidian_local_path_hint"
+                        android:singleLine="true" />
+
+                </io.legado.app.ui.widget.text.TextInputLayout>
+
+                <io.legado.app.ui.widget.text.AccentTextView
+                    android:id="@+id/btn_select_dir"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/select_obsidian_dir" />
+
+            </LinearLayout>
+
+            <io.legado.app.ui.widget.text.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <io.legado.app.lib.theme.view.ThemeEditText
+                    android:id="@+id/edit_vault_path"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/obsidian_vault_path_hint"
+                    android:inputType="text"
+                    android:singleLine="true" />
+
+            </io.legado.app.ui.widget.text.TextInputLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/flex_button_layout" />
+
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/flex_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        app:justifyContent="flex_end"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <io.legado.app.ui.widget.text.AccentTextView
+            android:id="@+id/btn_export"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            app:justifyContent="flex_end">
+            android:text="@string/export"
+            tools:ignore="RtlHardcoded" />
 
-            <io.legado.app.ui.widget.text.AccentTextView
-                android:id="@+id/btn_export"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:text="@string/export"
-                tools:ignore="RtlHardcoded" />
+    </com.google.android.flexbox.FlexboxLayout>
 
-        </com.google.android.flexbox.FlexboxLayout>
-
-    </LinearLayout>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
