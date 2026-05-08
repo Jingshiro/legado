@@ -60,6 +60,59 @@ object AiToolDef {
                 "get_source_groups",
                 "获取书源和订阅源的分组列表。",
                 properties = emptyMap()
+            ),
+            // 写操作工具（需要用户确认）
+            tool(
+                "update_book_group",
+                "将书架上的书籍移入指定分组。需要提供书名和目标分组名。此操作会弹出确认框。",
+                required = listOf("book_name", "group_name"),
+                properties = mapOf(
+                    "book_name" to prop("string", "书架上的书名"),
+                    "group_name" to prop("string", "目标分组名")
+                )
+            ),
+            tool(
+                "enable_book_source",
+                "启用或禁用指定书源。此操作会弹出确认框。",
+                required = listOf("source_name", "enabled"),
+                properties = mapOf(
+                    "source_name" to prop("string", "书源名称"),
+                    "enabled" to prop("boolean", "true 启用，false 禁用")
+                )
+            ),
+            tool(
+                "enable_rss_source",
+                "启用或禁用指定 RSS 订阅源。此操作会弹出确认框。",
+                required = listOf("source_name", "enabled"),
+                properties = mapOf(
+                    "source_name" to prop("string", "订阅源名称"),
+                    "enabled" to prop("boolean", "true 启用，false 禁用")
+                )
+            ),
+            tool(
+                "delete_book_source",
+                "删除指定书源（不可撤销）。此操作会弹出确认框。",
+                required = listOf("source_name"),
+                properties = mapOf(
+                    "source_name" to prop("string", "要删除的书源名称")
+                )
+            ),
+            tool(
+                "update_book_source_group",
+                "将指定书源移入目标分组。此操作会弹出确认框。",
+                required = listOf("source_name", "group_name"),
+                properties = mapOf(
+                    "source_name" to prop("string", "书源名称"),
+                    "group_name" to prop("string", "目标分组名")
+                )
+            ),
+            tool(
+                "delete_rss_source",
+                "删除指定 RSS 订阅源（不可撤销）。此操作会弹出确认框。",
+                required = listOf("source_name"),
+                properties = mapOf(
+                    "source_name" to prop("string", "要删除的订阅源名称")
+                )
             )
         )
     }

@@ -8,10 +8,12 @@ import io.legado.app.help.config.AiMemoryItem
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.ai.tool.AiToolDef
+import io.legado.app.ui.book.read.ai.tool.ToolExecuteResult
 import io.legado.app.ui.book.read.ai.tool.ToolRouter
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.toastOnUi
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.legado.app.data.appDb
@@ -30,6 +32,12 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
     val messagesLiveData = MutableLiveData<List<ChatMessage>>()
     val wordCountLiveData = MutableLiveData<Int>()
     val isGeneratingLiveData = MutableLiveData<Boolean>()
+    val confirmationLiveData = MutableLiveData<ConfirmationRequest?>()
+
+    fun confirmAction(confirmed: Boolean) {
+        confirmationLiveData.value?.deferred?.complete(confirmed)
+        confirmationLiveData.postValue(null)
+    }
 
     private val _messages = mutableListOf<ChatMessage>()
     val messages: List<ChatMessage> get() = _messages.toList()
@@ -108,6 +116,12 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
             buildString {
                 append("【人设与要求】\n")
                 append(AiConfig.persona)
+                if (AiConfig.toolEnabled) {
+                    append("\n\n【工具使用指南】\n")
+                    append("你可以调用工具来查询和管理用户的书架、书源、订阅等数据。")
+                    append("写操作（如删除、修改分组、启用/禁用）会弹出确认框，请先告知用户你将要执行的操作。")
+                    append("如果用户取消了操作，请尊重用户的选择，不要重复尝试。")
+                }
                 if (AiConfig.memory.isNotBlank()) {
                     append("\n\n【之前的对话记忆】\n")
                     append(AiConfig.memory)
@@ -242,17 +256,37 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
                 } catch (_: Exception) {
                     emptyMap<String, Any>()
                 }
-                val result = ToolRouter.execute(toolCall.function.name, args)
+                val toolResult = ToolRouter.execute(toolCall.function.name, args)
+                val resultJson = when (toolResult) {
+                    is ToolExecuteResult.Data -> toolResult.json
+                    is ToolExecuteResult.NeedConfirmation -> {
+                        val confirmed = requestConfirmation(toolResult.description)
+                        if (confirmed) {
+                            toolResult.action()
+                        } else {
+                            """{"cancelled":true,"message":"用户取消了操作"}"""
+                        }
+                    }
+                }
                 currentMessages.add(
                     ChatMessage(
                         role = "tool",
-                        content = result,
+                        content = resultJson,
                         toolCallId = toolCall.id
                     )
                 )
             }
         }
         return "工具调用轮次已达上限，请重新提问。"
+    }
+
+    /**
+     * 向 Activity 发起确认请求，挂起等待用户选择
+     */
+    private suspend fun requestConfirmation(description: String): Boolean {
+        val deferred = CompletableDeferred<Boolean>()
+        confirmationLiveData.postValue(ConfirmationRequest(description, deferred))
+        return deferred.await()
     }
 
     /**
@@ -368,6 +402,11 @@ data class ToolCall(
 data class FunctionCall(
     val name: String,
     val arguments: String
+)
+
+data class ConfirmationRequest(
+    val description: String,
+    val deferred: CompletableDeferred<Boolean>
 )
 
 /** 应用级内存缓存，持久化跨 Activity 周期的聊天记录 */

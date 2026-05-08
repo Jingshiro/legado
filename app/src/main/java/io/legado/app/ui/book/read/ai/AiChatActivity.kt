@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.legado.app.R
 import io.legado.app.base.BaseActivity
+import io.legado.app.lib.dialogs.alert
 import io.legado.app.databinding.ActivityAiChatBinding
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.config.AiConfigDialog
@@ -120,6 +121,19 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
                 binding.btnSend.setImageResource(R.drawable.ic_stop_black_24dp)
             } else {
                 binding.btnSend.setImageResource(R.drawable.ic_send)
+            }
+        }
+
+        viewModel.confirmationLiveData.observe(this) { request ->
+            if (request == null) return@observe
+            alert(R.string.ai_confirm_title) {
+                setMessage(request.description)
+                yesButton {
+                    viewModel.confirmAction(true)
+                }
+                noButton {
+                    viewModel.confirmAction(false)
+                }
             }
         }
     }
