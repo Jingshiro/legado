@@ -19,7 +19,7 @@ data class AiMemoryItem(
 }
 
 /**
- * AI 阅读伴侣相关配置
+ * AI 助手相关配置
  */
 object AiConfig {
     private const val KEY_AI_API_URL = "ai_api_url"
@@ -50,7 +50,7 @@ object AiConfig {
         }
 
     var persona: String
-        get() = appCtx.getPrefString(KEY_AI_PERSONA, "你是一个擅长分析文学作品的阅读伴侣，请结合用户发送的当下正在阅读的章节内容，回答用户的问题。如果用户想探讨剧情人物，请积极互动。") ?: ""
+        get() = appCtx.getPrefString(KEY_AI_PERSONA, "你是一个擅长分析文学作品的 AI 助手，请结合用户发送的当下正在阅读的章节内容，回答用户的问题。如果用户想探讨剧情人物，请积极互动。") ?: ""
         set(value) {
             appCtx.putPrefString(KEY_AI_PERSONA, value)
         }
