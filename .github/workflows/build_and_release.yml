@@ -87,23 +87,26 @@ jobs:
           TAG="${{ env.VERSION }}"
           REPO="mirror-233/legado"
           TOKEN="${{ secrets.GITEE_TOKEN }}"
+          RELEASE_ID=""
 
           # 1. 检查 release 是否已存在（重跑场景）
           echo "Checking if release for tag $TAG already exists..."
           EXISTING=$(curl -s "https://gitee.com/api/v5/repos/$REPO/releases/tags/$TAG?access_token=$TOKEN")
-          RELEASE_ID=$(echo "$EXISTING" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
+          echo "Existing release response: $EXISTING"
+          RELEASE_ID=$(echo "$EXISTING" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || true)
 
           if [ -n "$RELEASE_ID" ]; then
             echo "Release already exists (ID: $RELEASE_ID), reusing it."
           else
             # 2. Release 不存在，检查并创建 tag
             echo "Release not found, checking tag..."
-            TAG_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+            TAG_HTTP=$(curl -s -o /dev/null -w "%{http_code}" \
               "https://gitee.com/api/v5/repos/$REPO/tags/$TAG?access_token=$TOKEN")
+            echo "Tag check HTTP: $TAG_HTTP"
 
-            if [ "$TAG_CHECK" != "200" ]; then
+            if [ "$TAG_HTTP" != "200" ]; then
               echo "Tag not found, creating from main..."
-              curl -s -w "\nHTTP_STATUS:%{http_code}\n" \
+              curl -s -w "\nHTTP:%{http_code}\n" \
                 -X POST "https://gitee.com/api/v5/repos/$REPO/tags" \
                 -H "Content-Type: application/json" \
                 -d "{\"access_token\":\"$TOKEN\",\"tag_name\":\"$TAG\",\"refs\":\"main\"}"
@@ -123,7 +126,7 @@ jobs:
               exit 1
             fi
 
-            RELEASE_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin.rsplit('\n',1)[0])['id'])" 2>/dev/null)
+            RELEASE_ID=$(echo "$RESPONSE" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || true)
             echo "Created release ID: $RELEASE_ID"
           fi
 
