@@ -87,70 +87,44 @@ jobs:
           TAG="${{ env.VERSION }}"
           REPO="mirror-233/legado"
           TOKEN="${{ secrets.GITEE_TOKEN }}"
-          RELEASE_ID=""
-
-          # 1. 检查 release 是否已存在（重跑场景）
+          
+          # 1. 优雅地用 jq 查 Release ID
           echo "Checking if release for tag $TAG already exists..."
-          EXISTING=$(curl -s "https://gitee.com/api/v5/repos/$REPO/releases/tags/$TAG?access_token=$TOKEN")
-          echo "Existing release response: $EXISTING"
-          RELEASE_ID=$(echo "$EXISTING" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || true)
+          EXISTING_RES=$(curl -s "https://gitee.com/api/v5/repos/$REPO/releases/tags/$TAG?access_token=$TOKEN")
+          RELEASE_ID=$(echo "$EXISTING_RES" | jq -r '.id // empty')
 
           if [ -n "$RELEASE_ID" ]; then
-            echo "Release already exists (ID: $RELEASE_ID), reusing it."
+            echo "Release 已存在，ID: $RELEASE_ID，直接复用。"
           else
-            # 2. Release 不存在，检查并创建 tag
-            echo "Release not found, checking tag..."
-            TAG_HTTP=$(curl -s -o /dev/null -w "%{http_code}" \
-              "https://gitee.com/api/v5/repos/$REPO/tags/$TAG?access_token=$TOKEN")
-            echo "Tag check HTTP: $TAG_HTTP"
-
-            if [ "$TAG_HTTP" != "200" ]; then
-              echo "Tag not found, creating from main..."
-              curl -s -w "\nHTTP:%{http_code}\n" \
-                -X POST "https://gitee.com/api/v5/repos/$REPO/tags" \
-                -H "Content-Type: application/json" \
-                -d "{\"access_token\":\"$TOKEN\",\"tag_name\":\"$TAG\",\"refs\":\"main\"}"
-            fi
-
-            # 3. 创建 Release
-            echo "Creating release..."
-            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-              -X POST "https://gitee.com/api/v5/repos/$REPO/releases" \
+            echo "Release 不存在，准备创建..."
+            # Tag 在上一步 mirror 已经过去，直接建 Release
+            CREATE_RES=$(curl -s -X POST "https://gitee.com/api/v5/repos/$REPO/releases" \
               -H "Content-Type: application/json" \
-              -d "{\"access_token\":\"$TOKEN\",\"tag_name\":\"$TAG\",\"name\":\"Legado $TAG\",\"target_commitish\":\"main\",\"body\":\"由 GitHub Actions 自动构建并发布\"}")
-            echo "Create release response: $RESPONSE"
-
-            HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
-            if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "201" ]; then
-              echo "::error::Failed to create Gitee release (HTTP $HTTP_STATUS)"
+              -d "{\"access_token\":\"$TOKEN\",\"tag_name\":\"$TAG\",\"name\":\"Legado $TAG\",\"body\":\"由 GitHub Actions 自动构建并发布\"}")
+            
+            RELEASE_ID=$(echo "$CREATE_RES" | jq -r '.id // empty')
+            if [ -z "$RELEASE_ID" ]; then
+              echo "::error::Release 创建失败！Gitee 报错: $CREATE_RES"
               exit 1
             fi
-
-            RELEASE_ID=$(echo "$RESPONSE" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || true)
-            echo "Created release ID: $RELEASE_ID"
+            echo "创建成功，Release ID: $RELEASE_ID"
           fi
 
-          if [ -z "$RELEASE_ID" ]; then
-            echo "::error::Failed to get release ID"
-            exit 1
-          fi
-
-          # 4. 先用小文件测试上传通道
-          echo "test" > /tmp/test_upload.txt
-          echo "=== Testing upload with small file ==="
-          curl -v --max-time 30 \
-            "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
-            -F "file=@/tmp/test_upload.txt" 2>&1
-          echo ""
-          echo "=== Small file test done ==="
-
-          # 5. 上传 APK（去掉 -X POST，-F 已隐含 POST）
+          # 2. 直接传 APK，带重试机制和状态码阻断
           for file in apk_output/*.apk; do
             FILESIZE=$(du -h "$file" | cut -f1)
-            echo "Uploading $file ($FILESIZE) to release $RELEASE_ID..."
-            curl -v --max-time 600 --connect-timeout 30 \
-              "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
-              -F "file=@$file" 2>&1
-            echo ""
-            echo "=== $file upload done ==="
+            echo "Uploading $file ($FILESIZE) to Gitee..."
+            
+            # 使用 -w 抓取 HTTP 状态码，失败直接中断脚本
+            UPLOAD_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --retry 3 --max-time 600 \
+              "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files" \
+              -F "access_token=$TOKEN" \
+              -F "file=@$file")
+              
+            if [ "$UPLOAD_HTTP" = "201" ]; then
+              echo "✅ $file 上传成功！"
+            else
+              echo "::error::❌ $file 上传失败！HTTP 状态码: $UPLOAD_HTTP"
+              exit 1
+            fi
           done
