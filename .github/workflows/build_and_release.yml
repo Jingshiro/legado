@@ -102,7 +102,7 @@ jobs:
               -d "{
                 \"access_token\": \"$TOKEN\",
                 \"tag_name\": \"$TAG\",
-                \"ref\": \"main\"
+                \"refs\": \"main\"
               }")
             echo "Create tag response: $CREATE_TAG_RESP"
           else
@@ -118,6 +118,7 @@ jobs:
               \"access_token\": \"$TOKEN\",
               \"tag_name\": \"$TAG\",
               \"name\": \"Legado $TAG\",
+              \"target_commitish\": \"main\",
               \"body\": \"由 GitHub Actions 自动构建并发布\n\nGitHub 版本更新：\"
             }")
           echo "Create release response: $RESPONSE"
