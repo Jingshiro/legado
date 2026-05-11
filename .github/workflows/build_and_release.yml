@@ -72,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync to Gitee
-        uses: Yikun/hub-mirror-action@master
+        uses: Yikun/hub-mirror-action@v1.5
         with:
           src: github/${{ github.repository_owner }}
           dst: gitee/mirror-233
@@ -84,20 +84,61 @@ jobs:
 
       - name: Create Gitee Release & Upload Assets
         run: |
+          TAG="${{ env.VERSION }}"
+          REPO="mirror-233/legado"
+          TOKEN="${{ secrets.GITEE_TOKEN }}"
+
+          # 先检查 tag 是否存在于 Gitee，不存在则基于 main 分支创建
+          echo "Checking if tag $TAG exists on Gitee..."
+          TAG_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://gitee.com/api/v5/repos/$REPO/tags/$TAG?access_token=$TOKEN")
+          echo "Tag check HTTP status: $TAG_CHECK"
+
+          if [ "$TAG_CHECK" != "200" ]; then
+            echo "Tag $TAG not found on Gitee, creating from main..."
+            CREATE_TAG_RESP=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+              -X POST "https://gitee.com/api/v5/repos/$REPO/tags" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"access_token\": \"$TOKEN\",
+                \"tag_name\": \"$TAG\",
+                \"ref\": \"main\"
+              }")
+            echo "Create tag response: $CREATE_TAG_RESP"
+          else
+            echo "Tag $TAG already exists on Gitee."
+          fi
+
           # 创建 Release
-          curl -X POST "https://gitee.com/api/v5/repos/mirror-233/legado/releases" \
+          echo "Creating Gitee release..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -X POST "https://gitee.com/api/v5/repos/$REPO/releases" \
             -H "Content-Type: application/json" \
-            -d '{
-              "access_token": "${{ secrets.GITEE_TOKEN }}",
-              "tag_name": "${{ env.VERSION }}",
-              "name": "Legado ${{ env.VERSION }}",
-              "body": "由 GitHub Actions 自动构建并发布\n\nGitHub 版本更新："
-            }'
-          
+            -d "{
+              \"access_token\": \"$TOKEN\",
+              \"tag_name\": \"$TAG\",
+              \"name\": \"Legado $TAG\",
+              \"body\": \"由 GitHub Actions 自动构建并发布\n\nGitHub 版本更新：\"
+            }")
+          echo "Create release response: $RESPONSE"
+
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "201" ]; then
+            echo "::error::Failed to create Gitee release (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
           # 遍历 apk_output 文件夹上传 APK
           for file in apk_output/*.apk; do
             echo "Uploading $file to Gitee..."
-            curl -X POST "https://gitee.com/api/v5/repos/mirror-233/legado/releases/tags/${{ env.VERSION }}/attach_files" \
-              -F "access_token=${{ secrets.GITEE_TOKEN }}" \
-              -F "file=@$file"
+            UPLOAD_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+              -X POST "https://gitee.com/api/v5/repos/$REPO/releases/tags/$TAG/attach_files" \
+              -F "access_token=$TOKEN" \
+              -F "file=@$file")
+            echo "Upload response: $UPLOAD_RESPONSE"
+
+            UPLOAD_STATUS=$(echo "$UPLOAD_RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+            if [ "$UPLOAD_STATUS" != "200" ] && [ "$UPLOAD_STATUS" != "201" ]; then
+              echo "::warning::Failed to upload $file to Gitee (HTTP $UPLOAD_STATUS)"
+            fi
           done
