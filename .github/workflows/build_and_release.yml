@@ -58,7 +58,7 @@ jobs:
         run: |
           sed "s/applicationIdSuffix '.release'/applicationIdSuffix '.releaseS'/" app/build.gradle -i
           ./gradlew assembleAppRelease --build-cache --parallel --daemon --warning-mode all
-          find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_beta_${{ env.VERSION }}.apk \;
+          find app/build/outputs/apk -name "*.apk" -exec mv {} apk_output/legado_releaseS_${{ env.VERSION }}.apk \;
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
