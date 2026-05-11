@@ -139,10 +139,9 @@ jobs:
           for file in apk_output/*.apk; do
             FILESIZE=$(du -h "$file" | cut -f1)
             echo "Uploading $file ($FILESIZE) to release $RELEASE_ID..."
-            UPLOAD_RESPONSE=$(curl -v --max-time 600 --connect-timeout 30 -w "\nHTTP_STATUS:%{http_code}" \
-              -X POST "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files" \
-              -F "access_token=$TOKEN" \
-              -F "file=@$file" 2>&1)
+            UPLOAD_RESPONSE=$(curl -s --max-time 600 --connect-timeout 30 -w "\nHTTP_STATUS:%{http_code}" \
+              -X POST "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
+              -F "file=@$file")
             echo "$UPLOAD_RESPONSE"
 
             UPLOAD_STATUS=$(echo "$UPLOAD_RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
