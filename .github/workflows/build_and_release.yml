@@ -135,17 +135,22 @@ jobs:
             exit 1
           fi
 
-          # 4. 上传 APK
+          # 4. 先用小文件测试上传通道
+          echo "test" > /tmp/test_upload.txt
+          echo "=== Testing upload with small file ==="
+          curl -v --max-time 30 \
+            "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
+            -F "file=@/tmp/test_upload.txt" 2>&1
+          echo ""
+          echo "=== Small file test done ==="
+
+          # 5. 上传 APK（去掉 -X POST，-F 已隐含 POST）
           for file in apk_output/*.apk; do
             FILESIZE=$(du -h "$file" | cut -f1)
             echo "Uploading $file ($FILESIZE) to release $RELEASE_ID..."
-            UPLOAD_RESPONSE=$(curl -s --max-time 600 --connect-timeout 30 -w "\nHTTP_STATUS:%{http_code}" \
-              -X POST "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
-              -F "file=@$file")
-            echo "$UPLOAD_RESPONSE"
-
-            UPLOAD_STATUS=$(echo "$UPLOAD_RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
-            if [ "$UPLOAD_STATUS" != "200" ] && [ "$UPLOAD_STATUS" != "201" ]; then
-              echo "::warning::Failed to upload $file (HTTP $UPLOAD_STATUS)"
-            fi
+            curl -v --max-time 600 --connect-timeout 30 \
+              "https://gitee.com/api/v5/repos/$REPO/releases/$RELEASE_ID/attach_files?access_token=$TOKEN" \
+              -F "file=@$file" 2>&1
+            echo ""
+            echo "=== $file upload done ==="
           done
