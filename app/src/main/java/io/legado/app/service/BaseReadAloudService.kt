@@ -137,6 +137,7 @@ abstract class BaseReadAloudService : BaseService(),
     var paragraphStartPos = 0
     var readAloudByPage = false
         private set
+    private var waitNewReadAloud = true
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -271,6 +272,7 @@ abstract class BaseReadAloudService : BaseService(),
                 }
             }
             paragraphStartPos = pos
+            waitNewReadAloud = false
             launch(Main) {
                 if (play) play() else pageChanged = true
             }
@@ -338,6 +340,9 @@ abstract class BaseReadAloudService : BaseService(),
     }
 
     private fun prevP() {
+        if (waitNewReadAloud) {
+            return
+        }
         if (nowSpeak > 0) {
             playStop()
             do {
@@ -359,11 +364,15 @@ abstract class BaseReadAloudService : BaseService(),
             play()
         } else {
             toLast = true
+            waitNewReadAloud = true
             ReadBook.moveToPrevChapter(true)
         }
     }
 
     private fun nextP() {
+        if (waitNewReadAloud) {
+            return
+        }
         if (nowSpeak < contentList.size - 1) {
             playStop()
             readAloudNumber += contentList[nowSpeak].length.plus(1) - paragraphStartPos
@@ -384,6 +393,7 @@ abstract class BaseReadAloudService : BaseService(),
             upTtsProgress(readAloudNumber + 1)
             play()
         } else {
+            waitNewReadAloud = true
             nextChapter()
         }
     }
