@@ -9,7 +9,7 @@ object AppUpdate {
         AppUpdateGitHub
     }
     val giteeUpdate: AppUpdateInterface by lazy {
-        AppUpdateGitee
+        AppUpdateR2
     }
 
 

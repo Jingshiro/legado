@@ -71,35 +71,75 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync to Gitee
-        uses: Yikun/hub-mirror-action@v1.5
-        with:
-          src: github/${{ github.repository_owner }}
-          dst: gitee/mirror-233
-          dst_key: ${{ secrets.GITEE_RSA_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          account_type: user
-          static_list: "legado"
-          force_update: true
+      - name: Generate latest.json
+        env:
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, glob
 
-      - name: Create Gitee Release
-        uses: nICEnnnnnnnLee/action-gitee-release@v2.0.0
-        with:
-          gitee_action: create_release
-          gitee_owner: mirror-233
-          gitee_repo: legado
-          gitee_token: ${{ secrets.GITEE_TOKEN }}
-          gitee_tag_name: ${{ env.VERSION }}
-          gitee_release_name: Legado ${{ env.VERSION }}
-          gitee_target_commitish: main
+          version    = os.environ['VERSION']
+          public_url = os.environ['R2_PUBLIC_URL'].rstrip('/')
 
-      - name: Upload APKs to Gitee Release
-        uses: nICEnnnnnnnLee/action-gitee-release@v2.0.0
-        with:
-          gitee_action: upload_asset
-          gitee_owner: mirror-233
-          gitee_repo: legado
-          gitee_token: ${{ secrets.GITEE_TOKEN }}
-          gitee_tag_name: ${{ env.VERSION }}
-          gitee_files: apk_output/*.apk
-          gitee_upload_retry_times: 3
+          with open('app/src/main/assets/updateLog.md', encoding='utf-8') as f:
+              update_log = f.read()
+
+          assets = []
+          for apk_path in sorted(glob.glob('apk_output/*.apk')):
+              name = os.path.basename(apk_path)
+              url  = f"{public_url}/releases/{version}/{name}"
+              if 'releaseS' in name:
+                  variant = 'BETA_RELEASES'
+              elif 'releaseA' in name:
+                  variant = 'BETA_RELEASEA'
+              elif 'release' in name:
+                  variant = 'BETA_RELEASE'
+              else:
+                  variant = 'OFFICIAL'
+              assets.append({'name': name, 'url': url, 'variant': variant})
+
+          data = {
+              'versionName': version,
+              'updateLog': update_log,
+              'assets': assets
+          }
+          with open('latest.json', 'w', encoding='utf-8') as f:
+              json.dump(data, f, ensure_ascii=False, indent=2)
+          print(f"✅ 已生成 latest.json: version={version}, assets={[a['name'] for a in assets]}")
+          PYEOF
+
+      - name: Upload APKs and latest.json to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          ENDPOINT="https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+
+          # 上传各 APK 到版本子目录
+          for apk in apk_output/*.apk; do
+            filename=$(basename "$apk")
+            aws s3 cp "$apk" "s3://${{ secrets.R2_BUCKET }}/releases/${{ env.VERSION }}/$filename" \
+              --endpoint-url "$ENDPOINT" \
+              --no-progress
+            echo "✅ 已上传: $filename"
+          done
+
+          # 上传 latest.json 到根目录（固定 URL，app 检查更新用）
+          aws s3 cp latest.json "s3://${{ secrets.R2_BUCKET }}/latest.json" \
+            --endpoint-url "$ENDPOINT" \
+            --content-type "application/json" \
+            --no-progress
+          echo "✅ 已更新 latest.json"
+
+      - name: Output Download URLs
+        run: |
+          echo "## 📦 APK 下载地址" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for apk in apk_output/*.apk; do
+            filename=$(basename "$apk")
+            echo "- [$filename](${{ secrets.R2_PUBLIC_URL }}/releases/${{ env.VERSION }}/$filename)" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 latest.json: ${{ secrets.R2_PUBLIC_URL }}/latest.json" >> $GITHUB_STEP_SUMMARY
+
