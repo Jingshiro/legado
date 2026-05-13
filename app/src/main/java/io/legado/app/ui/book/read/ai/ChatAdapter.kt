@@ -2,7 +2,10 @@ package io.legado.app.ui.book.read.ai
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.RotateAnimation
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -29,11 +32,11 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val msg = getItem(position)
         val context = holder.binding.root.context
-        
+
         if (markwon == null) {
             markwon = Markwon.create(context)
         }
-        
+
         if (msg.role == "user") {
             holder.binding.llUserMsg.visible()
             holder.binding.llAiMsg.gone()
@@ -62,7 +65,50 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
                 )
                 holder.binding.ivAiAvatar.setImageResource(R.drawable.ic_chat_ai)
             }
+
+            // 处理思维链内容
+            val reasoning = msg.reasoningContent
+            if (!reasoning.isNullOrBlank()) {
+                holder.binding.llReasoning.visible()
+                markwon?.setMarkdown(holder.binding.tvReasoningContent, reasoning)
+                // 初始化为折叠状态（每次绑定都重置）
+                holder.binding.tvReasoningContent.gone()
+                holder.binding.ivReasoningArrow.rotation = 90f
+                // 点击头部切换折叠/展开
+                holder.binding.llReasoningHeader.setOnClickListener {
+                    val isExpanded = holder.binding.tvReasoningContent.visibility == View.VISIBLE
+                    if (isExpanded) {
+                        collapseReasoning(holder)
+                    } else {
+                        expandReasoning(holder)
+                    }
+                }
+            } else {
+                holder.binding.llReasoning.gone()
+            }
         }
+    }
+
+    private fun expandReasoning(holder: ChatViewHolder) {
+        holder.binding.tvReasoningContent.visible()
+        animateArrow(holder.binding.ivReasoningArrow, 90f, 270f)
+    }
+
+    private fun collapseReasoning(holder: ChatViewHolder) {
+        holder.binding.tvReasoningContent.gone()
+        animateArrow(holder.binding.ivReasoningArrow, 270f, 90f)
+    }
+
+    private fun animateArrow(view: android.widget.ImageView, from: Float, to: Float) {
+        val anim = RotateAnimation(
+            from, to,
+            Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f
+        ).apply {
+            duration = 200
+            fillAfter = true
+        }
+        view.startAnimation(anim)
     }
 
     class ChatViewHolder(val binding: ItemAiChatBinding) : RecyclerView.ViewHolder(binding.root)

@@ -388,6 +388,10 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
                         )
                     )
                 }
+            } else if (msg.role == "assistant" && !msg.reasoningContent.isNullOrBlank()) {
+                // 思维链模式：必须将 reasoning_content 回传给 API
+                map["content"] = msg.content
+                map["reasoning_content"] = msg.reasoningContent
             } else {
                 map["content"] = msg.content
             }
@@ -426,6 +430,8 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
         val messageMap = firstChoice?.get("message") as? Map<*, *> ?: throw Exception("解析响应失败")
 
         val content = messageMap["content"] as? String ?: ""
+        // 解析思维链内容（DeepSeek R1 等思维模式模型返回）
+        val reasoningContent = messageMap["reasoning_content"] as? String
         val toolCallsRaw = messageMap["tool_calls"] as? List<Map<*, *>>
 
         if (!toolCallsRaw.isNullOrEmpty()) {
@@ -442,11 +448,16 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
             return@withContext ChatMessage(
                 role = "assistant",
                 content = content,
-                toolCalls = toolCalls
+                toolCalls = toolCalls,
+                reasoningContent = reasoningContent
             )
         }
 
-        return@withContext ChatMessage(role = "assistant", content = content)
+        return@withContext ChatMessage(
+            role = "assistant",
+            content = content,
+            reasoningContent = reasoningContent
+        )
     }
 
     /**
@@ -456,13 +467,94 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
         val response = requestOpenAiMessage(chatMessages, tools = null)
         return response.content.ifBlank { throw Exception("响应内容为空") }
     }
+
+    /**
+     * 拉取供应商提供的模型列表（调用 /models 接口）
+     * 返回模型 ID 列表
+     */
+    suspend fun fetchModels(apiUrl: String, apiKey: String): List<String> = withContext(Dispatchers.IO) {
+        // 将 chat/completions URL 转换为 /models URL
+        val modelsUrl = buildModelsUrl(apiUrl)
+        val request = Request.Builder()
+            .url(modelsUrl)
+            .get()
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+        val responseString = okHttpClient.newCall(request).execute().use { response ->
+            val bodyStr = response.body.string()
+            if (!response.isSuccessful) throw Exception("HTTP ${response.code}: $bodyStr")
+            bodyStr
+        }
+        val jsonObject = GSON.fromJsonObject<Map<String, Any>>(responseString).getOrThrow()
+        val dataList = jsonObject["data"] as? List<*> ?: return@withContext emptyList()
+        dataList.mapNotNull { item ->
+            (item as? Map<*, *>)?.get("id") as? String
+        }.sorted()
+    }
+
+    /**
+     * 测试模型是否可用：发送一条 "hi" 消息，成功收到回复则可用
+     */
+    suspend fun testModel(apiUrl: String, apiKey: String, model: String): String = withContext(Dispatchers.IO) {
+        val testMessages = listOf(
+            ChatMessage(role = "user", content = "hi")
+        )
+        val messagesJsonList = testMessages.map { msg ->
+            mapOf("role" to msg.role, "content" to msg.content)
+        }
+        val requestBodyMap = mapOf(
+            "model" to model,
+            "messages" to messagesJsonList,
+            "max_tokens" to 50
+        )
+        val jsonBody = GSON.toJson(requestBodyMap)
+        val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url(apiUrl)
+            .post(body)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("Content-Type", "application/json")
+            .build()
+        val responseString = okHttpClient.newCall(request).execute().use { response ->
+            val bodyStr = response.body.string()
+            if (!response.isSuccessful) throw Exception("HTTP ${response.code}: $bodyStr")
+            bodyStr
+        }
+        val jsonObject = GSON.fromJsonObject<Map<String, Any>>(responseString).getOrThrow()
+        val choices = jsonObject["choices"] as? List<*>
+        val firstChoice = choices?.firstOrNull() as? Map<*, *>
+        val messageMap = firstChoice?.get("message") as? Map<*, *>
+        messageMap?.get("content") as? String ?: "(无回复)"
+    }
+
+    /**
+     * 将 chat/completions URL 推断为对应的 /models URL
+     * 例如：https://api.openai.com/v1/chat/completions -> https://api.openai.com/v1/models
+     */
+    private fun buildModelsUrl(chatUrl: String): String {
+        return try {
+            // 去掉 /chat/completions 后缀，拼接 /models
+            val normalized = chatUrl.trimEnd('/')
+            when {
+                normalized.endsWith("/chat/completions", ignoreCase = true) ->
+                    normalized.dropLast("/chat/completions".length) + "/models"
+                normalized.endsWith("/completions", ignoreCase = true) ->
+                    normalized.dropLast("/completions".length).substringBeforeLast('/') + "/models"
+                else ->
+                    normalized.substringBeforeLast('/') + "/models"
+            }
+        } catch (e: Exception) {
+            chatUrl.substringBeforeLast("/chat") + "/models"
+        }
+    }
 }
 
 data class ChatMessage(
     val role: String,
     val content: String = "",
     val toolCallId: String? = null,
-    val toolCalls: List<ToolCall>? = null
+    val toolCalls: List<ToolCall>? = null,
+    val reasoningContent: String? = null
 )
 
 data class ToolCall(

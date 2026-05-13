@@ -23,15 +23,78 @@
             android:src="@drawable/ic_chat_ai"
             app:tint="?attr/colorPrimary" />
 
-        <TextView
-            android:id="@+id/tv_ai_content"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:background="@drawable/bg_msg"
-            android:padding="12dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textIsSelectable="true" />
+            android:orientation="vertical">
+
+            <!-- 思维链折叠区域 -->
+            <LinearLayout
+                android:id="@+id/ll_reasoning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- 折叠/展开 头部 -->
+                <LinearLayout
+                    android:id="@+id/ll_reasoning_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:id="@+id/iv_reasoning_arrow"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:rotation="90"
+                        app:tint="?android:attr/textColorSecondary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="已深度思考"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <!-- 思维链内容（默认折叠） -->
+                <TextView
+                    android:id="@+id/tv_reasoning_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textSize="13sp"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textIsSelectable="true"
+                    android:background="@drawable/bg_msg"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_ai_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_msg"
+                android:padding="12dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textIsSelectable="true" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- User Message (Right) -->

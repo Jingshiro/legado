@@ -76,6 +76,28 @@
                     android:lines="1" />
             </io.legado.app.ui.widget.text.TextInputLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_fetch_models"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="拉取模型列表" />
+
+                <Button
+                    android:id="@+id/btn_test_model"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="测试模型可用性" />
+            </LinearLayout>
             <io.legado.app.ui.widget.text.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
