@@ -20,9 +20,14 @@ import io.legado.app.utils.visible
 import io.noties.markwon.Markwon
 import java.net.URI
 
-class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CALLBACK) {
+class ChatAdapter(
+    private val onDeleteMessage: (position: Int) -> Unit
+) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CALLBACK) {
 
     private var markwon: Markwon? = null
+
+    /** 当前展开删除按钮的 ViewHolder */
+    private var expandedHolder: ChatViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val binding = ItemAiChatBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -37,6 +42,10 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
             markwon = Markwon.create(context)
         }
 
+        // 每次绑定时隐藏删除按钮（防止复用残留）
+        holder.binding.ivDeleteAi.gone()
+        holder.binding.ivDeleteUser.gone()
+
         if (msg.role == "user") {
             holder.binding.llUserMsg.visible()
             holder.binding.llAiMsg.gone()
@@ -50,6 +59,21 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
                     ColorStateList.valueOf(ThemeStore.primaryColor(context))
                 )
                 holder.binding.ivUserAvatar.setImageResource(R.drawable.ic_person)
+            }
+
+            // 长按用户气泡显示删除按钮
+            holder.binding.tvUserContent.setOnLongClickListener {
+                toggleDeleteButton(holder, isUser = true)
+                true
+            }
+
+            // 点击删除按钮
+            holder.binding.ivDeleteUser.setOnClickListener {
+                val pos = holder.bindingAdapterPosition
+                if (pos != RecyclerView.NO_ID.toInt()) {
+                    collapseDeleteButton(holder)
+                    onDeleteMessage(pos)
+                }
             }
         } else {
             holder.binding.llAiMsg.visible()
@@ -86,7 +110,50 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(DIFF_CA
             } else {
                 holder.binding.llReasoning.gone()
             }
+
+            // 长按 AI 气泡显示删除按钮
+            holder.binding.tvAiContent.setOnLongClickListener {
+                toggleDeleteButton(holder, isUser = false)
+                true
+            }
+
+            // 点击删除按钮
+            holder.binding.ivDeleteAi.setOnClickListener {
+                val pos = holder.bindingAdapterPosition
+                if (pos != RecyclerView.NO_ID.toInt()) {
+                    collapseDeleteButton(holder)
+                    onDeleteMessage(pos)
+                }
+            }
         }
+    }
+
+    /**
+     * 切换删除按钮的显示状态；如果当前有其他展开的 holder，先折叠它
+     */
+    private fun toggleDeleteButton(holder: ChatViewHolder, isUser: Boolean) {
+        val deleteView = if (isUser) holder.binding.ivDeleteUser else holder.binding.ivDeleteAi
+        val alreadyExpanded = deleteView.visibility == View.VISIBLE
+
+        // 折叠之前展开的（如果不是同一个）
+        if (expandedHolder != null && expandedHolder != holder) {
+            collapseDeleteButton(expandedHolder!!)
+        }
+
+        if (alreadyExpanded) {
+            collapseDeleteButton(holder)
+        } else {
+            deleteView.alpha = 0f
+            deleteView.visible()
+            deleteView.animate().alpha(1f).setDuration(150).start()
+            expandedHolder = holder
+        }
+    }
+
+    private fun collapseDeleteButton(holder: ChatViewHolder) {
+        holder.binding.ivDeleteAi.gone()
+        holder.binding.ivDeleteUser.gone()
+        if (expandedHolder == holder) expandedHolder = null
     }
 
     private fun expandReasoning(holder: ChatViewHolder) {

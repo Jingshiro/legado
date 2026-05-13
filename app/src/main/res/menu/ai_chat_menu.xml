@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_ai_clear"
+        android:icon="@drawable/ic_clear_all"
+        android:title="清空对话"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_ai_summarize"
         android:icon="@drawable/ic_save"
         android:title="归纳记忆"

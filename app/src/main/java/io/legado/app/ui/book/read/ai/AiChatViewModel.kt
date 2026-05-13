@@ -263,6 +263,38 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
     }
 
     /**
+     * 清空当前聊天页面的全部对话（保留 system 消息）
+     */
+    fun clearMessages() {
+        synchronized(_messages) {
+            val systemMsg = _messages.firstOrNull { it.role == "system" }
+            _messages.clear()
+            if (systemMsg != null) {
+                _messages.add(systemMsg)
+            }
+        }
+        syncCache()
+        messagesLiveData.postValue(_messages.toList())
+    }
+
+    /**
+     * 删除指定显示位置的消息（position 是过滤掉 system/tool 后的可见列表下标）
+     * 如果被删除的是 AI 消息且其前一条是对应的 user 消息，不联动删除（单独删除）
+     */
+    fun deleteMessageAt(displayPosition: Int) {
+        synchronized(_messages) {
+            // 构建可见消息与原始下标的映射
+            val visibleIndices = _messages.indices
+                .filter { _messages[it].role != "system" && _messages[it].role != "tool" }
+            if (displayPosition < 0 || displayPosition >= visibleIndices.size) return
+            val realIndex = visibleIndices[displayPosition]
+            _messages.removeAt(realIndex)
+        }
+        syncCache()
+        messagesLiveData.postValue(_messages.toList())
+    }
+
+    /**
      * 带工具调用的请求循环：AI 返回 tool_call 时执行工具并再次请求，直到返回普通文本
      *
      * 处理策略：

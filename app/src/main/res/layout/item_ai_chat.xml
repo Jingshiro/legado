@@ -85,15 +85,35 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_ai_content"
+            <!-- AI消息气泡 + 删除按钮行 -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_msg"
-                android:padding="12dp"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textIsSelectable="true" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tv_ai_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_msg"
+                    android:padding="12dp"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textIsSelectable="true" />
+
+                <ImageView
+                    android:id="@+id/iv_delete_ai"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="4dp"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_outline_delete"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="删除消息"
+                    android:visibility="gone"
+                    app:tint="?android:attr/textColorSecondary" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
@@ -106,6 +126,20 @@
         android:orientation="horizontal"
         android:paddingStart="48dp"
         android:visibility="gone">
+
+        <!-- 删除按钮（放在气泡左侧） -->
+        <ImageView
+            android:id="@+id/iv_delete_user"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:layout_gravity="center_vertical"
+            android:padding="6dp"
+            android:src="@drawable/ic_outline_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="删除消息"
+            android:visibility="gone"
+            app:tint="?android:attr/textColorSecondary" />
 
         <TextView
             android:id="@+id/tv_user_content"

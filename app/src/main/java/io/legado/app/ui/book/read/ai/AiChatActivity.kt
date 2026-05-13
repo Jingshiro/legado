@@ -28,7 +28,11 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
     override val binding by viewBinding(ActivityAiChatBinding::inflate)
     private val viewModel by viewModels<AiChatViewModel>()
-    private val adapter by lazy { ChatAdapter() }
+    private val adapter by lazy {
+        ChatAdapter { displayPosition ->
+            viewModel.deleteMessageAt(displayPosition)
+        }
+    }
 
     /** 是否为独立模式（从"我的"页面进入，无书籍上下文） */
     private val isStandalone: Boolean get() = ReadBook.book == null
@@ -266,6 +270,20 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
     override fun onCompatOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.menu_ai_clear -> {
+                if (viewModel.isGeneratingLiveData.value == true) {
+                    toastOnUi("正在生成中，请稍候...")
+                    return true
+                }
+                alert("清空对话") {
+                    setMessage("确定要清空当前全部对话记录吗？")
+                    yesButton {
+                        viewModel.clearMessages()
+                    }
+                    noButton { }
+                }
+                return true
+            }
             R.id.menu_ai_settings -> {
                 showDialogFragment(AiConfigDialog())
                 return true
