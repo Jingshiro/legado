@@ -389,33 +389,47 @@ Book.readIteration: Int
 
 ### 工具 6：`set_book_note`
 
-**用途**：为书籍写阅读笔记——阅读前的期待/计划，或读完后的感想。
+**用途**：让 AI 针对书籍的指定章节写阅读感想，以 `BookThought`（想法）形式写入——等同于用户长按原文片段后写想法。支持同时为多个章节写感想。所有由 AI 写入的感想末尾强制追加标注 `——由AI助手生成`。
+
+> ⚠️ **注意**：此工具已调整功能定位。原"阅读前/完读感想（preReadNote/postReadNote）"功能因对应 UI 已下线，改由此工具以 BookThought 形式记录感想。
 
 #### 参数定义（JSON Schema）
 
 ```json
 {
   "name": "set_book_note",
-  "description": "为书籍写阅读笔记。noteType='pre' 写阅读前记录，noteType='post' 写完读感想，noteType='auto' 根据阅读状态自动选择。",
+  "description": "为书籍指定章节写阅读感想，以 BookThought（想法）形式写入。支持同时为多个章节写感想。AI 写入的所有内容末尾会自动追加「——由AI助手生成」标注。调用前请先用 get_book_content 获取章节内容，再针对内容写感想。",
   "parameters": {
     "type": "object",
     "properties": {
       "bookUrl": {
         "type": "string",
-        "description": "书籍唯一标识 URL"
+        "description": "书籍唯一标识 URL（从 get_bookshelf 获取）"
       },
-      "note": {
-        "type": "string",
-        "description": "笔记内容，支持 Markdown"
-      },
-      "noteType": {
-        "type": "string",
-        "description": "笔记类型：pre=阅读前, post=完读后, auto=自动判断（默认）",
-        "enum": ["pre", "post", "auto"],
-        "default": "auto"
+      "notes": {
+        "type": "array",
+        "description": "感想列表，每条对应一个章节。支持一次写多个章节。",
+        "items": {
+          "type": "object",
+          "properties": {
+            "chapterIndex": {
+              "type": "integer",
+              "description": "章节索引，从 0 开始（与 get_book_content 的 chapterIndex 一致）"
+            },
+            "selectedText": {
+              "type": "string",
+              "description": "本条感想关联的原文片段（建议取章节内的关键段落，最长 500 字），留空则使用章节标题作为关联文本"
+            },
+            "thought": {
+              "type": "string",
+              "description": "AI 的阅读感想内容（不需要手动追加标注，系统会自动加）"
+            }
+          },
+          "required": ["chapterIndex", "thought"]
+        }
       }
     },
-    "required": ["bookUrl", "note"]
+    "required": ["bookUrl", "notes"]
   }
 }
 ```
@@ -427,31 +441,53 @@ Book.readIteration: Int
   "success": true,
   "data": {
     "bookName": "斗破苍穹",
-    "bookUrl": "https://...",
-    "noteType": "post",
-    "noteField": "postReadNote",
-    "noteLength": 256
+    "total": 2,
+    "written": 2,
+    "failed": 0,
+    "thoughts": [
+      {
+        "chapterIndex": 5,
+        "chapterName": "第5章 萧炎的觉醒",
+        "thoughtId": 1747395012345,
+        "selectedText": "萧炎猛然起身……",
+        "thought": "这一章节是萧炎性格转变的关键……——由AI助手生成"
+      }
+    ]
   }
 }
 ```
 
 #### 对应数据实体
 
-```
-Book.preReadNote: String?   // 阅读前记录
-Book.postReadNote: String?  // 完读感想
+```kotlin
+// BookThought 完整字段
+data class BookThought(
+    val id: Long = 0,            // 自增主键
+    val bookName: String,        // 书名
+    val bookAuthor: String,      // 作者
+    val chapterIndex: Int,       // 章节索引（0-based）
+    val chapterPos: Int = 0,     // 章节内字符位置（AI 写入时填 0）
+    val chapterName: String,     // 章节标题
+    val selectedText: String,    // 关联的原文片段
+    val textHash: String,        // selectedText.hashCode().toString()
+    val thought: String,         // 感想内容
+    val createTime: Long,        // 创建时间戳
+    val updateTime: Long         // 更新时间戳
+)
 ```
 
 #### 实现要点
 
-1. `noteType='auto'` 的判断逻辑：
-   - 先读取 `Book.readIteration`：若为奇数（≥1）或偶数（≥2），说明已读完/正在重刷 → 写 `postReadNote`
-   - 若 `readIteration == 0`（未读完） → 写 `preReadNote`
-2. 写操作分类：**静默写入**（笔记操作是用户主动行为）
-3. 不覆盖已有笔记：若目标字段已有内容，**追加**而非替换（在原有内容末尾加 `\n\n---\n\n` 分隔后追加），除非用户明确要求覆盖
-4. 可加可选参数 `overwrite: boolean` 控制是否覆盖，默认 false
-5. 返回 `noteField` 说明实际写入了哪个字段，方便调试
-
+1. 写操作分类：**静默写入**（感想由 AI 主动生成，视为自动化操作）
+2. 调用前置条件：应先通过 `get_book_content` 获取目标章节内容，基于实际内容撰写感想
+3. `selectedText` 填写规则：
+   - 若用户指定了具体片段，使用用户指定片段（限 500 字）
+   - 若未指定，从章节缓存内容取前 200 字；若章节未缓存，使用章节标题
+4. `thought` 强制后缀：写入前在内容末尾追加 `\n——由AI助手生成`，不允许 AI 省略此标注
+5. `textHash` = `selectedText.hashCode().toString()`（与 legado 原生逻辑保持一致）
+6. `chapterPos` 设为 0（AI 无法感知精确字符位置）
+7. 若同一章节的同一 `selectedText` 已存在想法，则追加新想法（insert 新记录），不覆盖
+8. 返回每条写入结果，包含 `thoughtId`（数据库自增 id）供后续查询
 ---
 
 ## 第二批：管理闭环（优先级 P1）

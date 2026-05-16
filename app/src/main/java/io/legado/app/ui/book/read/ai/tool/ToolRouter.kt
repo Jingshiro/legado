@@ -1,4 +1,4 @@
-﻿package io.legado.app.ui.book.read.ai.tool
+package io.legado.app.ui.book.read.ai.tool
 
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
@@ -168,7 +168,8 @@ object ToolRouter {
         if (bookName.isNullOrBlank()) return """{"error":"book_name 参数不能为空"}"""
         val book = appDb.bookDao.all.find { it.name == bookName } ?: return """{"error":"未找到书籍: $bookName"}"""
         val chapters = appDb.bookChapterDao.getChapterList(book.bookUrl)
-        return GSON.toJson(chapters.take(MAX_CHAPTERS).map { ch -> mapOf("index" to (ch.index + 1), "title" to ch.title) })
+        // index 使用 0-based（与 get_book_content 的 chapterIndex 参数一致）
+        return GSON.toJson(chapters.take(MAX_CHAPTERS).map { ch -> mapOf("index" to ch.index, "title" to ch.title) })
     }
 
     private fun getBookGroups(): String {
@@ -326,26 +327,57 @@ object ToolRouter {
 
     private fun setBookNote(args: Map<*, *>): String {
         val bookUrl = args["bookUrl"] as? String ?: return """{"error":"bookUrl 参数不能为空"}"""
-        val note = args["note"] as? String ?: return """{"error":"note 参数不能为空"}"""
-        val noteType = args["noteType"] as? String ?: "auto"
-        val overwrite = args["overwrite"] as? Boolean ?: false
+        @Suppress("UNCHECKED_CAST")
+        val notesRaw = args["notes"] as? List<*> ?: return """{"error":"notes 参数不能为空且必须是数组"}"""
+        if (notesRaw.isEmpty()) return """{"error":"notes 数组不能为空"}"""
         val book = appDb.bookDao.getBook(bookUrl) ?: return """{"error":"书架中未找到该书籍"}"""
-        val actualField = when (noteType) {
-            "pre" -> "preReadNote"
-            "post" -> "postReadNote"
-            else -> if (book.readIteration == 0) "preReadNote" else "postReadNote"
+        val AI_TAG = "\n——由AI助手生成"
+        var written = 0; var failed = 0
+        val resultItems = mutableListOf<Map<String, Any?>>()
+        notesRaw.forEach { item ->
+            val m = item as? Map<*, *> ?: run { failed++; return@forEach }
+            val chapterIndex = (m["chapterIndex"] as? Double)?.toInt() ?: run { failed++; return@forEach }
+            val thoughtText = (m["thought"] as? String)?.takeIf { it.isNotBlank() } ?: run { failed++; return@forEach }
+            val chapter = appDb.bookChapterDao.getChapter(bookUrl, chapterIndex)
+            val chapterName = chapter?.title ?: "第${chapterIndex + 1}章"
+            // 确定 selectedText：优先用参数传入，其次取章节缓存前200字，最后用章节标题
+            val providedText = (m["selectedText"] as? String)?.takeIf { it.isNotBlank() }
+            val selectedText = when {
+                providedText != null -> providedText.take(500)
+                chapter != null -> {
+                    val cached = BookHelp.getContent(book, chapter)
+                    if (!cached.isNullOrBlank()) cached.take(200) else chapterName
+                }
+                else -> chapterName
+            }
+            val finalThought = thoughtText.trimEnd() + AI_TAG
+            try {
+                val thought = io.legado.app.data.entities.BookThought(
+                    bookName = book.name,
+                    bookAuthor = book.author,
+                    chapterIndex = chapterIndex,
+                    chapterPos = 0,
+                    chapterName = chapterName,
+                    selectedText = selectedText,
+                    textHash = selectedText.hashCode().toString(),
+                    thought = finalThought
+                )
+                val ids = appDb.bookThoughtDao.insert(thought)
+                val thoughtId = ids.firstOrNull() ?: 0L
+                written++
+                resultItems.add(mapOf("chapterIndex" to chapterIndex, "chapterName" to chapterName,
+                    "thoughtId" to thoughtId, "selectedText" to selectedText.take(50),
+                    "thought" to finalThought.take(100)))
+            } catch (e: Exception) {
+                failed++
+                resultItems.add(mapOf("chapterIndex" to chapterIndex, "error" to e.message))
+            }
         }
-        val separator = "\n\n---\n\n"
-        if (actualField == "preReadNote") {
-            book.preReadNote = if (overwrite || book.preReadNote.isNullOrBlank()) note else book.preReadNote + separator + note
-        } else {
-            book.postReadNote = if (overwrite || book.postReadNote.isNullOrBlank()) note else book.postReadNote + separator + note
-        }
-        appDb.bookDao.update(book)
         return GSON.toJson(mapOf("success" to true, "data" to mapOf(
-            "bookName" to book.name, "noteField" to actualField,
-            "noteLength" to note.length, "overwrite" to overwrite)))
+            "bookName" to book.name, "total" to notesRaw.size,
+            "written" to written, "failed" to failed, "thoughts" to resultItems)))
     }
+
 
     // ========== 批量确认写操作（已有） ==========
 
@@ -421,11 +453,12 @@ object ToolRouter {
         if (status < 0 || status > 10) return ToolExecuteResult.Data("""{"error":"status 必须在 0 到 10 之间"}""")
         val book = appDb.bookDao.getBook(bookUrl) ?: return ToolExecuteResult.Data("""{"error":"书架中未找到该书籍"}""")
         val statusLabel = readIterationLabel(status)
-        val prevLabel = readIterationLabel(book.readIteration)
+        val prevStatus = book.readIteration  // 在 action 执行前保存旧值
+        val prevLabel = readIterationLabel(prevStatus)
         return ToolExecuteResult.BatchConfirmation(description = "将《${book.name}》阅读状态从「$prevLabel」标记为「$statusLabel」") {
             withContext(Dispatchers.IO) { book.readIteration = status; appDb.bookDao.update(book) }
             GSON.toJson(mapOf("success" to true, "data" to mapOf("bookName" to book.name,
-                "previousStatus" to book.readIteration, "newStatus" to status, "statusLabel" to statusLabel)))
+                "previousStatus" to prevStatus, "newStatus" to status, "statusLabel" to statusLabel)))
         }
     }
 
@@ -528,7 +561,7 @@ object ToolRouter {
         val filename = args["filename"] as? String
         return when (action) {
             "list" -> {
-                val files = try { AppWebDav.getBackupFileList() } catch (e: Exception) { return ToolExecuteResult.Data("""{"error":"获取备份列表失败: ${e.message}}""") }
+                val files = try { AppWebDav.getBackupFileList() } catch (e: Exception) { return ToolExecuteResult.Data("""{"error":"获取备份列表失败: ${e.message}"}""") }
                 val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                 ToolExecuteResult.Data(GSON.toJson(mapOf("success" to true, "data" to mapOf("action" to "list", "total" to files.size,
                     "backups" to files.map { f -> mapOf("filename" to f.displayName, "lastModified" to sdf.format(Date(f.lastModify))) }))))

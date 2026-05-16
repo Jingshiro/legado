@@ -189,15 +189,22 @@ object AiToolDef {
             ),
             tool(
                 "set_book_note",
-                "为书籍写阅读笔记。noteType='pre' 写阅读前记录，noteType='post' 写完读感想，noteType='auto' 根据阅读状态自动选择（默认）。直接执行，无需确认。",
-                required = listOf("bookUrl", "note"),
+                "为书籍指定章节写阅读感想，以 BookThought（想法）形式写入。支持一次为多个章节写感想。所有 AI 写入的感想末尾会自动追加「——由AI助手生成」标注。调用前建议先用 get_book_content 获取章节内容，再针对内容撰写感想。",
+                required = listOf("bookUrl", "notes"),
                 properties = mapOf(
-                    "bookUrl" to prop("string", "书籍唯一标识 URL"),
-                    "note" to prop("string", "笔记内容，支持 Markdown"),
-                    "noteType" to prop("string", "笔记类型：pre=阅读前, post=完读后, auto=自动判断（默认）"),
-                    "overwrite" to prop("boolean", "是否覆盖已有笔记，默认 false（追加模式）")
+                    "bookUrl" to prop("string", "书籍唯一标识 URL（从 get_bookshelf 获取）"),
+                    "notes" to propArray(
+                        "感想列表，每条对应一个章节。支持一次写多个章节。",
+                        mapOf(
+                            "chapterIndex" to prop("integer", "章节索引，从 0 开始（与 get_book_content 的 chapterIndex 一致）"),
+                            "selectedText" to prop("string", "关联的原文片段（建议取章节内关键段落，最长 500 字），留空则自动取章节前 200 字或章节标题"),
+                            "thought" to prop("string", "AI 的阅读感想内容（系统会自动在末尾追加标注，无需手动添加）")
+                        ),
+                        listOf("chapterIndex", "thought")
+                    )
                 )
             ),
+
 
             // ===== 新增工具（P1：管理闭环）=====
             tool(
