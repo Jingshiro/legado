@@ -7,6 +7,7 @@ object AiToolDef {
 
     val allTools: List<Map<String, Any>> by lazy {
         listOf(
+            // ===== 已有工具（只读）=====
             tool(
                 "get_bookshelf",
                 "获取用户书架上的书籍列表。返回书名、作者、分组、当前阅读进度等信息。",
@@ -63,7 +64,7 @@ object AiToolDef {
                 "获取书源和订阅源的分组列表。",
                 properties = emptyMap()
             ),
-            // 写操作工具（批量确认，低风险）
+            // 已有写操作工具（批量确认，低风险）
             tool(
                 "update_book_group",
                 "将书架上的书籍移入指定分组。需要提供书名和目标分组名。多个此类操作会合并为一次确认。",
@@ -100,10 +101,10 @@ object AiToolDef {
                     "group_name" to prop("string", "目标分组名（将完全替换原有分组）")
                 )
             ),
-            // 写操作工具（逐个确认，高风险删除操作）
+            // 已有写操作工具（批量确认，高风险删除操作）
             tool(
                 "delete_book_source",
-                "删除指定书源（不可撤销）。此操作风险较高，会单独弹窗逐个确认。",
+                "删除指定书源（不可撤销）。此操作会合并为批量确认弹窗。",
                 required = listOf("source_name"),
                 properties = mapOf(
                     "source_name" to prop("string", "要删除的书源名称")
@@ -111,7 +112,7 @@ object AiToolDef {
             ),
             tool(
                 "delete_rss_source",
-                "删除指定 RSS 订阅源（不可撤销）。此操作风险较高，会单独弹窗逐个确认。",
+                "删除指定 RSS 订阅源（不可撤销）。此操作会合并为批量确认弹窗。",
                 required = listOf("source_name"),
                 properties = mapOf(
                     "source_name" to prop("string", "要删除的订阅源名称")
@@ -126,13 +127,170 @@ object AiToolDef {
                     "group_name" to prop("string", "要创建的分组名称")
                 )
             ),
-            // 书籍移除（逐个确认，不可撤销）
+            // 书籍移除（批量确认，不可撤销）
             tool(
                 "delete_book",
-                "从书架上移除指定书籍（不会删除本地文件，但此操作不可撤销）。此操作风险较高，会单独弹窗逐个确认。",
+                "从书架上移除指定书籍（不会删除本地文件，但此操作不可撤销）。此操作会合并为批量确认弹窗。",
                 required = listOf("book_name"),
                 properties = mapOf(
                     "book_name" to prop("string", "要移除的书名")
+                )
+            ),
+
+            // ===== 新增工具（P0：核心阅读体验）=====
+            tool(
+                "get_book_content",
+                "获取指定书籍某章节的正文内容。内容默认截断为前2000字，可调节（最大8000字）。",
+                required = listOf("bookUrl", "chapterIndex"),
+                properties = mapOf(
+                    "bookUrl" to prop("string", "书籍的唯一标识 URL（从 get_bookshelf 获取 bookUrl 字段，如不存在请用书名从书架查找）"),
+                    "chapterIndex" to prop("integer", "章节索引，从 0 开始"),
+                    "maxChars" to prop("integer", "返回最大字符数，默认 2000，最大 8000")
+                )
+            ),
+            tool(
+                "search_online_book",
+                "使用 legado 书源在线搜索书籍，返回匹配结果列表。搜索过程是流式的，等待 timeout 秒后返回结果。",
+                required = listOf("keyword"),
+                properties = mapOf(
+                    "keyword" to prop("string", "搜索关键词（书名、作者均可）"),
+                    "limit" to prop("integer", "返回结果数量上限，默认 10，最大 30"),
+                    "timeout" to prop("integer", "等待搜索结果的超时秒数，默认 10")
+                )
+            ),
+            tool(
+                "save_book_progress",
+                "保存指定书籍的阅读进度（章节索引和章节内位置）。此操作直接执行，无需确认。",
+                required = listOf("bookUrl", "durChapterIndex"),
+                properties = mapOf(
+                    "bookUrl" to prop("string", "书籍唯一标识 URL"),
+                    "durChapterIndex" to prop("integer", "当前阅读章节索引（0-based）"),
+                    "durChapterPos" to prop("integer", "章节内字符位置，默认 0"),
+                    "durChapterTitle" to prop("string", "章节标题（可选，辅助校验）")
+                )
+            ),
+            tool(
+                "rate_book",
+                "给书架中的书籍打评分，0-5 分（支持 0.5 步进）。直接执行，无需确认。",
+                required = listOf("bookUrl", "rating"),
+                properties = mapOf(
+                    "bookUrl" to prop("string", "书籍唯一标识 URL"),
+                    "rating" to prop("number", "评分，0.0 到 5.0 之间")
+                )
+            ),
+            tool(
+                "mark_book_status",
+                "标记书籍的阅读状态（首次读完、二刷中、二刷完等）。无论单本还是多本，均需批量确认弹窗；多本时合并一次弹窗。",
+                required = listOf("bookUrl", "status"),
+                properties = mapOf(
+                    "bookUrl" to prop("string", "书籍唯一标识 URL"),
+                    "status" to prop("integer", "阅读状态：0=未读完, 1=首次读完, 2=二刷中, 3=二刷完, 4=三刷中, 5=三刷完（以此类推）")
+                )
+            ),
+            tool(
+                "set_book_note",
+                "为书籍写阅读笔记。noteType='pre' 写阅读前记录，noteType='post' 写完读感想，noteType='auto' 根据阅读状态自动选择（默认）。直接执行，无需确认。",
+                required = listOf("bookUrl", "note"),
+                properties = mapOf(
+                    "bookUrl" to prop("string", "书籍唯一标识 URL"),
+                    "note" to prop("string", "笔记内容，支持 Markdown"),
+                    "noteType" to prop("string", "笔记类型：pre=阅读前, post=完读后, auto=自动判断（默认）"),
+                    "overwrite" to prop("boolean", "是否覆盖已有笔记，默认 false（追加模式）")
+                )
+            ),
+
+            // ===== 新增工具（P1：管理闭环）=====
+            tool(
+                "get_replace_rules",
+                "获取 legado 中所有文本替换规则列表，支持分页和按启用状态筛选。",
+                properties = mapOf(
+                    "offset" to prop("integer", "分页偏移量，默认 0"),
+                    "limit" to prop("integer", "每页数量，默认 50，最大 100"),
+                    "enabledOnly" to prop("boolean", "true=只返回已启用的规则，默认 false")
+                )
+            ),
+            tool(
+                "save_replace_rule",
+                "创建或修改文本替换规则，支持批量传入。rules 数组中每条：有 id 则更新，无 id 则新建。多条操作合并为一次批量确认。",
+                required = listOf("rules"),
+                properties = mapOf(
+                    "rules" to propArray(
+                        "规则列表，至少包含一条。单条操作时数组长度为 1。",
+                        mapOf(
+                            "id" to prop("string", "规则 ID（修改时必填，新建时留空）"),
+                            "name" to prop("string", "规则名称"),
+                            "pattern" to prop("string", "匹配模式（普通字符串或正则表达式）"),
+                            "replacement" to prop("string", "替换内容，留空字符串表示删除匹配内容"),
+                            "isRegex" to prop("boolean", "是否使用正则表达式，默认 false"),
+                            "scope" to prop("string", "生效范围：'all' 全部书籍，或填写 bookUrl 仅对该书生效，默认 'all'"),
+                            "isEnabled" to prop("boolean", "是否启用，默认 true"),
+                            "order" to prop("integer", "执行顺序，数字越小越先执行，默认 0")
+                        ),
+                        listOf("name", "pattern", "replacement")
+                    )
+                )
+            ),
+            tool(
+                "delete_replace_rule",
+                "删除指定的文本替换规则（不可撤销）。执行前列出所有待删除规则名称并合并为一次批量确认。",
+                required = listOf("ids"),
+                properties = mapOf(
+                    "ids" to propStringArray("要删除的规则 ID 列表（支持一次传多个）")
+                )
+            ),
+            tool(
+                "save_book_source",
+                "导入新书源到 legado。支持单个或批量导入，来源可以是 JSON 字符串或远程 URL。导入前展示书源名称列表并批量确认。",
+                properties = mapOf(
+                    "sourceJson" to prop("string", "书源 JSON 字符串（单个对象或对象数组）。与 sourceUrl 二选一。"),
+                    "sourceUrl" to prop("string", "书源远程 URL，工具自动拉取后导入。与 sourceJson 二选一。"),
+                    "enableAfterImport" to prop("boolean", "导入后是否自动启用，默认 true")
+                )
+            ),
+            tool(
+                "manage_webdav",
+                "管理 legado WebDAV 备份。支持列出备份文件(list)、恢复备份(restore)、删除备份(delete)。restore/delete 需批量确认。",
+                required = listOf("action"),
+                properties = mapOf(
+                    "action" to prop("string", "操作类型：list=列出备份, restore=恢复, delete=删除"),
+                    "filename" to prop("string", "备份文件名（restore/delete 时必填）")
+                )
+            ),
+
+            // ===== 新增工具（P2：知识闭环）=====
+            tool(
+                "get_thoughts",
+                "获取读书想法（划线+评注）列表，支持按书名筛选和分页。",
+                properties = mapOf(
+                    "bookName" to prop("string", "按书名筛选（精确匹配）。不填则返回所有书的想法。"),
+                    "offset" to prop("integer", "分页偏移量，默认 0"),
+                    "limit" to prop("integer", "每页数量，默认 20，最大 100"),
+                    "orderBy" to prop("string", "排序：createTime=按创建时间（默认）, chapterIndex=按章节顺序"),
+                    "order" to prop("string", "排序方向：desc=降序（默认）, asc=升序")
+                )
+            ),
+            tool(
+                "export_to_obsidian",
+                "将书籍的读书想法、笔记、评分等导出到 Obsidian vault，生成 Markdown 笔记文件。若文件已存在则询问是否覆盖（批量确认）。",
+                required = listOf("bookName"),
+                properties = mapOf(
+                    "bookName" to prop("string", "要导出的书名"),
+                    "exportPath" to prop("string", "Obsidian vault 内的目标路径（如 Reading/斗破苍穹.md）。不填则自动生成。"),
+                    "template" to prop("string", "导出模板：default=默认模板, minimal=仅划线和想法, full=全部信息"),
+                    "obsidianUrl" to prop("string", "Obsidian Local REST API 地址，如 http://localhost:27123"),
+                    "obsidianApiKey" to prop("string", "Obsidian Local REST API Key")
+                )
+            ),
+            tool(
+                "get_detailed_reading_record",
+                "获取详细阅读记录（时长、进度、日期等），支持按天/按书/时间段明细查询。",
+                properties = mapOf(
+                    "queryType" to prop("string", "查询类型：by_day=按天汇总（默认）, by_book=按书汇总, by_range=时间段明细"),
+                    "bookName" to prop("string", "按书名筛选（精确匹配，不填=全部书）"),
+                    "startDate" to prop("string", "开始日期，格式 YYYY-MM-DD，默认 7 天前"),
+                    "endDate" to prop("string", "结束日期，格式 YYYY-MM-DD，默认今天"),
+                    "offset" to prop("integer", "分页偏移量，默认 0"),
+                    "limit" to prop("integer", "每页数量，默认 20，最大 100")
                 )
             )
         )
@@ -141,7 +299,7 @@ object AiToolDef {
     private fun tool(
         name: String,
         description: String,
-        properties: Map<String, Map<String, String>>,
+        properties: Map<String, Map<String, Any>>,
         required: List<String> = emptyList()
     ): Map<String, Any> {
         val params = mutableMapOf<String, Any>(
@@ -161,7 +319,40 @@ object AiToolDef {
         )
     }
 
-    private fun prop(type: String, description: String): Map<String, String> {
+    private fun prop(type: String, description: String): Map<String, Any> {
         return mapOf("type" to type, "description" to description)
+    }
+
+    /**
+     * 生成数组类型的属性定义（用于 items 包含对象的数组参数）
+     */
+    private fun propArray(
+        description: String,
+        itemProperties: Map<String, Map<String, Any>>,
+        itemRequired: List<String> = emptyList()
+    ): Map<String, Any> {
+        val itemSchema = mutableMapOf<String, Any>(
+            "type" to "object",
+            "properties" to itemProperties
+        )
+        if (itemRequired.isNotEmpty()) {
+            itemSchema["required"] = itemRequired
+        }
+        return mapOf(
+            "type" to "array",
+            "description" to description,
+            "items" to itemSchema
+        )
+    }
+
+    /**
+     * 生成字符串数组类型的属性定义
+     */
+    private fun propStringArray(description: String): Map<String, Any> {
+        return mapOf(
+            "type" to "array",
+            "description" to description,
+            "items" to mapOf("type" to "string")
+        )
     }
 }

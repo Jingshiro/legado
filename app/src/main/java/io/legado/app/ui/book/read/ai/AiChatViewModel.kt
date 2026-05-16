@@ -1,4 +1,4 @@
-package io.legado.app.ui.book.read.ai
+﻿package io.legado.app.ui.book.read.ai
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
@@ -131,16 +131,17 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
         return withContext(Dispatchers.IO) {
             buildString {
                 append("【人设与要求】\n")
-                append(AiConfig.persona)
                 if (AiConfig.toolEnabled) {
                     append("\n\n【工具使用指南】\n")
-                    append("你可以调用工具来查询和管理用户的书架、书源、订阅等数据。\n")
-                    append("【确认机制】:\n")
-                    append("- 整理类操作（移动分组、启用/禁用）：同一轮的多个操作会合并为一次确认，用户统一许可或拒绝。请一次性调用所有需要的工具，不要一个一个来。\n")
-                    append("- 删除操作：风险较高，每个操作单独弹窗确认。\n")
-                    append("- 如果用户拒绝了操作，请根据系统注入的提示消息来调整方案。\n")
+                    append("你可以调用工具来查询和管理用户的书架、书源、阅读记录等数据。\n")
+                    append("【确认机制】：所有写操作（含删除）均采用批量确认——同一轮AI调用的多个写操作合并为一次弹窗，用户统一确认或拒绝。请一次性调用所有需要的工具，不要一个一个来。\n")
+                    append("【静默写操作（无需确认）】：save_book_progress、rate_book、set_book_note 直接执行。\n")
+                    append("【bookUrl说明】：get_book_content、rate_book、save_book_progress、mark_book_status、set_book_note 的 bookUrl 参数需从 get_bookshelf 返回结果的 bookUrl 字段获取，请先查询书架再操作。\n")
                     append("【书源数量限制】：get_book_sources 每次最多返回100条，用户书源可能超过500个。")
                     append("操作书源前请先用 get_source_groups 了解分组结构，再按分组分批查询。")
+                    append("如果要处理所有书源，请分批操作，并主动告知用户。")
+                }
+                if (AiConfig.memory.isNotBlank()) {
                     append("如果要处理所有书源，请分批操作，并主动告知用户'本次处理了第X-Y个，还有Z个待处理'。")
                 }
                 if (AiConfig.memory.isNotBlank()) {
@@ -358,14 +359,6 @@ class AiChatViewModel(application: Application) : BaseViewModel(application) {
                             toolResult.action()
                         } else {
                             """{"cancelled":true,"message":"用户取消了批量操作"}"""
-                        }
-                    }
-                    is ToolExecuteResult.NeedConfirmation -> {
-                        val confirmed = requestConfirmation(toolResult.description)
-                        if (confirmed) {
-                            toolResult.action()
-                        } else {
-                            """{"cancelled":true,"message":"用户取消了操作"}"""
                         }
                     }
                 }
