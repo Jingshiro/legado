@@ -152,9 +152,9 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
         viewModel.isGeneratingLiveData.observe(this) { isGenerating ->
             if (isGenerating) {
-                binding.btnSend.setImageResource(R.drawable.ic_stop_black_24dp)
+                binding.btnSend.setIconResource(R.drawable.ic_stop_black_24dp)
             } else {
-                binding.btnSend.setImageResource(R.drawable.ic_send)
+                binding.btnSend.setIconResource(R.drawable.ic_send)
             }
         }
 

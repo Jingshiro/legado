@@ -38,51 +38,61 @@
                 android:visibility="gone">
 
                 <!-- 折叠/展开 头部 -->
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/ll_reasoning_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingTop="4dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="4dp"
-                    android:background="?attr/selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/iv_reasoning_arrow"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_arrow_right"
-                        android:rotation="90"
-                        app:tint="?android:attr/textColorSecondary" />
-
-                    <TextView
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="已深度思考"
-                        android:textSize="12sp"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:fontFamily="sans-serif-medium" />
-                </LinearLayout>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="4dp">
+
+                        <ImageView
+                            android:id="@+id/iv_reasoning_arrow"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_arrow_right"
+                            android:rotation="90"
+                            app:tint="?android:attr/textColorSecondary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="已深度思考"
+                            android:textSize="12sp"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- 思维链内容（默认折叠） -->
-                <TextView
-                    android:id="@+id/tv_reasoning_content"
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:textSize="13sp"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textIsSelectable="true"
-                    android:background="@drawable/bg_msg"
-                    android:visibility="gone" />
+                    android:layout_marginTop="4dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="?attr/dividerHorizontal">
+                    <TextView
+                        android:id="@+id/tv_reasoning_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:textSize="13sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textIsSelectable="true"
+                        android:visibility="gone" />
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
             <!-- AI消息气泡 + 删除按钮行 -->
@@ -93,26 +103,37 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="4dp">
 
-                <TextView
-                    android:id="@+id/tv_ai_content"
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_msg"
-                    android:padding="12dp"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textIsSelectable="true" />
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="?attr/dividerHorizontal">
+                    <TextView
+                        android:id="@+id/tv_ai_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textIsSelectable="true" />
+                </com.google.android.material.card.MaterialCardView>
 
-                <ImageView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/iv_delete_ai"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_marginStart="4dp"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_outline_delete"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    app:icon="@drawable/ic_outline_delete"
+                    app:iconTint="?android:attr/textColorSecondary"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
                     android:contentDescription="删除消息"
-                    android:visibility="gone"
-                    app:tint="?android:attr/textColorSecondary" />
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -128,28 +149,39 @@
         android:visibility="gone">
 
         <!-- 删除按钮（放在气泡左侧） -->
-        <ImageView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/iv_delete_user"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="4dp"
             android:layout_gravity="center_vertical"
-            android:padding="6dp"
-            android:src="@drawable/ic_outline_delete"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            app:icon="@drawable/ic_outline_delete"
+            app:iconTint="?android:attr/textColorSecondary"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
             android:contentDescription="删除消息"
-            android:visibility="gone"
-            app:tint="?android:attr/textColorSecondary" />
+            android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tv_user_content"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_msg"
-            android:padding="12dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textIsSelectable="true" />
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorPrimary">
+            <TextView
+                android:id="@+id/tv_user_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textIsSelectable="true" />
+        </com.google.android.material.card.MaterialCardView>
 
         <ImageView
             android:id="@+id/iv_user_avatar"

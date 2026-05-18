@@ -20,6 +20,10 @@
 
 ## cronet版本: 128.0.6613.40
 
+**2026/05/18**
+
+- 优化AI助手界面UI，全面采用 Material Design 规范，替换为 MaterialCardView 和 MaterialButton
+
 **2026/05/16**
 
 - 新增AI助手可调用工具，具体直接在AI助手中询问AI或查看项目源码notes/legado_new_tools_guide.md
