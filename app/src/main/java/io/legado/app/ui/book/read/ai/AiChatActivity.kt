@@ -23,6 +23,8 @@ import io.legado.app.ui.book.read.config.AiConfigDialog
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
+import io.legado.app.lib.theme.backgroundColor
+import io.legado.app.utils.applyBackgroundTint
 
 class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
@@ -36,6 +38,12 @@ class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
     /** 是否为独立模式（从"我的"页面进入，无书籍上下文） */
     private val isStandalone: Boolean get() = ReadBook.book == null
+
+    override fun initTheme() {
+        // 保持 Material 主题，不允许 BaseActivity 覆盖为 AppCompat 主题
+        setTheme(R.style.AppTheme_Material)
+        window.decorView.applyBackgroundTint(backgroundColor)
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         initView()

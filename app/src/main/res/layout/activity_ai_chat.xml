@@ -54,7 +54,7 @@
                     app:cardCornerRadius="8dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="?attr/dividerHorizontal">
+                    app:strokeColor="@color/divider">
                     <EditText
                         android:id="@+id/et_chapter_start"
                         android:layout_width="48dp"
@@ -81,7 +81,7 @@
                     app:cardCornerRadius="8dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="?attr/dividerHorizontal">
+                    app:strokeColor="@color/divider">
                     <EditText
                         android:id="@+id/et_chapter_end"
                         android:layout_width="48dp"
@@ -118,7 +118,7 @@
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="?attr/dividerHorizontal">
+                    app:strokeColor="@color/divider">
 
                     <EditText
                         android:id="@+id/et_input"
@@ -148,7 +148,7 @@
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
                     app:iconSize="20dp"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MaterialComponents.MaterialCalendar.Day"
+                    app:shapeAppearanceOverlay="@style/AiChatCircleShapeOverlay"
                     app:strokeWidth="0dp"
                     android:contentDescription="@string/ai_send" />
             </LinearLayout>

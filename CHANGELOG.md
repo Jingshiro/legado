@@ -1,3 +1,10 @@
+**2026/05/18**
+
+- 修复AI助手界面改为MD风格后启动崩溃的问题
+- 修复MaterialCardView的strokeColor使用了drawable属性(?attr/dividerHorizontal)而非颜色导致在Android 16上崩溃
+- 修复BaseActivity运行时覆盖Material主题导致MaterialComponents组件样式无法解析
+- 修复引用MaterialComponents内部私有样式ShapeAppearanceOverlay导致的兼容性问题
+
 **2022/10/02**
 
 - 更新cronet: 106.0.5249.79
