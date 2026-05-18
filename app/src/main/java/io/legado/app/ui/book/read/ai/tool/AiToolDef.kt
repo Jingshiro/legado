@@ -199,7 +199,7 @@ object AiToolDef {
                         "感想列表，每条对应一个章节。支持一次写多个章节。",
                         mapOf(
                             "chapterIndex" to prop("integer", "章节索引，从 0 开始。在书籍阅读上下文中可从【参考章节内容】区块中确认对应章节的序号"),
-                            "selectedText" to prop("string", "关联的原文片段（建议取章节内关键段落，最长 500 字）。在书籍阅读上下文中请从【参考章节内容】中摘取，留空则自动取章节前 200 字"),
+                            "selectedText" to prop("string", "关联的原文片段（建议取章节内关键段落）。在书籍阅读上下文中请从【参考章节内容】中摘取，留空则自动取章节完整内容"),
                             "thought" to prop("string", "AI 的阅读感想内容（系统会自动在末尾追加标注，无需手动添加）")
                         ),
                         listOf("chapterIndex", "thought")

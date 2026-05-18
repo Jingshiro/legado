@@ -340,13 +340,13 @@ object ToolRouter {
             val thoughtText = (m["thought"] as? String)?.takeIf { it.isNotBlank() } ?: run { failed++; return@forEach }
             val chapter = appDb.bookChapterDao.getChapter(bookUrl, chapterIndex)
             val chapterName = chapter?.title ?: "第${chapterIndex + 1}章"
-            // 确定 selectedText：优先用参数传入，其次取章节缓存前200字，最后用章节标题
+            // 确定 selectedText：优先用参数传入，其次取章节缓存内容，最后用章节标题
             val providedText = (m["selectedText"] as? String)?.takeIf { it.isNotBlank() }
             val selectedText = when {
-                providedText != null -> providedText.take(500)
+                providedText != null -> providedText
                 chapter != null -> {
                     val cached = BookHelp.getContent(book, chapter)
-                    if (!cached.isNullOrBlank()) cached.take(200) else chapterName
+                    if (!cached.isNullOrBlank()) cached else chapterName
                 }
                 else -> chapterName
             }
@@ -366,8 +366,8 @@ object ToolRouter {
                 val thoughtId = ids.firstOrNull() ?: 0L
                 written++
                 resultItems.add(mapOf("chapterIndex" to chapterIndex, "chapterName" to chapterName,
-                    "thoughtId" to thoughtId, "selectedText" to selectedText.take(50),
-                    "thought" to finalThought.take(100)))
+                    "thoughtId" to thoughtId, "selectedText" to selectedText,
+                    "thought" to finalThought))
             } catch (e: Exception) {
                 failed++
                 resultItems.add(mapOf("chapterIndex" to chapterIndex, "error" to e.message))
