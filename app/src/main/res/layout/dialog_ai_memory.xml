@@ -13,6 +13,7 @@
         app:attachToActivity="false"
         app:fitStatusBar="false"
         app:navigationIcon="@null"
+        app:themeMode="1"
         app:title="AI 对话记忆" />
 
     <androidx.recyclerview.widget.RecyclerView

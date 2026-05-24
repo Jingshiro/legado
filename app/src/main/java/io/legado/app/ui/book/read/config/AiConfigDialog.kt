@@ -1,12 +1,14 @@
 package io.legado.app.ui.book.read.config
 
 import android.os.Bundle
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
+import io.legado.app.constant.Theme
 import io.legado.app.databinding.DialogAiConfigBinding
 import io.legado.app.help.config.AiConfig
 import io.legado.app.ui.book.read.ai.AiChatViewModel
@@ -42,9 +44,10 @@ class AiConfigDialog : BaseDialogFragment(R.layout.dialog_ai_config) {
     }
 
     private fun initToolbar() {
+        binding.titleBar.setTitleTextColor(Color.WHITE)
         binding.titleBar.toolbar.apply {
             inflateMenu(R.menu.ai_config)
-            menu.applyTint(requireContext())
+            menu.applyTint(requireContext(), Theme.Dark)
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.menu_help -> showHelp("aiCompanionHelp")

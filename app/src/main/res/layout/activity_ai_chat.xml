@@ -10,6 +10,7 @@
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:themeMode="1"
         app:title="@string/ai_companion" />
 
     <androidx.recyclerview.widget.RecyclerView

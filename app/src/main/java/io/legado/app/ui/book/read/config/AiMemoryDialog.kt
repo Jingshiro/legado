@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.read.config
 
 import android.os.Bundle
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,6 +52,7 @@ class AiMemoryDialog : BaseDialogFragment(R.layout.dialog_ai_memory) {
     }
 
     private fun initView() {
+        binding.titleBar.setTitleTextColor(Color.WHITE)
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
     }
