@@ -11,6 +11,7 @@ import io.legado.app.ui.book.read.ai.tool.AiToolDef
 import io.legado.app.ui.book.read.ai.tool.ToolExecuteResult
 import io.legado.app.ui.book.read.ai.tool.ToolRouter
 import io.legado.app.utils.GSON
+import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.CompletableDeferred

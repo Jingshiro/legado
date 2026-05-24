@@ -30,7 +30,7 @@ import io.legado.app.utils.applyBackgroundTint
 class AiChatActivity : BaseActivity<ActivityAiChatBinding>(false) {
 
     override val binding by viewBinding(ActivityAiChatBinding::inflate)
-    private val viewModel by viewModels<AiChatViewModel>()
+    internal val viewModel by viewModels<AiChatViewModel>()
     private val adapter by lazy {
         ChatAdapter { displayPosition ->
             viewModel.deleteMessageAt(displayPosition)
