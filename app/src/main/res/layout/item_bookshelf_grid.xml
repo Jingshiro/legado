@@ -1,119 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cv_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_item_bookshelf_grid"
+    android:layout_margin="6dp"
     android:clickable="true"
     android:focusable="true"
-    android:layout_margin="4dp"
-    android:scrollbars="none"
-    tools:ignore="UnusedAttribute">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@android:color/transparent">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <LinearLayout
+        <io.legado.app.ui.widget.image.CoverImageView
+            android:id="@+id/iv_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_cover_default"
+            android:transitionName="img_cover"
+            tools:ignore="UnusedAttribute,ImageContrastCheck" />
+
+        <!-- 未读徽章 -->
+        <io.legado.app.ui.widget.text.BadgeView
+            android:id="@+id/bv_unread"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="6dp"
+            android:includeFontPadding="false"
+            tools:ignore="RtlHardcoded" />
+
+        <!-- 阅读状态标签 -->
+        <TextView
+            android:id="@+id/tv_read_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_read_tag"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="2dp"
+            android:textColor="#FFFFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:ignore="HardcodedText,SmallSp" />
+
+        <!-- 加载动画 -->
+        <io.legado.app.ui.widget.anima.RotateLoading
+            android:id="@+id/rl_loading"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="6dp"
+            android:visibility="invisible"
+            app:loading_width="2dp" />
+
+    </FrameLayout>
+
+    <!-- 书名在封面下方 -->
+    <TextView
+        android:id="@+id/tv_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
-        android:scrollbars="none"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_gravity="bottom"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:lines="2"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="8dp"
+        android:text="@string/book_name"
+        android:textColor="@color/primaryText"
+        android:textSize="12sp"
+        tools:ignore="RtlHardcoded,RtlSymmetry" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none">
-
-            <io.legado.app.ui.widget.image.CoverImageView
-                android:id="@+id/iv_cover"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:scaleType="centerCrop"
-                android:scrollbars="none"
-                android:src="@drawable/image_cover_default"
-                android:transitionName="img_cover"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="UnusedAttribute,ImageContrastCheck"
-                tools:layout_editor_absoluteX="8dp" />
-
-            <io.legado.app.ui.widget.text.BadgeView
-                android:id="@+id/bv_unread"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:includeFontPadding="false"
-                android:scrollbars="none"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="RtlHardcoded" />
-
-            <TextView
-                android:id="@+id/tv_read_tag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:includeFontPadding="false"
-                android:paddingStart="3dp"
-                android:paddingTop="1dp"
-                android:paddingEnd="3dp"
-                android:paddingBottom="1dp"
-                android:textSize="10sp"
-                android:textColor="#FFFFFFFF"
-                android:textStyle="bold"
-                android:visibility="gone"
-                android:maxLines="1"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="RtlHardcoded,HardcodedText,SmallSp" />
-
-            <io.legado.app.ui.widget.anima.RotateLoading
-                android:id="@+id/rl_loading"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_gravity="right"
-                android:scrollbars="none"
-                android:visibility="invisible"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:loading_width="2dp"
-                tools:ignore="RtlHardcoded" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:ellipsize="end"
-            android:gravity="top|center_horizontal"
-            android:includeFontPadding="false"
-            android:lines="2"
-            android:scrollbars="none"
-            android:text="@string/book_name"
-            android:textColor="@color/primaryText"
-            android:textSize="12sp"
-            tools:ignore="RtlHardcoded,RtlSymmetry" />
-
-    </LinearLayout>
-
-    <View
-        android:id="@+id/vw_foreground"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:scrollbars="none"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
+</com.google.android.material.card.MaterialCardView>

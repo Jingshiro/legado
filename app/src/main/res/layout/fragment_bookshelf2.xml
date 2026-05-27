@@ -25,10 +25,11 @@
             android:id="@+id/rv_bookshelf"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="0dp"
-            android:paddingBottom="0dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             tools:listitem="@layout/item_bookshelf_list" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
