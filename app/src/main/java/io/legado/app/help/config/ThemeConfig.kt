@@ -206,6 +206,7 @@ object ThemeConfig {
             config.accentColor.toColorInt()
             config.backgroundColor.toColorInt()
             config.bottomBackground.toColorInt()
+            config.cardBackground?.toColorInt()
             return true
         } catch (_: Exception) {
             return false
@@ -235,7 +236,8 @@ object ThemeConfig {
             val accent = config.accentColor.toColorInt()
             val background = config.backgroundColor.toColorInt()
             val bBackground = config.bottomBackground.toColorInt()
-            val cardBackground = config.cardBackground.toColorInt()
+            val cardBackground = (config.cardBackground
+                ?: if (config.isNightTheme) "#2C2C2C" else "#F3EDF7").toColorInt()
             val isNightTheme = config.isNightTheme
             val transparentNavBar = config.transparentNavBar
             val backgroundPath = config.backgroundImgPath
@@ -274,6 +276,7 @@ object ThemeConfig {
                 }
             }
             val backgroundBlur = config.backgroundImgBlur
+            val cardBgAlpha = config.cardBackgroundAlpha
             if (isNightTheme) {
                 context.putPrefString(PreferKey.dNThemeName, config.themeName)
                 context.putPrefInt(PreferKey.cNPrimary, primary)
@@ -281,6 +284,7 @@ object ThemeConfig {
                 context.putPrefInt(PreferKey.cNBackground, background)
                 context.putPrefInt(PreferKey.cNBBackground, bBackground)
                 context.putPrefInt(PreferKey.cNCardBg, cardBackground)
+                context.putPrefInt(PreferKey.cardBgNAlpha, cardBgAlpha)
                 context.putPrefBoolean(PreferKey.tNavBarN, transparentNavBar)
                 context.putPrefString(PreferKey.bgImageN, backgroundPath)
                 context.putPrefInt(PreferKey.bgImageNBlurring, backgroundBlur)
@@ -291,6 +295,7 @@ object ThemeConfig {
                 context.putPrefInt(PreferKey.cBackground, background)
                 context.putPrefInt(PreferKey.cBBackground, bBackground)
                 context.putPrefInt(PreferKey.cCardBg, cardBackground)
+                context.putPrefInt(PreferKey.cardBgAlpha, cardBgAlpha)
                 context.putPrefBoolean(PreferKey.tNavBar, transparentNavBar)
                 context.putPrefString(PreferKey.bgImage, backgroundPath)
                 context.putPrefInt(PreferKey.bgImageBlurring, backgroundBlur)
@@ -329,6 +334,7 @@ object ThemeConfig {
             context.getPrefBoolean(PreferKey.tNavBar, false)
         val cardBg =
             context.getPrefInt(PreferKey.cCardBg, context.getCompatColor(R.color.md3_surfaceContainer))
+        val cardBgAlpha = context.getPrefInt(PreferKey.cardBgAlpha, 100)
         val bgImgPath =
             context.getPrefString(PreferKey.bgImage)
         val bgImgBlur =
@@ -342,6 +348,7 @@ object ThemeConfig {
             backgroundColor = "#${background.hexString}",
             bottomBackground = "#${bBackground.hexString}",
             cardBackground = "#${cardBg.hexString}",
+            cardBackgroundAlpha = cardBgAlpha,
             transparentNavBar = transparentNavBar,
             backgroundImgPath = bgImgPath,
             backgroundImgBlur = bgImgBlur
@@ -372,6 +379,7 @@ object ThemeConfig {
             context.getPrefBoolean(PreferKey.tNavBarN, false)
         val cardBg =
             context.getPrefInt(PreferKey.cNCardBg, context.getCompatColor(R.color.md3_surfaceContainer))
+        val cardBgAlpha = context.getPrefInt(PreferKey.cardBgNAlpha, 100)
         val bgImgPath =
             context.getPrefString(PreferKey.bgImageN)
         val bgImgBlur =
@@ -384,6 +392,7 @@ object ThemeConfig {
             backgroundColor = "#${background.hexString}",
             bottomBackground = "#${bBackground.hexString}",
             cardBackground = "#${cardBg.hexString}",
+            cardBackgroundAlpha = cardBgAlpha,
             transparentNavBar = transparentNavBar,
             backgroundImgPath = bgImgPath,
             backgroundImgBlur = bgImgBlur
@@ -511,6 +520,7 @@ object ThemeConfig {
         var backgroundColor: String,
         var bottomBackground: String,
         var cardBackground: String = "#F3EDF7",
+        var cardBackgroundAlpha: Int = 100,
         var transparentNavBar: Boolean,
         var backgroundImgPath: String?,
         var backgroundImgBlur: Int

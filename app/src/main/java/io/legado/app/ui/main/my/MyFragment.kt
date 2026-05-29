@@ -37,9 +37,10 @@ import io.legado.app.ui.dict.rule.DictRuleActivity
 import io.legado.app.ui.file.FileManageActivity
 import io.legado.app.ui.main.MainFragmentInterface
 import io.legado.app.ui.replace.ReplaceRuleActivity
+import io.legado.app.lib.theme.accentColor
 import io.legado.app.lib.theme.cardBackground
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.StateListDrawable
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.defaultSharedPreferences
 import io.legado.app.utils.observeEventSticky
@@ -129,49 +130,30 @@ class MyFragment() : BaseFragment(R.layout.fragment_my_config), MainFragmentInte
             updateWebServiceState()
         }
 
-        // 设置快捷按钮底色透明度比用户自定义值高 10
+        // 设置快捷按钮底色透明度比用户自定义值高 10，按下状态用主题强调色
         val buttonViews = listOf(
             binding.btnBackupRestore, binding.btnWebdav,
             binding.btnWebService, binding.btnReadRecord
         )
-        val cardBg = requireContext().cardBackground
+        val ctx = requireContext()
+        val cardBg = ctx.cardBackground
         val alpha = android.graphics.Color.alpha(cardBg)
-        val adjustedAlpha = (alpha + 25).coerceAtMost(255) // +10 in 0-100 scale ≈ +25 in 0-255
-        val newColor = ColorUtils.withAlpha(cardBg, adjustedAlpha / 255f)
+        val adjustedAlpha = (alpha + 25).coerceAtMost(255)
+        val normalColor = ColorUtils.withAlpha(cardBg, adjustedAlpha / 255f)
+        val pressedColor = ctx.accentColor
+        val corner = 12f * ctx.resources.displayMetrics.density
         buttonViews.forEach { view ->
-            val bg = view.background
-            when (bg) {
-                is GradientDrawable -> bg.setColor(newColor)
-                is android.graphics.drawable.StateListDrawable -> {
-                    // Selector：只修改非按下状态的颜色，按下状态保持强调色
-                    for (j in 0 until bg.stateCount) {
-                        val stateDrawable = bg.getStateDrawable(j)
-                        if (stateDrawable is GradientDrawable) {
-                            val stateSet = bg.getStateSet(j)
-                            if (!stateSet.contains(android.R.attr.state_pressed)) {
-                                stateDrawable.setColor(newColor)
-                            }
-                        }
-                    }
-                }
-                is RippleDrawable -> {
-                    for (i in 0 until bg.numberOfLayers) {
-                        val layer = bg.getDrawable(i)
-                        if (layer is GradientDrawable) {
-                            layer.setColor(newColor)
-                        } else if (layer is android.graphics.drawable.StateListDrawable) {
-                            for (j in 0 until layer.stateCount) {
-                                val stateDrawable = layer.getStateDrawable(j)
-                                if (stateDrawable is GradientDrawable) {
-                                    val stateSet = layer.getStateSet(j)
-                                    if (!stateSet.contains(android.R.attr.state_pressed)) {
-                                        stateDrawable.setColor(newColor)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            val pressed = GradientDrawable().apply {
+                setColor(pressedColor)
+                cornerRadius = corner
+            }
+            val normal = GradientDrawable().apply {
+                setColor(normalColor)
+                cornerRadius = corner
+            }
+            view.background = StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_pressed), pressed)
+                addState(intArrayOf(), normal)
             }
         }
     }

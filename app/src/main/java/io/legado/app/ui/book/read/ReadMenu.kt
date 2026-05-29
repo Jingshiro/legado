@@ -50,6 +50,7 @@ import io.legado.app.utils.invisible
 import io.legado.app.utils.loadAnimation
 import io.legado.app.utils.modifyBegin
 import io.legado.app.utils.openUrl
+import io.legado.app.utils.applyRoundedBackground
 import io.legado.app.utils.putPrefBoolean
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.visible
@@ -186,7 +187,7 @@ class ReadMenu @JvmOverloads constructor(
             tvBookName.setTextColor(textColor)
             tvChapterName.setTextColor(lightTextColor)
             tvChapterUrl.setTextColor(lightTextColor)
-        } else if (reset) {
+        } else {
             val bgColor = context.primaryColor
             val textColor = context.primaryTextColor
             titleBar.setCardBackgroundColor(bgColor)
@@ -403,7 +404,13 @@ class ReadMenu @JvmOverloads constructor(
     private fun bindEvent() = binding.run {
         vwMenuBg.setOnClickListener { runMenuOut() }
         ivBack.setOnClickListener {
-            runMenuOut()
+            callBack.onClickBack()
+        }
+        ivRefresh.setOnClickListener {
+            callBack.onClickRefresh()
+        }
+        ivDownload.setOnClickListener {
+            callBack.onClickDownload()
         }
         // 书名点击进入详情页
         tvBookName.setOnClickListener {
@@ -412,6 +419,7 @@ class ReadMenu @JvmOverloads constructor(
         ivMore.setOnClickListener {
             PopupMenu(context, ivMore).apply {
                 inflate(R.menu.book_read)
+                applyRoundedBackground(ivMore)
                 setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.menu_change_source -> {
@@ -733,6 +741,9 @@ class ReadMenu @JvmOverloads constructor(
         fun splitLongChapter(enable: Boolean) {}
         fun clearCache() {}
         fun showLog() {}
+        fun onClickRefresh() {}
+        fun onClickDownload() {}
+        fun onClickBack() {}
         fun showHelp()
         fun showLogin()
         fun payAction()

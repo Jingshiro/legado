@@ -508,3 +508,22 @@ fun Spinner.setSelectionSafely(position: Int) {
     }
 }
 
+/**
+ * 给 PopupMenu 设置圆角背景（通过 ListPopupWindow.setBackgroundDrawable）
+ */
+fun PopupMenu.applyRoundedBackground(anchor: View) {
+    try {
+        val helperField = javaClass.getDeclaredField("mPopup")
+        helperField.isAccessible = true
+        val helper = helperField.get(this)
+        val popupField = helper.javaClass.getDeclaredField("mPopup")
+        popupField.isAccessible = true
+        val listPopupWindow = popupField.get(helper) as? androidx.appcompat.widget.ListPopupWindow
+        val bg = androidx.core.content.ContextCompat.getDrawable(
+            anchor.context, io.legado.app.R.drawable.bg_popup_menu
+        )
+        listPopupWindow?.setBackgroundDrawable(bg)
+    } catch (_: Exception) {
+    }
+}
+

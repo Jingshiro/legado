@@ -1360,6 +1360,26 @@ class ReadBookActivity : BaseReadBookActivity(),
         showDialogFragment<MoreConfigDialog>()
     }
 
+    override fun onClickRefresh() {
+        if (ReadBook.bookSource == null) {
+            upContent()
+        } else {
+            ReadBook.book?.let {
+                ReadBook.curTextChapter = null
+                binding.readView.upContent()
+                viewModel.refreshContentDur(it)
+            }
+        }
+    }
+
+    override fun onClickDownload() {
+        showDownloadDialog()
+    }
+
+    override fun onClickBack() {
+        finish()
+    }
+
     override fun showSearchSetting() {
         showDialogFragment<MoreConfigDialog>()
     }
