@@ -434,7 +434,6 @@ class SimulationPageDelegate(readView: ReadView) : HorizontalPageDelegate(readVi
         canvas.restore()
     }
 
-    //
     private fun drawNextPageAreaAndShadow(
         canvas: Canvas,
         bitmap: Bitmap?
@@ -482,7 +481,6 @@ class SimulationPageDelegate(readView: ReadView) : HorizontalPageDelegate(readVi
         canvas.restore()
     }
 
-    //
     private fun drawCurrentPageArea(
         canvas: Canvas,
         bitmap: Bitmap?

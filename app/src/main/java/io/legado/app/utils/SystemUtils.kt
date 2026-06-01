@@ -1,6 +1,7 @@
 package io.legado.app.utils
 
 import android.annotation.SuppressLint
+import io.legado.app.constant.AppLog
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -26,7 +27,8 @@ object SystemUtils {
                 val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
                 intent.data = Uri.parse("package:" + activity.packageName)
                 activity.startActivity(intent)
-            } catch (ignored: Throwable) {
+            } catch (e: Throwable) {
+                AppLog.put("请求忽略电池优化出错", e)
             }
 
         }

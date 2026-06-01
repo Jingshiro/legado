@@ -61,20 +61,20 @@ import kotlin.math.min
 
 @Suppress("MemberVisibilityCanBePrivate")
 object ReadBook : CoroutineScope by MainScope() {
-    var book: Book? = null
+    @Volatile var book: Book? = null
     var callBack: CallBack? = null
     var inBookshelf = false
-    var chapterSize = 0
-    var simulatedChapterSize = 0
-    var durChapterIndex = 0
-    var durChapterPos = 0
-    var showBookplate = 0 // -1 for start, 1 for end, 0 for none
-    var isLocalBook = true
-    var chapterChanged = false
-    var prevTextChapter: TextChapter? = null
-    var curTextChapter: TextChapter? = null
-    var nextTextChapter: TextChapter? = null
-    var bookSource: BookSource? = null
+    @Volatile var chapterSize = 0
+    @Volatile var simulatedChapterSize = 0
+    @Volatile var durChapterIndex = 0
+    @Volatile var durChapterPos = 0
+    @Volatile var showBookplate = 0 // -1 for start, 1 for end, 0 for none
+    @Volatile var isLocalBook = true
+    @Volatile var chapterChanged = false
+    @Volatile var prevTextChapter: TextChapter? = null
+    @Volatile var curTextChapter: TextChapter? = null
+    @Volatile var nextTextChapter: TextChapter? = null
+    @Volatile var bookSource: BookSource? = null
     var msg: String? = null
     private val loadingChapters = arrayListOf<Int>()
     private val readRecord = ReadRecord()
@@ -82,18 +82,18 @@ object ReadBook : CoroutineScope by MainScope() {
     private val prevChapterLoadingLock = Mutex()
     private val curChapterLoadingLock = Mutex()
     private val nextChapterLoadingLock = Mutex()
-    var readStartTime: Long = System.currentTimeMillis()
+    @Volatile var readStartTime: Long = System.currentTimeMillis()
 
     /* 跳转进度前进度记录 */
-    var lastBookProgress: BookProgress? = null
+    @Volatile var lastBookProgress: BookProgress? = null
 
     /* web端阅读进度记录 */
-    var webBookProgress: BookProgress? = null
+    @Volatile var webBookProgress: BookProgress? = null
 
     var preDownloadTask: Job? = null
     val downloadedChapters = hashSetOf<Int>()
     val downloadFailChapters = hashMapOf<Int, Int>()
-    var contentProcessor: ContentProcessor? = null
+    @Volatile var contentProcessor: ContentProcessor? = null
     val downloadScope = CoroutineScope(SupervisorJob() + IO)
     val preDownloadSemaphore = Semaphore(2)
     val executor = globalExecutor

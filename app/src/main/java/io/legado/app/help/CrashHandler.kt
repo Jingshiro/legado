@@ -151,7 +151,8 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
                 val fileDoc = FileDoc.fromUri(uri, true)
                 fileDoc.createFileIfNotExist(fileName, "crash")
                     .writeText(crashLog)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
             kotlin.runCatching {
                 appCtx.externalCacheDir?.let { rootFile ->

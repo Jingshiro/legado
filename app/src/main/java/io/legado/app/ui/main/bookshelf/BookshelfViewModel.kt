@@ -67,7 +67,8 @@ class BookshelfViewModel(application: Application) : BaseViewModel(application) 
                                 }
                             }
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        AppLog.put("书源匹配出错:$bookUrl", e)
                     }
                 }
                 if (source == null) { //根据域名找书源
@@ -81,7 +82,8 @@ class BookshelfViewModel(application: Application) : BaseViewModel(application) 
                                 source = bs
                                 break
                             }
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            AppLog.put("书源正则匹配出错:${bookSource.bookSourceName}", e)
                         }
                     }
                 }

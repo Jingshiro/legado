@@ -25,21 +25,6 @@ class ExoVideoManager: GSYVideoBaseManager() {
         return ExoPlayerManager()
     }
 
-//    fun prepare(
-//        url: String,
-//        mapHeadData: MutableMap<String?, String?>?,
-//        index: Int,
-//        loop: Boolean,
-//        speed: Float,
-//        cache: Boolean,
-//        cachePath: File?,
-//        overrideExtension: String?
-//    ) {
-//        val msg = Message()
-//        msg.what = HANDLER_PREPARE
-//        msg.obj =GSYModel(url, mapHeadData, loop, speed, cache, cachePath, overrideExtension)
-//        sendMessage(msg)
-//    }
     /**
      * 上一集
      */

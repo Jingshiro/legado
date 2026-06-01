@@ -144,7 +144,8 @@ class AddToBookshelfDialog() : BaseDialogFragment(R.layout.dialog_add_to_bookshe
                                 return@execute book
                             }
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        AppLog.put("书源正则匹配出错:${source.bookSourceName}", e)
                     }
                 }
                 throw NoStackTraceException("未找到匹配书源")

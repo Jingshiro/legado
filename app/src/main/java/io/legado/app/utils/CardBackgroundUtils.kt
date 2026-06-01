@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import io.legado.app.R
+import io.legado.app.constant.AppLog
 import io.legado.app.lib.theme.cardBackground
 
 /**
@@ -53,7 +54,9 @@ private fun applyCardBackgroundRecursive(view: View, newColor: Int, defaultColor
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            AppLog.put("卡片背景着色出错", e)
+        }
     }
     if (view is ViewGroup) {
         for (i in 0 until view.childCount) {

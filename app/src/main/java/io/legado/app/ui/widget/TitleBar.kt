@@ -161,14 +161,6 @@ class TitleBar @JvmOverloads constructor(
         }
 
         if (!isInEditMode) {
-//            if (fitStatusBar) {
-//                setPadding(paddingLeft, context.statusBarHeight, paddingRight, paddingBottom)
-//            }
-//
-//            if (fitNavigationBar) {
-//                setPadding(paddingLeft, paddingTop, paddingRight, context.navigationBarHeight)
-//            }
-
             if (fitStatusBar || fitNavigationBar) {
                 setOnApplyWindowInsetsListenerCompat { _, windowInsets ->
                     val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -269,10 +261,6 @@ class TitleBar @JvmOverloads constructor(
     }
 
     fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, fullScreen: Boolean) {
-//        if (fitStatusBar) {
-//            val topPadding = if (!isInMultiWindowMode && fullScreen) context.statusBarHeight else 0
-//            setPadding(paddingLeft, topPadding, paddingRight, paddingBottom)
-//        }
     }
 
     private fun attachToActivity() {

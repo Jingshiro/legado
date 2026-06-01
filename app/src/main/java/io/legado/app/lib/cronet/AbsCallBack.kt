@@ -1,6 +1,7 @@
 package io.legado.app.lib.cronet
 
 import androidx.annotation.Keep
+import io.legado.app.constant.AppLog
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.http.CookieManager
 import io.legado.app.help.http.CookieManager.cookieJarHeader
@@ -162,7 +163,7 @@ abstract class AbsCallBack(
         try {
             responseCallback?.onResponse(mCall, response)
         } catch (e: IOException) {
-            // Pass?
+            AppLog.put("Cronet响应回调出错", e)
         }
     }
 

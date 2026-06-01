@@ -54,12 +54,6 @@ val cronetEngine: ExperimentalCronetEngine? by lazy {
 val options by lazy {
     val options = JSONObject()
 
-    //设置域名映射规则
-    //MAP hostname ip,MAP hostname ip
-//    val host = JSONObject()
-//    host.put("host_resolver_rules","")
-//    options.put("HostResolverRules", host)
-
     //启用DnsHttpsSvcb更容易迁移到http3
     val dnsSvcb = JSONObject()
     dnsSvcb.put("enable", true)
