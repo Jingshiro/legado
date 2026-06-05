@@ -19,11 +19,11 @@
 
 | 工具 | 功能 | 风险 | 状态 |
 |------|------|------|------|
-| `get_replace_rules` | 获取文本替换规则列表 | 低 | ❌ |
-| `save_replace_rule` | 创建/修改替换规则 | 中 | ❌ |
-| `delete_replace_rule` | 删除替换规则 | 高 | ❌ |
-| `save_book_source` | 导入书源（JSON/URL） | 中 | ❌ |
-| `manage_webdav` | WebDAV 备份管理 | 高 | ❌ |
+| `get_replace_rules` | 获取文本替换规则列表 | 低 | ✅ |
+| `save_replace_rule` | 创建/修改替换规则 | 中 | ✅ |
+| `delete_replace_rule` | 删除替换规则 | 高 | ✅ |
+| ~~`save_book_source`~~ | ~~导入书源（JSON/URL）~~ | ~~中~~ | 🚫 终止 |
+| ~~`manage_webdav`~~ | ~~WebDAV 备份管理~~ | ~~高~~ | 🚫 终止 |
 
 > 参考：[[legado_new_tools_guide]] 第二批（P1）
 
