@@ -89,10 +89,6 @@ class BookThoughtDialog() : BaseDialogFragment(R.layout.dialog_book_thought, tru
             }
             tvOk.setOnClickListener {
                 val thoughtText = editThought.text?.toString()?.trim().orEmpty()
-                if (thoughtText.isEmpty()) {
-                    context?.toastOnUi(R.string.cannot_empty)
-                    return@setOnClickListener
-                }
                 lifecycleScope.launch {
                     withContext(IO) {
                         appDb.bookThoughtDao.insert(
