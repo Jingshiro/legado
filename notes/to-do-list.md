@@ -35,9 +35,9 @@
 
 | 工具 | 功能 | 风险 | 状态 |
 |------|------|------|------|
-| `get_thoughts` | 获取读书想法列表 | 低 | ❌ |
-| `export_to_obsidian` | 想法导出到 Obsidian（AI 工具入口） | 低 | ❌ |
-| `get_detailed_reading_record` | 获取详细阅读记录 | 低 | ❌ |
+| `get_thoughts` | 获取读书想法列表 | 低 | ✅ |
+| `export_to_obsidian` | 想法导出到 Obsidian（AI 工具入口） | 低 | ✅ |
+| `get_detailed_reading_record` | 获取详细阅读记录 | 低 | ✅ |
 
 > 参考：[[legado_new_tools_guide]] 第三批（P2）
 
