@@ -295,10 +295,12 @@
     <string name="underline_style_dashed">Dashed</string>
     <string name="underline_style_wave">Wave</string>
     <string name="underline_style_dotted">Dotted</string>
-    <string name="underline_weight">Weight</string>
+    <string name="underline_weight">Thickness</string>
     <string name="underline_color">Color</string>
+    <string name="underline_select_color">Select color</string>
     <string name="underline_follow_accent">Follow accent color</string>
     <string name="default_value">Default</string>
+    <string name="preview">Preview</string>
     <string name="new_thought">New thought</string>
     <string name="select_thought">Select thought</string>
     <string name="select_thought_item">Thought %1$d: %2$s</string>

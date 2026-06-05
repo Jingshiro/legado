@@ -268,9 +268,9 @@ data class TextLine(
             if (start >= 0f && currentPaint != null) {
                 val style = currentStyle
                 if (style?.style == 3) {
-                    // 曲线：用Path画正弦波
+                    // 曲线：用Path画正弦波，固定4dp振幅
                     val path = android.graphics.Path()
-                    val amplitude = currentPaint!!.strokeWidth * 2
+                    val amplitude = 4f.dpToPx()
                     val segWidth = end - start
                     path.moveTo(start, lineY)
                     var x = start

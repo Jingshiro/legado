@@ -43,7 +43,8 @@
             android:text="@string/thought_underline_style"
             android:textColor="@color/primaryText"
             android:textSize="13sp"
-            android:alpha="0.7" />
+            android:alpha="0.7"
+            android:visibility="gone" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_group_style"
@@ -162,7 +163,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:paddingBottom="4dp"
-            android:text="Preview"
+            android:text="@string/preview"
             android:textColor="@color/primaryText"
             android:textSize="13sp"
             android:alpha="0.7" />

@@ -859,5 +859,18 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
             if (value.isNullOrEmpty()) appCtx.removePref(PreferKey.obsidianLocalDirUri)
             else appCtx.putPrefString(PreferKey.obsidianLocalDirUri, value)
         }
+
+    // 思考下划线默认样式
+    var thoughtUnderlineStyle: Int
+        get() = appCtx.getPrefInt("thoughtUnderlineStyle", 0)
+        set(value) { appCtx.putPrefInt("thoughtUnderlineStyle", value) }
+
+    var thoughtUnderlineWeight: Float
+        get() = appCtx.getPrefInt("thoughtUnderlineWeight", 25) / 10f
+        set(value) { appCtx.putPrefInt("thoughtUnderlineWeight", (value * 10).toInt()) }
+
+    var thoughtUnderlineColor: String
+        get() = appCtx.getPrefString("thoughtUnderlineColor", "") ?: ""
+        set(value) { appCtx.putPrefString("thoughtUnderlineColor", value) }
 }
 
