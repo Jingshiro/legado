@@ -71,8 +71,7 @@ class ReadStyleDialog : BaseDialogFragment(R.layout.dialog_read_book_style),
 
     private fun initView() = binding.run {
         val bg = requireContext().bottomBackground
-        (root as? com.google.android.material.card.MaterialCardView)
-            ?.setCardBackgroundColor(bg)
+        root.setCardBackgroundColor(bg)
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvPageAnim.setTextColor(textColor)

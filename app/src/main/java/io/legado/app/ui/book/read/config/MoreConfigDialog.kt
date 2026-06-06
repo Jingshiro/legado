@@ -26,6 +26,7 @@ import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.ui.book.read.page.provider.ChapterProvider
 import io.legado.app.ui.widget.number.NumberPickerDialog
+import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getPrefBoolean
@@ -67,13 +68,9 @@ class MoreConfigDialog : BasePrefDialogFragment() {
             cardElevation = 8.dpToPx().toFloat()
             strokeWidth = 0
             id = R.id.tag1
+            setCardBackgroundColor(requireContext().bottomBackground)
         }
-        val view = LinearLayout(context)
-        view.setBackgroundColor(requireContext().bottomBackground)
-        cardView.addView(view, ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ))
+        cardView.applyNavigationBarPadding()
         container?.addView(cardView)
         return cardView
     }

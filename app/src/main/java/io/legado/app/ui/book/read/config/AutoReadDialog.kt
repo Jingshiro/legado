@@ -58,8 +58,7 @@ class AutoReadDialog : BaseDialogFragment(R.layout.dialog_auto_read) {
         }
         root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
-        (binding.root as? com.google.android.material.card.MaterialCardView)
-            ?.setCardBackgroundColor(bg)
+        root.setCardBackgroundColor(bg)
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvReadSpeedTitle.setTextColor(textColor)
