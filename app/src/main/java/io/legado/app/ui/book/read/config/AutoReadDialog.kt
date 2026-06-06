@@ -21,6 +21,7 @@ import io.legado.app.ui.book.read.BaseReadBookActivity
 import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ColorUtils
+import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import java.util.Locale
 
@@ -55,7 +56,10 @@ class AutoReadDialog : BaseDialogFragment(R.layout.dialog_auto_read) {
             dismiss()
             return@run
         }
+        root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
+        (binding.root as? com.google.android.material.card.MaterialCardView)
+            ?.setCardBackgroundColor(bg)
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvReadSpeedTitle.setTextColor(textColor)

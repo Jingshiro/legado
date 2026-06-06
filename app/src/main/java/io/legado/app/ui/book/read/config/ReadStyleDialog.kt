@@ -26,6 +26,7 @@ import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.ui.font.FontSelectDialog
 import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.ColorUtils
+import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getIndexById
 import io.legado.app.utils.postEvent
@@ -56,6 +57,7 @@ class ReadStyleDialog : BaseDialogFragment(R.layout.dialog_read_book_style),
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
         (activity as ReadBookActivity).bottomDialog++
+        binding.root.applyNavigationBarPadding()
         initView()
         initData()
         initViewEvent()
@@ -69,6 +71,8 @@ class ReadStyleDialog : BaseDialogFragment(R.layout.dialog_read_book_style),
 
     private fun initView() = binding.run {
         val bg = requireContext().bottomBackground
+        (root as? com.google.android.material.card.MaterialCardView)
+            ?.setCardBackgroundColor(bg)
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvPageAnim.setTextColor(textColor)

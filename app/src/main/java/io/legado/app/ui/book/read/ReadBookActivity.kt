@@ -1175,6 +1175,10 @@ class ReadBookActivity : BaseReadBookActivity(),
             setMessage("《${book.name}》已标记为读完，是否开始${nthStr}刷？")
             yesButton {
                 ReadIterationHelper.moveToNextIteration(book)
+                // 跳转到第一页
+                ReadBook.openChapter(0, 0)
+                // 覆盖云端进度
+                ReadBook.uploadProgress()
                 postEvent(EventBus.UP_BOOKSHELF, book.bookUrl)
             }
             noButton()

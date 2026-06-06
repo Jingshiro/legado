@@ -54,7 +54,10 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud) {
             dismiss()
             return
         }
+        binding.root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
+        (binding.root as? com.google.android.material.card.MaterialCardView)
+            ?.setCardBackgroundColor(bg)
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         binding.run {
