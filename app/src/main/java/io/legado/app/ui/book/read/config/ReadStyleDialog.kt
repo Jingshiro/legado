@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.read.config
 
 import android.content.DialogInterface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -72,7 +73,10 @@ class ReadStyleDialog : BaseDialogFragment(R.layout.dialog_read_book_style),
     private fun initView() = binding.run {
         val bg = requireContext().bottomBackground
         root.setCardBackgroundColor(bg)
-        root.background = null  // 清除 BaseDialogFragment 设置的 filletBackground
+        root.background = GradientDrawable().apply {
+            cornerRadius = 16f.dpToPx()
+            setColor(bg)
+        }
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvPageAnim.setTextColor(textColor)

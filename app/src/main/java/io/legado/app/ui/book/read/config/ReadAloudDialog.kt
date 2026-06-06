@@ -2,6 +2,7 @@ package io.legado.app.ui.book.read.config
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -57,7 +58,10 @@ class ReadAloudDialog : BaseDialogFragment(R.layout.dialog_read_aloud) {
         binding.root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
         binding.root.setCardBackgroundColor(bg)
-        binding.root.background = null  // 清除 BaseDialogFragment 设置的 filletBackground
+        binding.root.background = GradientDrawable().apply {
+            cornerRadius = 16f.dpToPx()
+            setColor(bg)
+        }
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         binding.run {

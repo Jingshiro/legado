@@ -2,6 +2,7 @@ package io.legado.app.ui.book.read.config
 
 import android.content.DialogInterface
 import android.graphics.PorterDuff
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -22,6 +23,7 @@ import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.applyNavigationBarPadding
+import io.legado.app.utils.dpToPx
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import java.util.Locale
 
@@ -59,7 +61,10 @@ class AutoReadDialog : BaseDialogFragment(R.layout.dialog_auto_read) {
         root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
         root.setCardBackgroundColor(bg)
-        root.background = null  // 清除 BaseDialogFragment 设置的 filletBackground
+        root.background = GradientDrawable().apply {
+            cornerRadius = 16f.dpToPx()
+            setColor(bg)
+        }
         val isLight = ColorUtils.isColorLight(bg)
         val textColor = requireContext().getPrimaryTextColor(isLight)
         tvReadSpeedTitle.setTextColor(textColor)
