@@ -257,6 +257,7 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             if (textPage.isBookplateStart || textPage.isBookplateEnd) {
                 ReadBook.book?.let { book ->
                     if (io.legado.app.ui.book.read.page.provider.BookplateDrawer.onClick(context, x, y, textPage, book, relativeOffset)) {
+                        postInvalidate()
                         return true
                     }
                 }
