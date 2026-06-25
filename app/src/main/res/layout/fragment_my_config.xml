@@ -697,6 +697,47 @@
 
                     </LinearLayout>
 
+                    <!-- 阅读 Skill -->
+                    <LinearLayout
+                        android:id="@+id/item_reading_skill"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_bottom_books"
+                            app:tint="?android:textColorSecondary" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/reading_skill"
+                                android:textSize="16sp"
+                                android:textColor="?android:textColorPrimary" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/reading_skill_desc"
+                                android:textSize="12sp"
+                                android:textColor="?android:textColorSecondary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
                     <!-- AI 助手 -->
                     <LinearLayout
                         android:id="@+id/item_ai_assistant"

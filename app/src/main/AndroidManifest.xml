@@ -239,6 +239,10 @@
             android:name=".ui.about.AboutActivity"
             android:launchMode="singleTask"
             android:screenOrientation="behind" />
+        <!-- 阅读 Skill -->
+        <activity
+            android:name=".ui.main.my.ReadingSkillActivity"
+            android:screenOrientation="behind" />
         <!-- 书源管理 -->
         <activity
             android:name=".ui.book.source.manage.BookSourceActivity"

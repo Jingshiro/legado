@@ -27,6 +27,7 @@ import io.legado.app.ui.about.ReadRecordActivity
 import io.legado.app.ui.book.thought.ObsidianExportDialog
 import io.legado.app.ui.book.bookmark.AllBookmarkActivity
 import io.legado.app.ui.book.read.ai.AiChatActivity
+import io.legado.app.ui.main.my.ReadingSkillActivity
 import io.legado.app.ui.book.source.manage.BookSourceActivity
 import io.legado.app.ui.book.toc.rule.TxtTocRuleActivity
 import io.legado.app.ui.browser.WebViewActivity
@@ -283,6 +284,11 @@ class MyFragment() : BaseFragment(R.layout.fragment_my_config), MainFragmentInte
         // 文件管理
         binding.itemFileManage.setOnClickListener {
             startActivity<FileManageActivity>()
+        }
+
+        // 阅读 Skill
+        binding.itemReadingSkill.setOnClickListener {
+            startActivity<ReadingSkillActivity>()
         }
 
         // AI 助手

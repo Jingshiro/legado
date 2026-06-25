@@ -5,7 +5,7 @@
 本分支由 Jingshiro 维护，项目地址：[https://github.com/Jingshiro/legado](https://github.com/Jingshiro/legado)
 
 - **详细阅读记录**：记录更细致的阅读信息，支持导出与统计。
-- **AI 助手**：引入大模型交互能力，支持工具调用，AI 可查询和管理书架、书源、订阅等数据。支持 AI Agent 通过 HTTP 调用，可以将此skills发送给你的 AI Agent 使用：`https://pub-0e6ce5d0161d4148a621c594405613f1.r2.dev/reading-profile-skill.zip` 
+- **AI 助手**：引入大模型交互能力，支持工具调用，AI 可查询和管理书架、书源、订阅等数据。支持 AI Agent 通过 HTTP 调用，可以将此skills发送给你的 AI Agent 使用：`https://github.com/Jingshiro/reading-skill`
 - **想法分享与导出**：长按文字可写下想法，可生成分享卡片，也可一键导出至 Obsidian。
 - **阅读小票**：可在书籍首页和尾页显示小票，录入书籍的评分和阅读时长。
 - **WebDAV 备份管理增强**：支持在本地对云端备份进行删除、重命名等操作。
@@ -23,6 +23,8 @@
 - 优化阅读页二级弹窗样式
 - 新增想法下划线样式自定义功能
 - 修复启动页自定义背景图和文字/图标开关不生效的问题
+- 新增 Legado Skill 页面，支持阅读画像分析与相似书推荐，可整合多平台阅读数据
+- 阅读小票样式优化
 
 **2026/05 - UI 全面迭代为 Material Design 3**
 
