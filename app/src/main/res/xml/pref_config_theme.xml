@@ -243,4 +243,34 @@
 
     </io.legado.app.lib.prefs.PreferenceCategory>
 
+    <io.legado.app.lib.prefs.PreferenceCategory
+        android:key="bottomIconCategory"
+        android:title="@string/bottom_icon_style"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false"
+        app:layout="@layout/view_preference_category">
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="bottomIconBookshelf"
+            android:title="@string/bottom_icon_bookshelf"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="bottomIconExplore"
+            android:title="@string/bottom_icon_explore"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="bottomIconRss"
+            android:title="@string/bottom_icon_rss"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="bottomIconMy"
+            android:title="@string/bottom_icon_my"
+            app:iconSpaceReserved="false" />
+
+    </io.legado.app.lib.prefs.PreferenceCategory>
+
 </androidx.preference.PreferenceScreen>

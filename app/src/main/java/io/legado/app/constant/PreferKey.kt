@@ -228,4 +228,9 @@ object PreferKey {
     const val backupFont = "backupFont"
     const val backupThemeBg = "backupThemeBg"
     const val backupReadBg = "backupReadBg"
+
+    const val bottomIconBookshelf = "bottomIconBookshelf"
+    const val bottomIconExplore = "bottomIconExplore"
+    const val bottomIconRss = "bottomIconRss"
+    const val bottomIconMy = "bottomIconMy"
 }

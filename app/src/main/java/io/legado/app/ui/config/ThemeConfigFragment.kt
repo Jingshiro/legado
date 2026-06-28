@@ -63,6 +63,10 @@ class ThemeConfigFragment : PreferenceFragment(),
 
     private val requestCodeBgLight = 121
     private val requestCodeBgDark = 122
+    private val requestCodeBottomIconBookshelf = 131
+    private val requestCodeBottomIconExplore = 132
+    private val requestCodeBottomIconRss = 133
+    private val requestCodeBottomIconMy = 134
     private val selectImage = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
             when (it.requestCode) {
@@ -72,6 +76,19 @@ class ThemeConfigFragment : PreferenceFragment(),
 
                 requestCodeBgDark -> setBgFromUri(uri, PreferKey.bgImageN) {
                     upTheme(true)
+                }
+
+                requestCodeBottomIconBookshelf,
+                requestCodeBottomIconExplore,
+                requestCodeBottomIconRss,
+                requestCodeBottomIconMy -> {
+                    val prefKey = when (it.requestCode) {
+                        requestCodeBottomIconBookshelf -> PreferKey.bottomIconBookshelf
+                        requestCodeBottomIconExplore -> PreferKey.bottomIconExplore
+                        requestCodeBottomIconRss -> PreferKey.bottomIconRss
+                        else -> PreferKey.bottomIconMy
+                    }
+                    setBottomIconFromUri(uri, prefKey)
                 }
             }
         }
@@ -86,6 +103,10 @@ class ThemeConfigFragment : PreferenceFragment(),
         upPreferenceSummary(PreferKey.bgImageN, getPrefString(PreferKey.bgImageN))
         upPreferenceSummary(PreferKey.barElevation, AppConfig.elevation.toString())
         upPreferenceSummary(PreferKey.fontScale)
+        upPreferenceSummary(PreferKey.bottomIconBookshelf, getPrefString(PreferKey.bottomIconBookshelf))
+        upPreferenceSummary(PreferKey.bottomIconExplore, getPrefString(PreferKey.bottomIconExplore))
+        upPreferenceSummary(PreferKey.bottomIconRss, getPrefString(PreferKey.bottomIconRss))
+        upPreferenceSummary(PreferKey.bottomIconMy, getPrefString(PreferKey.bottomIconMy))
         findPreference<ColorPreference>(PreferKey.cBackground)?.let {
             it.onSaveColor = { color ->
                 if (!ColorUtils.isColorLight(color)) {
@@ -169,7 +190,11 @@ class ThemeConfigFragment : PreferenceFragment(),
             }
 
             PreferKey.bgImage,
-            PreferKey.bgImageN -> {
+            PreferKey.bgImageN,
+            PreferKey.bottomIconBookshelf,
+            PreferKey.bottomIconExplore,
+            PreferKey.bottomIconRss,
+            PreferKey.bottomIconMy -> {
                 upPreferenceSummary(key, getPrefString(key))
             }
 
@@ -213,6 +238,10 @@ class ThemeConfigFragment : PreferenceFragment(),
 
             PreferKey.bgImage -> selectBgAction(false)
             PreferKey.bgImageN -> selectBgAction(true)
+            PreferKey.bottomIconBookshelf -> selectBottomIconAction(PreferKey.bottomIconBookshelf, requestCodeBottomIconBookshelf)
+            PreferKey.bottomIconExplore -> selectBottomIconAction(PreferKey.bottomIconExplore, requestCodeBottomIconExplore)
+            PreferKey.bottomIconRss -> selectBottomIconAction(PreferKey.bottomIconRss, requestCodeBottomIconRss)
+            PreferKey.bottomIconMy -> selectBottomIconAction(PreferKey.bottomIconMy, requestCodeBottomIconMy)
             "themeList" -> ThemeListDialog().show(childFragmentManager, "themeList")
             "saveDayTheme",
             "saveNightTheme" -> alertSaveTheme(key)
@@ -414,6 +443,49 @@ class ThemeConfigFragment : PreferenceFragment(),
                 }
                 putPrefString(preferenceKey, file.absolutePath)
                 success()
+            }.onFailure {
+                appCtx.toastOnUi(it.localizedMessage)
+            }
+        }
+    }
+
+    private fun selectBottomIconAction(preferenceKey: String, requestCode: Int) {
+        val actions = arrayListOf(getString(R.string.select_image))
+        if (!getPrefString(preferenceKey).isNullOrEmpty()) {
+            actions.add(getString(R.string.delete))
+        }
+        context?.selector(items = actions) { _, i ->
+            when (i) {
+                0 -> {
+                    selectImage.launch {
+                        this.requestCode = requestCode
+                        mode = HandleFileContract.IMAGE
+                    }
+                }
+                1 -> {
+                    removePref(preferenceKey)
+                    upPreferenceSummary(preferenceKey, null)
+                    recreateActivities()
+                }
+            }
+        }
+    }
+
+    private fun setBottomIconFromUri(uri: Uri, preferenceKey: String) {
+        readUri(uri) { fileDoc, inputStream ->
+            kotlin.runCatching {
+                var file = requireContext().externalFiles
+                val suffix = "." + fileDoc.name.substringAfterLast(".")
+                val fileName = uri.inputStream(requireContext()).getOrThrow().use {
+                    MD5Utils.md5Encode(it) + suffix
+                }
+                file = FileUtils.createFileIfNotExist(file, "bottomIcons", fileName)
+                FileOutputStream(file).use {
+                    inputStream.copyTo(it)
+                }
+                putPrefString(preferenceKey, file.absolutePath)
+                upPreferenceSummary(preferenceKey, file.absolutePath)
+                recreateActivities()
             }.onFailure {
                 appCtx.toastOnUi(it.localizedMessage)
             }

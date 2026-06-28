@@ -877,6 +877,11 @@
     <string name="is_enabled">是否启用</string>
     <string name="background_image">背景图片</string>
     <string name="background_image_blurring">背景图片虚化</string>
+    <string name="bottom_icon_style">底部图标样式</string>
+    <string name="bottom_icon_bookshelf">书架图标</string>
+    <string name="bottom_icon_explore">发现图标</string>
+    <string name="bottom_icon_rss">订阅图标</string>
+    <string name="bottom_icon_my">我的图标</string>
     <string name="background_image_blurring_radius">虚化半径</string>
     <string name="background_image_hint">0 为停用，启用范围 1~25\n半径数值越大，虚化效果越高\n.9.png背景图时此设置无效</string>
     <string name="export_folder">导出文件夹</string>

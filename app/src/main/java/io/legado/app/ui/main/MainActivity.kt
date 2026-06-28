@@ -2,6 +2,7 @@
 
 package io.legado.app.ui.main
 
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.MenuItem
@@ -45,6 +46,8 @@ import io.legado.app.ui.main.my.MyFragment
 import io.legado.app.ui.main.rss.RssFragment
 import io.legado.app.ui.widget.dialog.TextDialog
 import io.legado.app.ui.widget.text.BadgeView
+import io.legado.app.utils.BitmapUtils
+import io.legado.app.utils.getPrefString
 import io.legado.app.utils.isCreated
 import io.legado.app.utils.navigationBarHeight
 import io.legado.app.utils.observeEvent
@@ -395,6 +398,28 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         realPositions[index] = idMy
         bottomMenuCount = index + 1
         adapter.notifyDataSetChanged()
+        applyBottomIcons()
+    }
+
+    private fun applyBottomIcons() {
+        val iconSize = (24 * resources.displayMetrics.density).toInt()
+        val iconMap = mapOf(
+            R.id.menu_bookshelf to PreferKey.bottomIconBookshelf,
+            R.id.menu_discovery to PreferKey.bottomIconExplore,
+            R.id.menu_rss to PreferKey.bottomIconRss,
+            R.id.menu_my_config to PreferKey.bottomIconMy
+        )
+        binding.bottomNavigationView.menu.let { menu ->
+            iconMap.forEach { (itemId, prefKey) ->
+                val path = getPrefString(prefKey)
+                if (!path.isNullOrEmpty()) {
+                    val bitmap = BitmapUtils.decodeBitmap(path, iconSize, iconSize)
+                    if (bitmap != null) {
+                        menu.findItem(itemId)?.icon = BitmapDrawable(resources, bitmap)
+                    }
+                }
+            }
+        }
     }
 
     private fun upHomePage() {
