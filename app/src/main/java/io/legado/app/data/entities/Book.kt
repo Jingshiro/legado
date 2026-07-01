@@ -24,6 +24,7 @@ import io.legado.app.model.ReadBook
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import kotlinx.parcelize.IgnoredOnParcel
+import kotlin.jvm.Transient
 import kotlinx.parcelize.Parcelize
 import java.nio.charset.Charset
 import java.time.LocalDate
@@ -160,22 +161,27 @@ data class Book(
         GSON.fromJsonObject<HashMap<String, String>>(variable).getOrNull() ?: hashMapOf()
     }
 
+    @Transient
     @Ignore
     @IgnoredOnParcel
     override var infoHtml: String? = null
 
+    @Transient
     @Ignore
     @IgnoredOnParcel
     override var tocHtml: String? = null
 
+    @Transient
     @Ignore
     @IgnoredOnParcel
     var downloadUrls: List<String>? = null
 
+    @Transient
     @Ignore
     @IgnoredOnParcel
     private var folderName: String? = null
 
+    @Transient
     @get:Ignore
     @IgnoredOnParcel
     val lastChapterIndex get() = totalChapterNum - 1
