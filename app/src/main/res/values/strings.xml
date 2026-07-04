@@ -1459,6 +1459,7 @@
     <string name="action_import_theme">导入主题</string>
     <!--高亮规则-->
     <string name="highlight_mode">高亮模式</string>
+    <string name="dot_all">跨行匹配</string>
     <string name="style_bold">加粗</string>
     <string name="style_italic">斜体</string>
     <string name="style_underline">下划线</string>

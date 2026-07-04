@@ -87,6 +87,14 @@
                     android:text="@string/highlight_mode"
                     tools:ignore="TouchTargetSizeCheck" />
 
+                <io.legado.app.lib.theme.view.ThemeCheckBox
+                    android:id="@+id/cb_dot_all"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/dot_all"
+                    tools:ignore="TouchTargetSizeCheck" />
+
                 <ImageView
                     android:id="@+id/iv_help"
                     android:layout_width="24dp"

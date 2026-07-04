@@ -195,14 +195,13 @@ class ContentProcessor private constructor(
                 }
                 // 高亮规则产生 HTML 标签，需要标记为 usehtml 以走 HTML 渲染路径
                 if (effectiveReplaceRules?.any { it.isHighlight } == true) {
-                    mContent = mContent.lines().joinToString("\n") { line ->
-                        if (line.contains("<b>") || line.contains("<i>") || line.contains("<u>")
-                            || line.contains("<font ") || line.contains("<strong>")
-                            || line.contains("<span ")
-                        ) {
+                    val hasHtmlTag = mContent.contains("<b>") || mContent.contains("<i>")
+                        || mContent.contains("<u>") || mContent.contains("<font ")
+                        || mContent.contains("<strong>") || mContent.contains("<span ")
+                    if (hasHtmlTag) {
+                        mContent = splitMultiLineHtmlTags(mContent)
+                        mContent = mContent.lines().joinToString("\n") { line ->
                             "<usehtml>$line<endhtml>"
-                        } else {
-                            line
                         }
                     }
                 }
@@ -248,7 +247,9 @@ class ContentProcessor private constructor(
      */
     private fun applyHighlightRule(content: String, rule: ReplaceRule): String {
         val regex = if (rule.isRegex) {
-            rule.pattern.toRegex()
+            val options = mutableSetOf<RegexOption>()
+            if (rule.isDotAll) options.add(RegexOption.DOT_MATCHES_ALL)
+            rule.pattern.toRegex(options)
         } else {
             Regex.escape(rule.pattern).toRegex()
         }
@@ -295,6 +296,60 @@ class ContentProcessor private constructor(
         }
 
         return sb.toString()
+    }
+
+    /**
+     * 将跨行的 HTML 标签拆分为每行都有完整标签的形式
+     * 例如: <font color="red">第一行\n第二行</font>
+     * 变为: <font color="red">第一行</font>\n<font color="red">第二行</font>
+     */
+    private fun splitMultiLineHtmlTags(content: String): String {
+        val result = StringBuilder()
+        val tagStack = mutableListOf<String>() // 存储未闭合的开标签原文
+        val tagPattern = Regex("""<(/?)(\w+)(\s[^>]*)?>""", RegexOption.IGNORE_CASE)
+        var i = 0
+
+        while (i < content.length) {
+            if (content[i] == '\n') {
+                // 换行：闭合所有未闭合标签，换行，重新打开
+                for (j in tagStack.indices.reversed()) {
+                    val name = tagPattern.find(tagStack[j])?.groupValues?.get(2) ?: continue
+                    result.append("</$name>")
+                }
+                result.append('\n')
+                for (tag in tagStack) {
+                    result.append(tag)
+                }
+                i++
+            } else if (content[i] == '<') {
+                val match = tagPattern.find(content, i)
+                if (match != null && match.range.first == i) {
+                    val isClosing = match.groupValues[1] == "/"
+                    val tagName = match.groupValues[2].lowercase()
+                    if (isClosing) {
+                        // 闭合标签：弹栈
+                        if (tagStack.isNotEmpty()) {
+                            val last = tagStack.last()
+                            if (tagPattern.find(last)?.groupValues?.get(2)?.lowercase() == tagName) {
+                                tagStack.removeAt(tagStack.lastIndex)
+                            }
+                        }
+                    } else if (!match.value.endsWith("/>")) {
+                        // 开标签（非自闭合）：压栈
+                        tagStack.add(match.value)
+                    }
+                    result.append(match.value)
+                    i = match.range.last + 1
+                } else {
+                    result.append(content[i])
+                    i++
+                }
+            } else {
+                result.append(content[i])
+                i++
+            }
+        }
+        return result.toString()
     }
 
 }

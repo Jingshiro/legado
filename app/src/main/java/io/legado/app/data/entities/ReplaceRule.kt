@@ -54,6 +54,9 @@ data class ReplaceRule(
     //是否高亮模式
     @ColumnInfo(defaultValue = "0")
     var isHighlight: Boolean = false,
+    //正则是否跨行匹配（DOTALL）
+    @ColumnInfo(defaultValue = "0")
+    var isDotAll: Boolean = false,
     //超时时间
     @ColumnInfo(defaultValue = "3000")
     var timeoutMillisecond: Long = 3000L,
