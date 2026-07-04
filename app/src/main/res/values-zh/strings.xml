@@ -38,12 +38,12 @@
     <string name="delete_select_group">删除当前分组</string>
     <string name="delete_all">删除所有</string>
     <string name="replace">替换</string>
-    <string name="replace_purify">替换净化</string>
+    <string name="replace_purify">净化与高亮</string>
     <string name="custom_export_section">自定义Epub导出章节</string>
-    <string name="replace_purify_desc">配置替换净化规则</string>
+    <string name="replace_purify_desc">配置净化替换与高亮规则</string>
     <string name="not_available">暂无</string>
     <string name="enable">启用</string>
-    <string name="replace_purify_search">替换净化-搜索</string>
+    <string name="replace_purify_search">规则搜索</string>
     <string name="bookshelf">书架</string>
     <string name="favorites">收藏夹</string>
     <string name="favorite">收藏</string>
@@ -198,7 +198,7 @@
     <string name="import_book_source">导入书源</string>
     <string name="import_local">本地导入</string>
     <string name="import_on_line">网络导入</string>
-    <string name="replace_rule_title">替换净化</string>
+    <string name="replace_rule_title">净化与高亮</string>
     <string name="replace_rule_edit">替换规则编辑</string>
     <string name="replace_rule">替换规则</string>
     <string name="replace_to">替换为</string>
@@ -1306,4 +1306,14 @@
     <string name="sys_image_picker">系统图片选择器</string>
     <string name="template_style">模板样式</string>
     <string name="reading_skill_desc">让你的Agent管理你的Legado书架、书源以及其他信息</string>
+    <!--高亮规则-->
+    <string name="highlight_mode">高亮模式</string>
+    <string name="style_bold">加粗</string>
+    <string name="style_italic">斜体</string>
+    <string name="style_underline">下划线</string>
+    <string name="style_color">颜色</string>
+    <string name="style_font_size">字号</string>
+    <string name="style_font_family">字体</string>
+    <string name="style_custom_color">自定义颜色</string>
+    <string name="highlight_mode_hint">在替换为中使用HTML标签设置样式，如 &lt;span style=\"color:red\"&gt;$1&lt;/span&gt;</string>
 </resources>

@@ -12,6 +12,7 @@ import io.legado.app.exception.RegexTimeoutException
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.utils.ChineseUtils
+import io.legado.app.utils.CssStyleParser
 import io.legado.app.utils.escapeRegex
 import io.legado.app.utils.replace
 import io.legado.app.utils.stackTraceStr
@@ -163,7 +164,10 @@ class ContentProcessor private constructor(
                         return@forEach
                     }
                     try {
-                        val tmp = if (item.isRegex) {
+                        val tmp = if (item.isHighlight) {
+                            // 高亮模式：按捕获组应用样式
+                            applyHighlightRule(mContent, item)
+                        } else if (item.isRegex) {
                             mContent.replace(
                                 item.name,
                                 item.regex,
@@ -187,6 +191,18 @@ class ContentProcessor private constructor(
                     } catch (e: Exception) {
                         AppLog.put("替换净化: 规则 ${item.name}替换出错.\n${mContent}", e)
                         appCtx.toastOnUi("替换净化: 规则 ${item.name}替换出错")
+                    }
+                }
+                // 高亮规则产生 HTML 标签，需要标记为 usehtml 以走 HTML 渲染路径
+                if (effectiveReplaceRules?.any { it.isHighlight } == true) {
+                    mContent = mContent.lines().joinToString("\n") { line ->
+                        if (line.contains("<b>") || line.contains("<i>") || line.contains("<u>")
+                            || line.contains("<font ") || line.contains("<strong>")
+                        ) {
+                            "<usehtml>$line<endhtml>"
+                        } else {
+                            line
+                        }
                     }
                 }
             }
@@ -219,6 +235,65 @@ class ContentProcessor private constructor(
             }
         }
         return BookContent(sameTitleRemoved, contents, effectiveReplaceRules)
+    }
+
+    /**
+     * 应用高亮规则
+     * 解析替换模板中的 HTML/CSS 样式，按捕获组生成带样式的 HTML
+     *
+     * @param content 原始文本内容
+     * @param rule 高亮替换规则
+     * @return 应用高亮样式后的 HTML 内容
+     */
+    private fun applyHighlightRule(content: String, rule: ReplaceRule): String {
+        val regex = if (rule.isRegex) {
+            rule.pattern.toRegex()
+        } else {
+            Regex.escape(rule.pattern).toRegex()
+        }
+
+        // 从替换模板中提取各捕获组的样式
+        val groupStyles = CssStyleParser.extractGroupStyles(rule.replacement)
+
+        // 构建带样式的替换结果
+        val sb = StringBuilder()
+        var lastEnd = 0
+        regex.findAll(content).forEach { matchResult ->
+            // 添加匹配前的原文
+            sb.append(content, lastEnd, matchResult.range.first)
+
+            // 解析替换模板，将 $N 替换为带样式的匹配内容
+            var styledReplacement = rule.replacement
+            for ((groupIndex, style) in groupStyles.entries.sortedByDescending { it.key }) {
+                val groupValue = matchResult.groupValues.getOrNull(groupIndex) ?: ""
+                if (groupValue.isEmpty()) continue
+
+                // 生成带样式的 HTML
+                val styledText = if (style.hasStyle()) {
+                    style.wrapWithHtmlTags(groupValue)
+                } else {
+                    groupValue
+                }
+
+                // 替换模板中的 $N（带标签或不带标签）
+                // 先替换带标签的: <tag>$N</tag>（支持嵌套标签如 <b><font color="red">$N</font></b>）
+                val taggedPattern = Regex(
+                    """((?:<[^/][^>]*>)+)\$$groupIndex((?:</[^>]*>)+)""",
+                    RegexOption.IGNORE_CASE
+                )
+                styledReplacement = taggedPattern.replace(styledReplacement, styledText)
+                // 再替换裸的 $N
+                styledReplacement = styledReplacement.replace("\$$groupIndex", styledText)
+            }
+            sb.append(styledReplacement)
+            lastEnd = matchResult.range.last + 1
+        }
+        // 添加最后一个匹配后的内容
+        if (lastEnd < content.length) {
+            sb.append(content, lastEnd, content.length)
+        }
+
+        return sb.toString()
     }
 
 }

@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.read.page.entities.column
 
 import android.graphics.Canvas
+import android.graphics.Typeface
 import android.os.Build
 import android.text.TextPaint
 import androidx.annotation.Keep
@@ -22,7 +23,11 @@ data class TextHtmlColumn(
     override val charData: String,
     val mTextSize: Float,
     val mTextColor: Int?,
-    val linkUrl: String?
+    val linkUrl: String?,
+    val mTypeface: Typeface? = null,
+    val mIsBold: Boolean = false,
+    val mIsItalic: Boolean = false,
+    val mIsUnderline: Boolean = false
 ) : TextBaseColumn {
 
     override var textLine: TextLine = emptyTextLine
@@ -30,6 +35,15 @@ data class TextHtmlColumn(
     private val textPaint: TextPaint by lazy {
         TextPaint(ChapterProvider.contentPaint).apply {
             textSize = mTextSize
+            // 应用字体
+            val baseTypeface = mTypeface ?: ChapterProvider.typeface
+            typeface = when {
+                mIsBold && mIsItalic -> Typeface.create(baseTypeface, Typeface.BOLD_ITALIC)
+                mIsBold -> Typeface.create(baseTypeface, Typeface.BOLD)
+                mIsItalic -> Typeface.create(baseTypeface, Typeface.ITALIC)
+                else -> baseTypeface
+            }
+            isUnderlineText = mIsUnderline
         }
     }
 
@@ -78,7 +92,9 @@ data class TextHtmlColumn(
             } else {
                 mTextColor ?: ReadBookConfig.textColor
             }
-            isUnderlineText = false
+            if (!mIsUnderline) {
+                isUnderlineText = false
+            }
         }
         drawText(view, canvas, y, textPaint)
     }

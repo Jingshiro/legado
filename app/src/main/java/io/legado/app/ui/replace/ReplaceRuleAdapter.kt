@@ -61,6 +61,9 @@ class ReplaceRuleAdapter(context: Context, var callBack: CallBack) :
             if (oldItem.isEnabled != newItem.isEnabled) {
                 payload.putBoolean("enabled", newItem.isEnabled)
             }
+            if (oldItem.isHighlight != newItem.isHighlight) {
+                payload.putBoolean("highlight", newItem.isHighlight)
+            }
             if (payload.isEmpty) {
                 return null
             }
@@ -108,6 +111,7 @@ class ReplaceRuleAdapter(context: Context, var callBack: CallBack) :
                 cbName.text = item.getDisplayNameGroup()
                 swtEnabled.isChecked = item.isEnabled
                 cbName.isChecked = selected.contains(item)
+                ivHighlight.visibility = if (item.isHighlight) View.VISIBLE else View.GONE
             } else {
                 for (i in payloads.indices) {
                     val bundle = payloads[i] as Bundle
@@ -116,6 +120,7 @@ class ReplaceRuleAdapter(context: Context, var callBack: CallBack) :
                             "selected" -> cbName.isChecked = selected.contains(item)
                             "upName" -> cbName.text = item.getDisplayNameGroup()
                             "enabled" -> swtEnabled.isChecked = item.isEnabled
+                            "highlight" -> ivHighlight.visibility = if (item.isHighlight) View.VISIBLE else View.GONE
                         }
                     }
                 }

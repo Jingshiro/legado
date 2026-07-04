@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.read.page.provider
 
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.text.Layout
 import android.text.Spanned
 import android.text.StaticLayout
@@ -9,6 +10,9 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.ReplacementSpan
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
+import android.text.style.UnderlineSpan
 import android.text.style.URLSpan
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
@@ -18,6 +22,7 @@ import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookThought
 import io.legado.app.help.book.BookContent
 import io.legado.app.help.book.BookHelp
+import io.legado.app.help.book.FontManager
 import io.legado.app.help.book.getBookSource
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
@@ -763,6 +768,10 @@ class TextChapterLayout(
                 val textSize = extractTextSize(spanned, charIndex, textPaint.textSize)
                 val textColor = extractTextColor(spanned, charIndex)
                 val linkUrl = extractLinkUrl(spanned, charIndex)
+                val isBold = extractIsBold(spanned, charIndex)
+                val isItalic = extractIsItalic(spanned, charIndex)
+                val isUnderline = extractIsUnderline(spanned, charIndex)
+                val typeface = extractTypeface(spanned, charIndex)
                 val charRight = if (charIndex + 1 < lineEnd) {
                     staticLayout.getPrimaryHorizontal(charIndex + 1)
                 } else {
@@ -861,7 +870,11 @@ class TextChapterLayout(
                             char,
                             textSize,
                             textColor,
-                            linkUrl
+                            linkUrl,
+                            typeface,
+                            isBold,
+                            isItalic,
+                            isUnderline
                         )
                     )
                 }
@@ -992,6 +1005,30 @@ class TextChapterLayout(
         val urlSpans = spanned.getSpans(index, index + 1, URLSpan::class.java)
         urlSpans.firstOrNull()?.let { span ->
             return span.url
+        }
+        return null
+    }
+
+    private fun extractIsBold(spanned: Spanned, index: Int): Boolean {
+        val styleSpans = spanned.getSpans(index, index + 1, StyleSpan::class.java)
+        return styleSpans.any { it.style == Typeface.BOLD || it.style == Typeface.BOLD_ITALIC }
+    }
+
+    private fun extractIsItalic(spanned: Spanned, index: Int): Boolean {
+        val styleSpans = spanned.getSpans(index, index + 1, StyleSpan::class.java)
+        return styleSpans.any { it.style == Typeface.ITALIC || it.style == Typeface.BOLD_ITALIC }
+    }
+
+    private fun extractIsUnderline(spanned: Spanned, index: Int): Boolean {
+        val underlineSpans = spanned.getSpans(index, index + 1, UnderlineSpan::class.java)
+        return underlineSpans.isNotEmpty()
+    }
+
+    private fun extractTypeface(spanned: Spanned, index: Int): Typeface? {
+        val typefaceSpans = spanned.getSpans(index, index + 1, TypefaceSpan::class.java)
+        typefaceSpans.firstOrNull()?.let { span ->
+            val family = span.family ?: return@let
+            return FontManager.getTypeface(family)
         }
         return null
     }

@@ -10,17 +10,36 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <io.legado.app.lib.theme.view.ThemeCheckBox
-        android:id="@+id/cb_name"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:singleLine="true"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/swt_enabled"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlSymmetry" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <io.legado.app.lib.theme.view.ThemeCheckBox
+            android:id="@+id/cb_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:scrollbars="none"
+            android:singleLine="true"
+            tools:ignore="RtlSymmetry" />
+
+        <ImageView
+            android:id="@+id/iv_highlight"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_highlight"
+            android:tint="@color/primaryText"
+            android:visibility="gone"
+            android:contentDescription="@string/highlight_mode"
+            tools:ignore="TouchTargetSizeCheck" />
+
+    </LinearLayout>
 
     <io.legado.app.lib.theme.view.ThemeSwitch
         android:id="@+id/swt_enabled"

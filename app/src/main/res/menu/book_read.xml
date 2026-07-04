@@ -92,8 +92,6 @@
 
     <item
         android:id="@+id/menu_enable_replace"
-        android:checkable="true"
-        android:checked="true"
         android:title="@string/replace_rule_title"
         app:showAsAction="never" />
 

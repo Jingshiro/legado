@@ -40,11 +40,11 @@
     <string name="delete_all">Delete all</string>
     <string name="custom_export_section">Custom export chapter of epub</string>
     <string name="replace">Replace</string>
-    <string name="replace_purify">Replacement</string>
-    <string name="replace_purify_desc">Configure replacement rules</string>
+    <string name="replace_purify">Purify &amp; Highlight</string>
+    <string name="replace_purify_desc">Configure purify, replacement and highlight rules</string>
     <string name="not_available">Not available now</string>
     <string name="enable">Enable</string>
-    <string name="replace_purify_search">Search Replacement</string>
+    <string name="replace_purify_search">Search Rules</string>
     <string name="bookshelf">Bookshelf</string>
     <string name="favorites">Favorites</string>
     <string name="favorite">Favorite</string>
@@ -199,7 +199,7 @@
     <string name="import_book_source">Import book sources</string>
     <string name="import_local">Import local</string>
     <string name="import_on_line">Import online</string>
-    <string name="replace_rule_title">Replacement</string>
+    <string name="replace_rule_title">Purify &amp; Highlight</string>
     <string name="replace_rule_edit">Edit replacement rule</string>
     <string name="replace_rule">Pattern</string>
     <string name="replace_to">Replacement</string>
@@ -1457,4 +1457,14 @@
     <string name="import_from_clipboard">剪贴板导入</string>
     <string name="import_from_file">文件导入</string>
     <string name="action_import_theme">导入主题</string>
+    <!--高亮规则-->
+    <string name="highlight_mode">高亮模式</string>
+    <string name="style_bold">加粗</string>
+    <string name="style_italic">斜体</string>
+    <string name="style_underline">下划线</string>
+    <string name="style_color">颜色</string>
+    <string name="style_font_size">字号</string>
+    <string name="style_font_family">字体</string>
+    <string name="style_custom_color">Custom Color</string>
+    <string name="highlight_mode_hint">在替换为中使用HTML标签设置样式，如 &lt;span style=\"color:red\"&gt;$1&lt;/span&gt;</string>
 </resources>

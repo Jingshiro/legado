@@ -10,6 +10,7 @@
 |------|------|------|
 | AI 工具开发指南 | [[legado_new_tools_guide]] | 14个 AI 工具的完整定义、参数、返回格式 |
 | Material Design 迁移计划 | [[material_design_migration_plan]] | 5个阶段的 MD3 迁移策略 |
+| 高亮规则开发计划 | [[highlight_rule_plan]] | 替换规则扩展，支持正则捕获组样式 |
 
 ---
 

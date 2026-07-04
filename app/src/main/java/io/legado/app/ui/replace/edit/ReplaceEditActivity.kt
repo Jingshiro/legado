@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -15,7 +16,9 @@ import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.databinding.ActivityReplaceEditBinding
+import io.legado.app.help.book.FontManager
 import io.legado.app.lib.dialogs.SelectItem
+import io.legado.app.lib.dialogs.alert
 import io.legado.app.ui.code.CodeEditActivity
 import io.legado.app.ui.widget.keyboard.KeyboardToolPop
 import io.legado.app.utils.GSON
@@ -129,10 +132,24 @@ class ReplaceEditActivity :
         binding.ivHelp.setOnClickListener {
             showHelp("regexHelp")
         }
+        binding.ivHelpReplaceTo.setOnClickListener {
+            showHelp("replaceToHelp")
+        }
         binding.root.setOnApplyWindowInsetsListenerCompat { _, windowInsets ->
             softKeyboardTool.initialPadding = windowInsets.imeHeight
             windowInsets
         }
+        // 高亮模式切换
+        binding.cbHighlight.setOnCheckedChangeListener { _, isChecked ->
+            binding.llStyleToolbar.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+        // 样式工具栏按钮
+        binding.tvBold.setOnClickListener { insertStyleTag("b") }
+        binding.tvItalic.setOnClickListener { insertStyleTag("i") }
+        binding.tvUnderline.setOnClickListener { insertStyleTag("u") }
+        binding.tvColor.setOnClickListener { showColorPicker() }
+        binding.tvFontSize.setOnClickListener { showFontSizeDialog() }
+        binding.tvFontFamily.setOnClickListener { showFontFamilyDialog() }
     }
 
     private fun upReplaceView(replaceRule: ReplaceRule) = binding.run {
@@ -140,12 +157,15 @@ class ReplaceEditActivity :
         etGroup.setText(replaceRule.group)
         etReplaceRule.setText(replaceRule.pattern)
         cbUseRegex.isChecked = replaceRule.isRegex
+        cbHighlight.isChecked = replaceRule.isHighlight
         etReplaceTo.setText(replaceRule.replacement)
         cbScopeTitle.isChecked = replaceRule.scopeTitle
         cbScopeContent.isChecked = replaceRule.scopeContent
         etScope.setText(replaceRule.scope)
         etExcludeScope.setText(replaceRule.excludeScope)
         etTimeout.setText(replaceRule.timeoutMillisecond.toString())
+        // 根据高亮模式显示/隐藏工具栏
+        llStyleToolbar.visibility = if (replaceRule.isHighlight) View.VISIBLE else View.GONE
     }
 
     private fun getReplaceRule(): ReplaceRule = binding.run {
@@ -154,6 +174,7 @@ class ReplaceEditActivity :
         replaceRule.group = etGroup.text.toString()
         replaceRule.pattern = etReplaceRule.text.toString()
         replaceRule.isRegex = cbUseRegex.isChecked
+        replaceRule.isHighlight = cbHighlight.isChecked
         replaceRule.replacement = etReplaceTo.text.toString()
         replaceRule.scopeTitle = cbScopeTitle.isChecked
         replaceRule.scopeContent = cbScopeContent.isChecked
@@ -163,15 +184,118 @@ class ReplaceEditActivity :
         return replaceRule
     }
 
+    /**
+     * 在"替换为"输入框的光标位置插入样式标签
+     * @param tag 标签名，如 "b", "i", "u", "font"
+     * @param attr 标签属性，如 " color=\"red\"", " face=\"楷体\""
+     */
+    private fun insertStyleTag(tag: String, attr: String = "") {
+        val editText = binding.etReplaceTo
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
+        val editable = editText.editableText
+        val selectedText = if (start in 0..end && end <= editable.length) {
+            editable.substring(start, end)
+        } else {
+            ""
+        }
+        val openTag = "<$tag$attr>"
+        val closeTag = "</$tag>"
+        val insertText = "$openTag$selectedText$closeTag"
+        if (start < 0 || start >= editable.length) {
+            editable.append(insertText)
+        } else {
+            editable.replace(start, end, insertText)
+        }
+        val cursorPos = start + openTag.length + selectedText.length
+        editText.setSelection(cursorPos)
+    }
+
+    /**
+     * 显示颜色选择器，插入 <font color="xxx"></font>
+     */
+    private fun showColorPicker() {
+        val colors = listOf(
+            "red", "blue", "green", "orange", "purple",
+            "brown", "pink", "gold", "gray", "black"
+        )
+        val labels = colors + getString(R.string.style_custom_color)
+        alert(title = getString(R.string.style_color)) {
+            items(labels) { _, index ->
+                if (index < colors.size) {
+                    insertStyleTag("font", " color=\"${colors[index]}\"")
+                } else {
+                    showCustomColorInput()
+                }
+            }
+            cancelButton()
+        }
+    }
+
+    /**
+     * 自定义颜色输入对话框
+     */
+    private fun showCustomColorInput() {
+        val input = android.widget.EditText(this).apply {
+            hint = "#FF0000"
+            setSingleLine(true)
+        }
+        alert(title = getString(R.string.style_custom_color)) {
+            customView { input }
+            okButton {
+                val color = input.text.toString().trim()
+                if (color.isNotEmpty()) {
+                    insertStyleTag("font", " color=\"$color\"")
+                }
+            }
+            cancelButton()
+        }
+    }
+
+    /**
+     * 显示字号选择对话框，插入 <big></big> 或 <small></small>
+     */
+    private fun showFontSizeDialog() {
+        val options = listOf("大字号 <big>", "小字号 <small>")
+        alert(title = getString(R.string.style_font_size)) {
+            items(options) { _, index ->
+                when (index) {
+                    0 -> insertStyleTag("big")
+                    1 -> insertStyleTag("small")
+                }
+            }
+            cancelButton()
+        }
+    }
+
+    /**
+     * 显示字体选择对话框，插入 <font face="xxx"></font>
+     */
+    private fun showFontFamilyDialog() {
+        val fontNames = FontManager.getAvailableFontNames()
+        if (fontNames.isEmpty()) {
+            toastOnUi("未找到字体文件，请在设置中配置字体目录")
+            return
+        }
+        alert(title = getString(R.string.style_font_family)) {
+            items(fontNames) { _, _, index ->
+                insertStyleTag("font", " face=\"${fontNames[index]}\"")
+            }
+            cancelButton()
+        }
+    }
+
     override fun helpActions(): List<SelectItem<String>> {
         return arrayListOf(
-            SelectItem("正则教程", "regexHelp")
+            SelectItem("正则教程", "regexHelp"),
+            SelectItem("高亮模式说明", "highlightHelp")
         )
     }
 
     override fun onHelpActionSelect(action: String) {
         when (action) {
             "regexHelp" -> showHelp("regexHelp")
+            "highlightHelp" -> showHelp("highlightHelp")
         }
     }
 
