@@ -16,6 +16,8 @@ import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.databinding.ActivityReplaceEditBinding
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import io.legado.app.help.book.FontManager
 import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.lib.dialogs.alert
@@ -34,9 +36,11 @@ import io.legado.app.utils.viewbindingdelegate.viewBinding
  */
 class ReplaceEditActivity :
     VMBaseActivity<ActivityReplaceEditBinding, ReplaceEditViewModel>(),
-    KeyboardToolPop.CallBack {
+    KeyboardToolPop.CallBack,
+    ColorPickerDialogListener {
 
     companion object {
+        private const val COLOR_PICKER_ID = 1001
 
         fun startIntent(
             context: Context,
@@ -212,60 +216,81 @@ class ReplaceEditActivity :
     }
 
     /**
-     * 显示颜色选择器，插入 <font color="xxx"></font>
+     * 显示调色盘，插入 <font color="xxx"></font>
      */
     private fun showColorPicker() {
-        val colors = listOf(
-            "red", "blue", "green", "orange", "purple",
-            "brown", "pink", "gold", "gray", "black"
-        )
-        val labels = colors + getString(R.string.style_custom_color)
-        alert(title = getString(R.string.style_color)) {
-            items(labels) { _, index ->
-                if (index < colors.size) {
-                    insertStyleTag("font", " color=\"${colors[index]}\"")
-                } else {
-                    showCustomColorInput()
-                }
-            }
-            cancelButton()
+        ColorPickerDialog.newBuilder()
+            .setDialogType(ColorPickerDialog.TYPE_PRESETS)
+            .setShowAlphaSlider(false)
+            .setDialogId(COLOR_PICKER_ID)
+            .show(this)
+    }
+
+    override fun onColorSelected(dialogId: Int, color: Int) {
+        if (dialogId == COLOR_PICKER_ID) {
+            val hex = String.format("#%06X", 0xFFFFFF and color)
+            insertStyleTag("font", " color=\"$hex\"")
         }
     }
 
-    /**
-     * 自定义颜色输入对话框
-     */
-    private fun showCustomColorInput() {
-        val input = android.widget.EditText(this).apply {
-            hint = "#FF0000"
-            setSingleLine(true)
-        }
-        alert(title = getString(R.string.style_custom_color)) {
-            customView { input }
-            okButton {
-                val color = input.text.toString().trim()
-                if (color.isNotEmpty()) {
-                    insertStyleTag("font", " color=\"$color\"")
-                }
-            }
-            cancelButton()
-        }
-    }
+    override fun onDialogDismissed(dialogId: Int) = Unit
 
     /**
-     * 显示字号选择对话框，插入 <big></big> 或 <small></small>
+     * 显示字号选择对话框，插入 <span style="font-size:Npx"></span>
      */
     private fun showFontSizeDialog() {
-        val options = listOf("大字号 <big>", "小字号 <small>")
+        val options = listOf("12px", "14px", "16px", "18px", "20px", "24px", "自定义...")
         alert(title = getString(R.string.style_font_size)) {
             items(options) { _, index ->
-                when (index) {
-                    0 -> insertStyleTag("big")
-                    1 -> insertStyleTag("small")
+                if (index < options.lastIndex) {
+                    val px = options[index].removeSuffix("px")
+                    insertFontSizeTag(px)
+                } else {
+                    showCustomFontSizeInput()
                 }
             }
             cancelButton()
         }
+    }
+
+    private fun showCustomFontSizeInput() {
+        val input = android.widget.EditText(this).apply {
+            hint = "16"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setSingleLine(true)
+        }
+        alert(title = getString(R.string.style_font_size)) {
+            customView { input }
+            okButton {
+                val px = input.text.toString().trim()
+                if (px.isNotEmpty()) {
+                    insertFontSizeTag(px)
+                }
+            }
+            cancelButton()
+        }
+    }
+
+    private fun insertFontSizeTag(px: String) {
+        val editText = binding.etReplaceTo
+        val start = editText.selectionStart
+        val end = editText.selectionEnd
+        val editable = editText.editableText
+        val selectedText = if (start in 0..end && end <= editable.length) {
+            editable.substring(start, end)
+        } else {
+            ""
+        }
+        val openTag = "<span style=\"font-size:${px}px\">"
+        val closeTag = "</span>"
+        val insertText = "$openTag$selectedText$closeTag"
+        if (start < 0 || start >= editable.length) {
+            editable.append(insertText)
+        } else {
+            editable.replace(start, end, insertText)
+        }
+        val cursorPos = start + openTag.length + selectedText.length
+        editText.setSelection(cursorPos)
     }
 
     /**

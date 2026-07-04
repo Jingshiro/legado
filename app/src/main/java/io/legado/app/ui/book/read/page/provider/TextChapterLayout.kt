@@ -8,6 +8,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.ReplacementSpan
 import android.text.style.StyleSpan
@@ -342,7 +343,8 @@ class TextChapterLayout(
                 } else if (text.startsWith("<usehtml>")) {
                     val endInt = text.lastIndexOf("<")
                     if (endInt > 9) {
-                        setTypeHtml(imageStyle, book, text.substring(9, endInt))
+                        val hasIndent = content.startsWith(paragraphIndent)
+                        setTypeHtml(imageStyle, book, text.substring(9, endInt), hasIndent)
                         return@forEach
                     }
                 }
@@ -710,6 +712,7 @@ class TextChapterLayout(
         imageStyle: String?,
         book: Book,
         htmlContent: String,
+        hasIndent: Boolean = false,
     ) {
         val textViewTagHandler = TextViewTagHandler()
         val spanned = htmlContent.parseAsHtml(HtmlCompat.FROM_HTML_MODE_COMPACT, tagHandler = textViewTagHandler)
@@ -754,6 +757,23 @@ class TextChapterLayout(
             textLine.upTopBottom(durY, lineHeight, textPaint.fontMetrics) //y坐标
 
             val columns = mutableListOf<BaseColumn>()
+            // 首行添加段落缩进
+            if (lineIndex == 0 && hasIndent) {
+                var indentX = 0f
+                repeat(paragraphIndent.length) {
+                    val x1 = indentX + indentCharWidth
+                    columns.add(
+                        TextColumn(
+                            charData = ChapterProvider.indentChar,
+                            start = absStartX + indentX,
+                            end = absStartX + x1
+                        )
+                    )
+                    indentX = x1
+                }
+                textLine.indentWidth = indentX
+                textLine.indentSize = paragraphIndent.length
+            }
             var charIndex = lineStart
             while (charIndex < lineEnd) {
                 val char = spanned[charIndex].toString()
@@ -764,7 +784,7 @@ class TextChapterLayout(
                     charIndex++
                     continue
                 }
-                val charX = staticLayout.getPrimaryHorizontal(charIndex)
+                val charX = staticLayout.getPrimaryHorizontal(charIndex) + textLine.indentWidth
                 val textSize = extractTextSize(spanned, charIndex, textPaint.textSize)
                 val textColor = extractTextColor(spanned, charIndex)
                 val linkUrl = extractLinkUrl(spanned, charIndex)
@@ -773,7 +793,7 @@ class TextChapterLayout(
                 val isUnderline = extractIsUnderline(spanned, charIndex)
                 val typeface = extractTypeface(spanned, charIndex)
                 val charRight = if (charIndex + 1 < lineEnd) {
-                    staticLayout.getPrimaryHorizontal(charIndex + 1)
+                    staticLayout.getPrimaryHorizontal(charIndex + 1) + textLine.indentWidth
                 } else {
                     tempPaint.textSize = textSize
                     val charWidth = tempPaint.measureText(char)
@@ -983,15 +1003,14 @@ class TextChapterLayout(
     }
 
     private fun extractTextSize(spanned: Spanned, index: Int, defaultSize: Float): Float {
+        val sizeSpans = spanned.getSpans(index, index + 1, AbsoluteSizeSpan::class.java)
+        sizeSpans.firstOrNull()?.let { span ->
+            return span.size.toFloat()
+        }
         val relativeSpans = spanned.getSpans(index, index + 1, RelativeSizeSpan::class.java)
-        // 如果有 RelativeSizeSpan，基于基准大小计算
         relativeSpans.firstOrNull()?.let { span ->
             return defaultSize * span.sizeChange
         }
-//        val sizeSpans = spanned.getSpans(index, index + 1, AbsoluteSizeSpan::class.java)
-//        sizeSpans.firstOrNull()?.let { span ->
-//            return span.size.toFloat()
-//        }
         return defaultSize
     }
 

@@ -198,6 +198,7 @@ class ContentProcessor private constructor(
                     mContent = mContent.lines().joinToString("\n") { line ->
                         if (line.contains("<b>") || line.contains("<i>") || line.contains("<u>")
                             || line.contains("<font ") || line.contains("<strong>")
+                            || line.contains("<span ")
                         ) {
                             "<usehtml>$line<endhtml>"
                         } else {

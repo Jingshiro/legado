@@ -21,8 +21,16 @@ object CssStyleParser {
     private val boldTagRegex = Regex("""</?(?:b|strong)>""", RegexOption.IGNORE_CASE)
     private val italicTagRegex = Regex("""</?(?:i|em)>""", RegexOption.IGNORE_CASE)
     private val underlineTagRegex = Regex("""</?(?:u)>""", RegexOption.IGNORE_CASE)
-    private val fontTagRegex = Regex(
+    private val fontSizeSpanRegex = Regex(
+        """<span\s+[^>]*style\s*=\s*["'][^"']*font-size\s*:\s*([\d.]+)\s*px[^"']*["'][^>]*>""",
+        RegexOption.IGNORE_CASE
+    )
+    private val fontColorTagRegex = Regex(
         """<font\s+[^>]*color\s*=\s*["']([^"']+)["'][^>]*>""",
+        RegexOption.IGNORE_CASE
+    )
+    private val fontFaceTagRegex = Regex(
+        """<font\s+[^>]*face\s*=\s*["']([^"']+)["'][^>]*>""",
         RegexOption.IGNORE_CASE
     )
     private val spanTagRegex = Regex(
@@ -63,7 +71,7 @@ object CssStyleParser {
         var isItalic = false
         var isUnderline = false
         var color: Int? = null
-        var fontSize: Float? = null
+        var fontSizePx: Float? = null
         var fontFamily: String? = null
 
         fontWeightRegex.find(style)?.let { match ->
@@ -80,13 +88,13 @@ object CssStyleParser {
             color = parseColor(match.groupValues[1].trim())
         }
         fontSizeRegex.find(style)?.let { match ->
-            fontSize = match.groupValues[1].toFloatOrNull()
+            fontSizePx = match.groupValues[1].toFloatOrNull()
         }
         fontFamilyRegex.find(style)?.let { match ->
             fontFamily = match.groupValues[1].trim()
         }
 
-        return HighlightStyle(isBold, isItalic, isUnderline, color, fontSize, fontFamily)
+        return HighlightStyle(isBold, isItalic, isUnderline, color, fontSizePx, fontFamily)
     }
 
     /**
@@ -99,7 +107,7 @@ object CssStyleParser {
         var isItalic = false
         var isUnderline = false
         var color: Int? = null
-        var fontSize: Float? = null
+        var fontSizePx: Float? = null
         var fontFamily: String? = null
 
         // 检查 HTML 标签
@@ -108,8 +116,13 @@ object CssStyleParser {
         if (underlineTagRegex.containsMatchIn(html)) isUnderline = true
 
         // 检查 font 标签的 color 属性
-        fontTagRegex.find(html)?.let { match ->
+        fontColorTagRegex.find(html)?.let { match ->
             color = parseColor(match.groupValues[1].trim())
+        }
+
+        // 检查 font 标签的 face 属性
+        fontFaceTagRegex.find(html)?.let { match ->
+            fontFamily = match.groupValues[1].trim()
         }
 
         // 检查 span 标签的 style 属性
@@ -120,11 +133,16 @@ object CssStyleParser {
             if (parsed.isItalic) isItalic = true
             if (parsed.isUnderline) isUnderline = true
             if (parsed.color != null) color = parsed.color
-            if (parsed.fontSize != null) fontSize = parsed.fontSize
+            if (parsed.fontSizePx != null) fontSizePx = parsed.fontSizePx
             if (parsed.fontFamily != null) fontFamily = parsed.fontFamily
         }
 
-        return HighlightStyle(isBold, isItalic, isUnderline, color, fontSize, fontFamily)
+        // 检查 <span style="font-size:Npx"> 标签
+        fontSizeSpanRegex.find(html)?.let { match ->
+            fontSizePx = match.groupValues[1].toFloatOrNull()
+        }
+
+        return HighlightStyle(isBold, isItalic, isUnderline, color, fontSizePx, fontFamily)
     }
 
     /**
@@ -186,11 +204,11 @@ object CssStyleParser {
         val isItalic: Boolean = false,
         val isUnderline: Boolean = false,
         @param:ColorInt val color: Int? = null,
-        val fontSize: Float? = null,
+        val fontSizePx: Float? = null,
         val fontFamily: String? = null
     ) {
         fun hasStyle(): Boolean {
-            return isBold || isItalic || isUnderline || color != null || fontSize != null || fontFamily != null
+            return isBold || isItalic || isUnderline || color != null || fontSizePx != null || fontFamily != null
         }
 
         /**
@@ -202,9 +220,15 @@ object CssStyleParser {
             if (isBold) result = "<b>$result</b>"
             if (isItalic) result = "<i>$result</i>"
             if (isUnderline) result = "<u>$result</u>"
+            fontFamily?.let {
+                result = "<font face=\"$it\">$result</font>"
+            }
             color?.let {
                 val colorStr = ColorUtils.intToString(it)
                 result = "<font color=\"$colorStr\">$result</font>"
+            }
+            fontSizePx?.let { px ->
+                result = "<span style=\"font-size:${px.toInt()}px\">$result</span>"
             }
             return result
         }
