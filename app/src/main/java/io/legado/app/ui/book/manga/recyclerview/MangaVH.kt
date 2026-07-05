@@ -11,7 +11,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -31,7 +30,7 @@ open class MangaVH<VB : ViewBinding>(val binding: VB, private val context: Conte
     RecyclerView.ViewHolder(binding.root) {
 
     protected lateinit var mLoading: ProgressBar
-    protected lateinit var mImage: AppCompatImageView
+    protected lateinit var mImage: ImageView
     protected lateinit var mProgress: TextView
     protected lateinit var mFlProgress: FrameLayout
     protected var mRetry: Button? = null
@@ -40,7 +39,7 @@ open class MangaVH<VB : ViewBinding>(val binding: VB, private val context: Conte
 
     fun initComponent(
         loading: ProgressBar,
-        image: AppCompatImageView,
+        image: ImageView,
         progress: TextView,
         button: Button? = null,
         flProgress: FrameLayout,

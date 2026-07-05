@@ -23,6 +23,7 @@ import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.lib.theme.filletBackground
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.setBackgroundKeepPadding
+import io.legado.app.lib.theme.bottomSheetBackground
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
@@ -69,6 +70,14 @@ abstract class BaseDialogFragment(
             })
         } else {
             dialog?.window?.setBackgroundDrawable(requireContext().filletBackground)
+            lifecycle.addObserver(LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_START) {
+                    if (dialog?.window?.attributes?.gravity == Gravity.BOTTOM) {
+                        dialog?.window?.setBackgroundDrawable(requireContext().bottomSheetBackground)
+                        view?.background = requireContext().bottomSheetBackground
+                    }
+                }
+            })
         }
     }
 

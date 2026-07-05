@@ -51,12 +51,13 @@
 | 阶段 | 内容 | 工作量 | 状态 |
 |------|------|--------|------|
 | ~~Phase 1~~ | ~~主题切换~~ | ~~1-2天~~ | ✅ |
-| Phase 2 | 自定义 View 迁移（16个 AppCompat 基类） | 2-3天 | ❌ |
-| Phase 3a | 自定义 TextInputLayout → Material（152处） | 5-7天 | ❌ |
-| Phase 3b | Toolbar → MaterialToolbar（30处） | 1天 | ❌ |
-| Phase 3c | AppCompatImageView → ImageView（77处） | 1天 | ❌ |
+| ~~Phase 2~~ | ~~自定义 View 迁移（10个 AppCompat 基类）~~ | ~~2-3天~~ | ✅ |
+| ~~Phase 3a~~ | ~~自定义 TextInputLayout 评估（保留，动态着色需要）~~ | | ✅ |
+| ~~Phase 3b~~ | ~~Toolbar → MaterialToolbar（30处）~~ | ~~1天~~ | ✅ |
+| ~~Phase 3c~~ | ~~AppCompatImageView → ImageView（77处）~~ | ~~1天~~ | ✅ |
 | ~~Phase 3d~~ | ~~CardView → MaterialCardView~~ | | ✅ |
-| Phase 3e | AppCompatSpinner 自动升级确认 | 0.5天 | ❌ |
+| ~~Phase 3e~~ | ~~AppCompatSpinner 自动升级确认~~ | | ✅ |
+| ~~Phase 3f~~ | ~~AppCompatTextView/Button 散落控件替换~~ | | ✅ |
 | Phase 4 | 样式细节调优（色彩/ripple/Shape） | 3-5天 | ❌ |
 | Phase 5 | 进阶优化（Material3/Dynamic Color/Motion） | 按需 | ❌ |
 

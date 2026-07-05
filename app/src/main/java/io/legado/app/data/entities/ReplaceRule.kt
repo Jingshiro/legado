@@ -62,7 +62,10 @@ data class ReplaceRule(
     var timeoutMillisecond: Long = 3000L,
     //排序
     @ColumnInfo(name = "sortOrder", defaultValue = "0")
-    var order: Int = Int.MIN_VALUE
+    var order: Int = Int.MIN_VALUE,
+    //绑定的主题组合 (例如: DAY_羊皮纸,NIGHT_深色护眼)
+    @ColumnInfo(defaultValue = "")
+    var bindToThemes: String? = ""
 ) : Parcelable {
 
     override fun equals(other: Any?): Boolean {

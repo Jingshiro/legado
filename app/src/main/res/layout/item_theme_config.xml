@@ -16,7 +16,7 @@
         android:textColor="@color/primaryText"
         tools:text="theme" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_share"
         android:layout_width="36dp"
         android:layout_height="36dp"
@@ -29,7 +29,7 @@
         android:tint="@color/primaryText"
         tools:ignore="UnusedAttribute" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_delete"
         android:layout_width="36dp"
         android:layout_height="36dp"

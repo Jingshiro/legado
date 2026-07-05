@@ -16,7 +16,7 @@
         app:layout_constraintRight_toLeftOf="@id/iv_edit"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_edit"
         android:layout_width="36dp"
         android:layout_height="36dp"
@@ -30,7 +30,7 @@
         app:layout_constraintRight_toLeftOf="@+id/iv_menu_delete"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_menu_delete"
         android:layout_width="36dp"
         android:layout_height="36dp"

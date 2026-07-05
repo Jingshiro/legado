@@ -236,7 +236,7 @@
 
         </io.legado.app.ui.widget.seekbar.VerticalSeekBarWrapper>
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/vw_brightness_pos_adjust"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -289,7 +289,7 @@
                     android:minHeight="52dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:contentDescription="@string/search_content"
@@ -315,7 +315,7 @@
                     android:minHeight="52dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:contentDescription="@string/auto_next_page"
@@ -341,7 +341,7 @@
                     android:minHeight="52dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:contentDescription="@string/replace_rule_title"
@@ -367,7 +367,7 @@
                     android:minHeight="52dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:contentDescription="@string/ai_companion"
@@ -393,7 +393,7 @@
                     android:minHeight="52dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/iv_night_icon"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
@@ -492,7 +492,7 @@
                     android:minHeight="48dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/iv_catalog"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
@@ -520,7 +520,7 @@
                     android:minHeight="48dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/iv_read_aloud"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
@@ -548,7 +548,7 @@
                     android:minHeight="48dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/iv_font"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
@@ -576,7 +576,7 @@
                     android:minHeight="48dp"
                     android:orientation="vertical"
                     android:padding="4dp">
-                    <androidx.appcompat.widget.AppCompatImageView
+                    <ImageView
                         android:id="@+id/iv_setting"
                         android:layout_width="22dp"
                         android:layout_height="22dp"

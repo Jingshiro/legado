@@ -7,7 +7,7 @@
     android:background="?android:attr/selectableItemBackground"
     tools:ignore="RtlHardcoded,RtlSymmetry">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_good"
         android:layout_width="30dp"
         android:layout_height="0dp"
@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/md_red_A200" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_bad"
         android:layout_width="30dp"
         android:layout_height="0dp"
@@ -99,7 +99,7 @@
         app:layout_constraintRight_toLeftOf="@+id/iv_checked"
         app:layout_constraintTop_toBottomOf="@+id/tv_current_chapter_word_count" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_checked"
         android:layout_width="40dp"
         android:layout_height="40dp"

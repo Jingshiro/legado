@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatAutoCompleteTextView
+import android.widget.AutoCompleteTextView
 import io.legado.app.R
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.utils.applyTint
@@ -23,7 +23,7 @@ import io.legado.app.utils.visible
 class AutoCompleteTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatAutoCompleteTextView(context, attrs) {
+) : AutoCompleteTextView(context, attrs) {
 
     var delCallBack: ((value: String) -> Unit)? = null
 

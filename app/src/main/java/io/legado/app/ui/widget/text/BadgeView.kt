@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
-import androidx.appcompat.widget.AppCompatTextView
+import android.widget.TextView
 import io.legado.app.R
 import io.legado.app.lib.theme.accentColor
 import io.legado.app.utils.ColorUtils
@@ -28,7 +28,7 @@ import io.legado.app.utils.visible
 class BadgeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatTextView(context, attrs) {
+) : TextView(context, attrs) {
 
     var isHideOnNull = true
         set(hideOnNull) {

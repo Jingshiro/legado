@@ -15,7 +15,7 @@ import android.view.ViewOutlineProvider
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 import io.legado.app.R
 import io.legado.app.utils.getCompatColor
 import io.legado.app.utils.printOnDebug
@@ -27,7 +27,7 @@ import kotlin.math.pow
 class CircleImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatImageView(context, attrs) {
+) : ImageView(context, attrs) {
 
     private val mDrawableRect = RectF()
     private val mBorderRect = RectF()

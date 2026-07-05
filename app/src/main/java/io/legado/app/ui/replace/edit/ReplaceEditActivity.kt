@@ -19,6 +19,7 @@ import io.legado.app.databinding.ActivityReplaceEditBinding
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import io.legado.app.help.book.FontManager
+import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.ui.code.CodeEditActivity
@@ -154,6 +155,40 @@ class ReplaceEditActivity :
         binding.tvColor.setOnClickListener { showColorPicker() }
         binding.tvFontSize.setOnClickListener { showFontSizeDialog() }
         binding.tvFontFamily.setOnClickListener { showFontFamilyDialog() }
+        
+        // 绑定主题多选框
+        binding.etBindToThemes.setOnClickListener {
+            val configList = ReadBookConfig.configList
+            val options = mutableListOf<String>()
+            val optionKeys = mutableListOf<String>()
+            configList.forEach { config ->
+                options.add("浅色模式 - ${config.name}")
+                optionKeys.add("DAY_${config.name}")
+                options.add("夜间模式 - ${config.name}")
+                optionKeys.add("NIGHT_${config.name}")
+                options.add("墨水屏模式 - ${config.name}")
+                optionKeys.add("EINK_${config.name}")
+            }
+            val binds = binding.etBindToThemes.text.toString().split(",").filter { it.isNotBlank() }
+            val checkedItems = BooleanArray(options.size) { i ->
+                binds.contains(optionKeys[i])
+            }
+            alert("绑定阅读主题") {
+                multiChoiceItems(options.toTypedArray(), checkedItems) { _, which, isChecked ->
+                    checkedItems[which] = isChecked
+                }
+                okButton {
+                    val result = mutableListOf<String>()
+                    for (i in checkedItems.indices) {
+                        if (checkedItems[i]) {
+                            result.add(optionKeys[i])
+                        }
+                    }
+                    binding.etBindToThemes.setText(result.joinToString(","))
+                }
+                cancelButton()
+            }
+        }
     }
 
     private fun upReplaceView(replaceRule: ReplaceRule) = binding.run {
@@ -169,6 +204,7 @@ class ReplaceEditActivity :
         etScope.setText(replaceRule.scope)
         etExcludeScope.setText(replaceRule.excludeScope)
         etTimeout.setText(replaceRule.timeoutMillisecond.toString())
+        etBindToThemes.setText(replaceRule.bindToThemes ?: "")
         // 根据高亮模式显示/隐藏工具栏
         llStyleToolbar.visibility = if (replaceRule.isHighlight) View.VISIBLE else View.GONE
     }
@@ -187,6 +223,7 @@ class ReplaceEditActivity :
         replaceRule.scope = etScope.text.toString()
         replaceRule.excludeScope = etExcludeScope.text.toString()
         replaceRule.timeoutMillisecond = etTimeout.text.toString().ifEmpty { "3000" }.toLong()
+        replaceRule.bindToThemes = etBindToThemes.text.toString()
         return replaceRule
     }
 

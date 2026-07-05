@@ -11,7 +11,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.bumptech.glide.load.DataSource
@@ -51,7 +51,7 @@ import splitties.init.appCtx
 class CoverImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatImageView(context, attrs) {
+) : ImageView(context, attrs) {
     companion object {
         private val nameBitmapCache by lazy { LruCache<String, Bitmap>(33) }
         private val needNameBitmap by lazy { LruCache<String, Boolean>(99) }

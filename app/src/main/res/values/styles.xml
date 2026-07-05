@@ -49,6 +49,7 @@
         <item name="colorOnSurface">@color/primaryText</item>
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Legado.SmallComponent</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Legado.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Legado.LargeComponent</item>
         <item name="dialogCornerRadius">16dp</item>
         <item name="actionOverflowMenuStyle">@style/Style.PopupMenu</item>
         <item name="android:itemTextAppearance">@style/Style.MenuItemText</item>
@@ -105,6 +106,11 @@
     <style name="ShapeAppearance.Legado.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Legado.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
     </style>
 
     <style name="ReadMenuBottomSheetShape" parent="">

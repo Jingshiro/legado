@@ -2,12 +2,12 @@ package io.legado.app.ui.widget.image
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 
 class ImageButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatImageView(context, attrs) {
+) : ImageView(context, attrs) {
 
 
     override fun setEnabled(enabled: Boolean) {

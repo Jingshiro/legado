@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewStub
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import io.legado.app.R
 
 @Suppress("unused")
@@ -19,9 +19,9 @@ class DynamicFrameLayout @JvmOverloads constructor(
 ) : FrameLayout(context, attrs), ViewSwitcher {
 
     private var errorView: View? = null
-    private var errorImage: AppCompatImageView? = null
-    private var errorTextView: AppCompatTextView? = null
-    private var actionBtn: AppCompatButton? = null
+    private var errorImage: ImageView? = null
+    private var errorTextView: TextView? = null
+    private var actionBtn: Button? = null
 
     private var progressView: View? = null
     private var progressBar: ProgressBar? = null

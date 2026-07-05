@@ -10,7 +10,7 @@ import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import android.view.animation.Interpolator
 import android.widget.OverScroller
-import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
+import android.widget.MultiAutoCompleteTextView
 import androidx.core.view.ViewCompat
 import kotlin.math.abs
 import kotlin.math.max
@@ -22,7 +22,7 @@ import kotlin.math.min
 open class ScrollMultiAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatMultiAutoCompleteTextView(context, attrs) {
+) : MultiAutoCompleteTextView(context, attrs) {
 
     //是否到顶或者到底的标志
     private var disallowIntercept = true

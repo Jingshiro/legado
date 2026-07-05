@@ -126,7 +126,7 @@
             android:orientation="horizontal"
             android:padding="6dp">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/iv_timer"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
@@ -210,7 +210,7 @@
                 android:paddingLeft="6dp"
                 android:paddingRight="6dp">
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_tts_speech_reduce"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -227,7 +227,7 @@
                     android:layout_weight="1"
                     android:max="45" />
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_tts_speech_add"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -260,7 +260,7 @@
                 android:orientation="vertical"
                 android:paddingBottom="7dp">
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_catalog"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -302,7 +302,7 @@
                 android:paddingBottom="7dp"
                 tools:ignore="TextSizeCheck">
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_main_menu"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -343,7 +343,7 @@
                 android:orientation="vertical"
                 android:paddingBottom="7dp">
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_to_backstage"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -384,7 +384,7 @@
                 android:orientation="vertical"
                 android:paddingBottom="7dp">
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <ImageView
                     android:id="@+id/iv_setting"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"

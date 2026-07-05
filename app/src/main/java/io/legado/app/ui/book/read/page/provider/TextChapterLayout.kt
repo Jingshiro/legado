@@ -342,9 +342,12 @@ class TextChapterLayout(
                     return@forEach
                 } else if (text.startsWith("<usehtml>")) {
                     val endInt = text.lastIndexOf("<")
-                    if (endInt > 9) {
-                        val hasIndent = content.startsWith(paragraphIndent)
-                        setTypeHtml(imageStyle, book, text.substring(9, endInt), hasIndent)
+                    if (endInt >= 9) {
+                        val htmlContent = text.substring(9, endInt)
+                        if (htmlContent.isNotEmpty()) {
+                            val hasIndent = content.startsWith(paragraphIndent)
+                            setTypeHtml(imageStyle, book, htmlContent, hasIndent)
+                        }
                         return@forEach
                     }
                 }
@@ -722,15 +725,26 @@ class TextChapterLayout(
         if (textPaint.color != textColor) {
             textPaint.color = textColor
         }
+        val spannable = if (spanned is android.text.Spannable) spanned else android.text.SpannableString(spanned)
+        if (hasIndent) {
+            var marginX = 0f
+            repeat(paragraphIndent.length) {
+                marginX += indentCharWidth
+            }
+            spannable.setSpan(
+                android.text.style.LeadingMarginSpan.Standard(marginX.toInt(), 0),
+                0, spannable.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
         val staticLayout = if (atLeastApi28) {
-            StaticLayout.Builder.obtain(spanned, 0, spanned.length, textPaint, width)
+            StaticLayout.Builder.obtain(spannable, 0, spannable.length, textPaint, width)
                 .setIncludePad(true)
                 .setUseLineSpacingFromFallbacks(true)
                 .build()
         } else {
             @Suppress("DEPRECATION")
             StaticLayout(
-                spanned,
+                spannable,
                 textPaint,
                 width,
                 Layout.Alignment.ALIGN_NORMAL,
@@ -785,7 +799,7 @@ class TextChapterLayout(
                     charIndex++
                     continue
                 }
-                val charX = staticLayout.getPrimaryHorizontal(charIndex) + textLine.indentWidth
+                val charX = staticLayout.getPrimaryHorizontal(charIndex)
                 val textSize = extractTextSize(spanned, charIndex, textPaint.textSize)
                 val textColor = extractTextColor(spanned, charIndex)
                 val linkUrl = extractLinkUrl(spanned, charIndex)
@@ -794,7 +808,7 @@ class TextChapterLayout(
                 val isUnderline = extractIsUnderline(spanned, charIndex)
                 val typeface = extractTypeface(spanned, charIndex)
                 val charRight = if (charIndex + 1 < lineEnd) {
-                    staticLayout.getPrimaryHorizontal(charIndex + 1) + textLine.indentWidth
+                    staticLayout.getPrimaryHorizontal(charIndex + 1)
                 } else {
                     tempPaint.textSize = textSize
                     val charWidth = tempPaint.measureText(char)

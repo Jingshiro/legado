@@ -11,7 +11,7 @@
         android:layout_height="48dp"
         style="@style/Widget.AppCompat.ProgressBar" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/tv_loading_message"
         style="@style/Style.Text.Second.Normal.Wrap"
         android:paddingTop="16dp"

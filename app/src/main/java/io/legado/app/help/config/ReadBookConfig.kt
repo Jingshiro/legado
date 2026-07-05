@@ -216,6 +216,7 @@ object ReadBookConfig {
             field = value
             if (appCtx.getPrefInt(PreferKey.readStyleSelect) != value) {
                 appCtx.putPrefInt(PreferKey.readStyleSelect, value)
+                updateHighlightRuleState()
             }
         }
     var comicStyleSelect = appCtx.getPrefInt(PreferKey.comicStyleSelect, readStyleSelect)
@@ -223,8 +224,14 @@ object ReadBookConfig {
             field = value
             if (appCtx.getPrefInt(PreferKey.comicStyleSelect) != value) {
                 appCtx.putPrefInt(PreferKey.comicStyleSelect, value)
+                updateHighlightRuleState()
             }
         }
+
+    fun updateHighlightRuleState() {
+        io.legado.app.help.book.ContentProcessor.upReplaceRules()
+        io.legado.app.utils.postEvent(io.legado.app.constant.EventBus.REFRESH_BOOK_CONTENT, true)
+    }
     var shareLayout = appCtx.getPrefBoolean(PreferKey.shareLayout)
         set(value) {
             field = value

@@ -44,7 +44,7 @@
         android:visibility="gone"
         app:isBottomBackground="true" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/iv_menu_more"
         android:layout_width="36dp"
         android:layout_height="36dp"

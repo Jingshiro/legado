@@ -152,3 +152,12 @@ val Context.filletBackground: GradientDrawable
         background.setColor(backgroundColor)
         return background
     }
+
+val Context.bottomSheetBackground: GradientDrawable
+    get() {
+        val background = GradientDrawable()
+        val r = 20f.dpToPx()
+        background.cornerRadii = floatArrayOf(r, r, r, r, 0f, 0f, 0f, 0f)
+        background.setColor(backgroundColor)
+        return background
+    }

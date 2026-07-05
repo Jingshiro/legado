@@ -10,7 +10,7 @@ import android.os.Build
 import android.text.StaticLayout
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
-import androidx.appcompat.widget.AppCompatTextView
+import android.widget.TextView
 import io.legado.app.help.config.AppConfig
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
 import io.legado.app.utils.canvasrecorder.recordIfNeededThenDraw
@@ -19,7 +19,7 @@ import io.legado.app.utils.dpToPx
 class BatteryView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatTextView(context, attrs) {
+) : TextView(context, attrs) {
     private val batteryTypeface by lazy {
         Typeface.createFromAsset(context.assets, "font/number.ttf")
     }

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/tool_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
             android:textColor="@color/primaryText"
             android:textSize="12sp" />
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/iv_top"
             android:layout_width="36dp"
             android:layout_height="match_parent"
@@ -70,7 +70,7 @@
             app:tint="@color/primaryText"
             tools:ignore="UnusedAttribute" />
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/iv_bottom"
             android:layout_width="36dp"
             android:layout_height="match_parent"

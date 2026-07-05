@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Path
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 import io.legado.app.R
 import io.legado.app.utils.dpToPx
 import kotlin.math.max
@@ -13,7 +13,7 @@ import kotlin.math.max
 class FilletImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatImageView(context, attrs) {
+) : ImageView(context, attrs) {
     internal var width: Float = 0.toFloat()
     internal var height: Float = 0.toFloat()
     private var leftTopRadius: Int = 0

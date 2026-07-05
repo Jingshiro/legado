@@ -3,7 +3,7 @@ package io.legado.app.ui.widget.text
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatTextView
+import android.widget.TextView
 import io.legado.app.R
 import io.legado.app.lib.theme.Selector
 import io.legado.app.lib.theme.ThemeStore
@@ -14,7 +14,7 @@ import io.legado.app.utils.getCompatColor
 class AccentBgTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : AppCompatTextView(context, attrs) {
+) : TextView(context, attrs) {
 
     private var radius = 12.dpToPx()
 

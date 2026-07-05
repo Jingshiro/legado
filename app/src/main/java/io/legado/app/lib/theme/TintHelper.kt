@@ -19,11 +19,11 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorInt
-import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.ViewCompat
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.legado.app.R
@@ -152,7 +152,7 @@ object TintHelper {
                 is RadioButton -> setTint(view, color, isDark)
                 is SeekBar -> setTint(view, color, isDark)
                 is ProgressBar -> setTint(view, color)
-                is AppCompatEditText -> setTint(view, color, isDark)
+                is EditText -> setTint(view, color, isDark)
                 is CheckBox -> setTint(view, color, isDark)
                 is CheckedTextView -> setTint(view, color, isDark)
                 is ImageView -> setTint(view, color)
@@ -260,7 +260,7 @@ object TintHelper {
 
 
     @SuppressLint("RestrictedApi")
-    fun setTint(editText: AppCompatEditText, @ColorInt color: Int, useDarker: Boolean) {
+    fun setTint(editText: EditText, @ColorInt color: Int, useDarker: Boolean) {
         val editTextColorStateList = ColorStateList(
             arrayOf(
                 intArrayOf(-android.R.attr.state_enabled),
@@ -283,7 +283,7 @@ object TintHelper {
                 color
             )
         )
-        editText.supportBackgroundTintList = editTextColorStateList
+        ViewCompat.setBackgroundTintList(editText, editTextColorStateList)
         setCursorTint(editText, color)
     }
 

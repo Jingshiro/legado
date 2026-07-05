@@ -68,6 +68,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
             PreferKey.themeMode -> {
                 themeMode = appCtx.getPrefString(PreferKey.themeMode, "0")
                 isEInkMode = themeMode == "3"
+                ReadBookConfig.updateHighlightRuleState()
             }
 
             PreferKey.clickActionTL -> clickActionTL =

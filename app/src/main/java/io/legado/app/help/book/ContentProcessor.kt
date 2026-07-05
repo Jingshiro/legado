@@ -90,13 +90,22 @@ class ContentProcessor private constructor(
     }
 
     fun upReplaceRules() {
+        val modeStr = when {
+            AppConfig.isEInkMode -> "EINK"
+            AppConfig.isNightTheme -> "NIGHT"
+            else -> "DAY"
+        }
+        val targetBind = "${modeStr}_${ReadBookConfig.durConfig.name}"
+
         titleReplaceRules.run {
             clear()
-            addAll(appDb.replaceRuleDao.findEnabledByTitleScope(bookName, bookOrigin))
+            val rules = appDb.replaceRuleDao.findEnabledByTitleScope(bookName, bookOrigin)
+            addAll(rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) })
         }
         contentReplaceRules.run {
             clear()
-            addAll(appDb.replaceRuleDao.findEnabledByContentScope(bookName, bookOrigin))
+            val rules = appDb.replaceRuleDao.findEnabledByContentScope(bookName, bookOrigin)
+            addAll(rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) })
         }
     }
 
@@ -229,7 +238,7 @@ class ContentProcessor private constructor(
                     if (hasHtmlTag) {
                         mContent = splitMultiLineHtmlTags(mContent)
                         mContent = mContent.lines().joinToString("\n") { line ->
-                            "<usehtml>$line<endhtml>"
+                            if (line.isBlank()) line else "<usehtml>$line<endhtml>"
                         }
                     }
                 }

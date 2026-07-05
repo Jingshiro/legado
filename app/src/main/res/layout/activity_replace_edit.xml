@@ -280,6 +280,22 @@
                     tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
             </io.legado.app.ui.widget.text.TextInputLayout>
 
+            <io.legado.app.ui.widget.text.TextInputLayout
+                android:id="@+id/til_bind_to_themes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="绑定阅读主题 (点击选择，不选则全局生效)">
+
+                <io.legado.app.lib.theme.view.ThemeEditText
+                    android:id="@+id/et_bind_to_themes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:cursorVisible="false"
+                    android:longClickable="false"
+                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+            </io.legado.app.ui.widget.text.TextInputLayout>
+
         </LinearLayout>
     </io.legado.app.ui.widget.NoChildScrollNestedScrollView>
 

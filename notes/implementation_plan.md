@@ -9,7 +9,7 @@ This plan addresses a set of improvements and fixes for the custom enhanced bran
 *   **[COMPLETED] 3. Obsidian Silent Auto-Export** - Implemented in exporter, settings dialog, and API controller.
 *   **[COMPLETED] 4. Highlight Rules Performance Optimization (Caching)** - Implemented via `LruCache` in `ContentProcessor.kt`.
 *   **[COMPLETED] 4.1. Bookmark & Thought Bugfixes** - Fixed missing thoughts in AllBookmarkActivity and fixed underline rendering offsets.
-*   **[IN PROGRESS] 5. Material Design 3 Migration (Phase 2 & 3)** - Refactoring custom widgets to Material Design 3.
+*   **[COMPLETED] 5. Material Design 3 Migration (Phase 2 & 3)** - Refactored custom widgets to Material Design 3.
 
 ---
 
