@@ -9,6 +9,7 @@ import io.legado.app.api.controller.BookThoughtController
 import io.legado.app.api.controller.ReadRecordController
 import io.legado.app.api.controller.ReplaceRuleController
 import io.legado.app.api.controller.RssSourceController
+import io.legado.app.api.controller.ThemeController
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.service.WebService
 import io.legado.app.utils.GSON
@@ -70,6 +71,9 @@ class HttpServer(port: Int) : NanoHTTPD(port) {
                             "/testReplaceRule" -> ReplaceRuleController.testRule(postData)
                             "/saveBookThought" -> BookThoughtController.saveBookThought(postData)
                             "/deleteBookThought" -> BookThoughtController.deleteBookThought(postData)
+                            "/saveThemeConfig" -> ThemeController.saveThemeConfig(postData)
+                            "/deleteThemeConfig" -> ThemeController.deleteThemeConfig(postData)
+                            "/applyThemeConfig" -> ThemeController.applyThemeConfig(postData)
                             else -> null
                         }
                     }
@@ -96,6 +100,7 @@ class HttpServer(port: Int) : NanoHTTPD(port) {
                         "/getReadRecords" -> ReadRecordController.getReadRecords(parameters)
                         "/getReadTime" -> ReadRecordController.getReadTime(parameters)
                         "/getDetailedReadRecords" -> ReadRecordController.getDetailedReadRecords(parameters)
+                        "/getThemeConfigs" -> ThemeController.allThemeConfigs
                         else -> null
                     }
                 }

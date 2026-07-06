@@ -220,7 +220,12 @@ object AiToolDef {
             ),
             tool(
                 "save_replace_rule",
-                "创建或修改文本替换规则，支持批量传入。rules 数组中每条：有 id 则更新，无 id 则新建。多条操作合并为一次批量确认。",
+                "创建或修改文本替换/高亮规则，支持批量传入。rules 数组中每条：有 id 则更新，无 id 则新建。多条操作合并为一次批量确认。\n" +
+                "【高亮规则说明】当 isHighlight=true 时，replacement 字段使用 HTML 标签格式：\n" +
+                "  捕获组引用：\$0（整个匹配）、\$1（第1个括号）、\$N（第N个括号）\n" +
+                "  支持标签：<b>加粗</b>、<i>斜体</i>、<u>下划线</u>、<font color=\"#D32F2F\">颜色</font>、<big>/<small>字号\n" +
+                "  示例：pattern=\"\\\"([^\\\"]+)\\\"\" + replacement=\"<b><font color=\\\"#D32F2F\\\">\$1</font></b>\" + isRegex=true + isHighlight=true\n" +
+                "  效果：将书中所有双引号内文字加粗并染红（引号本身被丢弃）",
                 required = listOf("rules"),
                 properties = mapOf(
                     "rules" to propArray(
@@ -228,10 +233,15 @@ object AiToolDef {
                         mapOf(
                             "id" to prop("string", "规则 ID（修改时必填，新建时留空）"),
                             "name" to prop("string", "规则名称"),
+                            "group" to prop("string", "分组名，不填则无分组"),
                             "pattern" to prop("string", "匹配模式（普通字符串或正则表达式）"),
-                            "replacement" to prop("string", "替换内容，留空字符串表示删除匹配内容"),
+                            "replacement" to prop("string", "替换内容：净化规则留空字符串表示删除匹配内容；高亮规则（isHighlight=true）填写 HTML 标签+捕获组引用格式"),
                             "isRegex" to prop("boolean", "是否使用正则表达式，默认 false"),
-                            "scope" to prop("string", "生效范围：'all' 全部书籍，或填写 bookUrl 仅对该书生效，默认 'all'"),
+                            "isHighlight" to prop("boolean", "是否为高亮规则（用 HTML 渲染替换内容，需 isRegex=true），默认 false"),
+                            "scope" to prop("string", "生效范围：空字符串=全部书籍，或填写书源 bookUrl 仅对该书生效"),
+                            "scopeTitle" to prop("boolean", "是否作用于章节标题，默认 false"),
+                            "scopeContent" to prop("boolean", "是否作用于正文，默认 true"),
+                            "excludeScope" to prop("string", "排除范围（书源 URL，多个用逗号分隔），被排除的书籍不应用此规则"),
                             "isEnabled" to prop("boolean", "是否启用，默认 true"),
                             "order" to prop("integer", "执行顺序，数字越小越先执行，默认 0")
                         ),
@@ -239,6 +249,7 @@ object AiToolDef {
                     )
                 )
             ),
+
             tool(
                 "delete_replace_rule",
                 "删除指定的文本替换规则（不可撤销）。执行前列出所有待删除规则名称并合并为一次批量确认。",
@@ -301,9 +312,60 @@ object AiToolDef {
                     "offset" to prop("integer", "分页偏移量，默认 0"),
                     "limit" to prop("integer", "每页数量，默认 20，最大 100")
                 )
+            ),
+
+            // ===== 新增工具（主题配色管理）=====
+            tool(
+                "get_theme_configs",
+                "获取 legado 所有已保存的主题配色列表。返回每个主题的完整配置字段（颜色、是否夜间、背景图等）。",
+                properties = emptyMap()
+            ),
+            tool(
+                "save_theme_config",
+                "新建或覆盖主题配色。同名主题（themeName 相同）会被覆盖，不同名则新增。保存后需调用 apply_theme_config 才会实际生效。\n" +
+                "颜色格式：16进制字符串，如 \"#607D8B\"。\n" +
+                "字段说明：\n" +
+                "  primaryColor — 主色（工具栏、按钮等主要颜色）\n" +
+                "  accentColor — 强调色（选中状态、浮动按钮等）\n" +
+                "  backgroundColor — 背景色（夜间模式必须填深色，否则会被系统重置）\n" +
+                "  bottomBackground — 底部导航栏背景色\n" +
+                "  cardBackground — 卡片/列表项背景色，可为 null 则使用默认值 #F3EDF7\n" +
+                "  backgroundImgPath — 背景图路径（null=纯色；http=网络图；本地文件绝对路径）",
+                required = listOf("themeName", "isNightTheme", "primaryColor", "accentColor",
+                    "backgroundColor", "bottomBackground", "transparentNavBar", "backgroundImgBlur"),
+                properties = mapOf(
+                    "themeName" to prop("string", "主题名称（必填，同名则覆盖）"),
+                    "isNightTheme" to prop("boolean", "true=夜间主题，false=日间主题"),
+                    "primaryColor" to prop("string", "主色，16进制，如 \"#607D8B\""),
+                    "accentColor" to prop("string", "强调色，16进制，如 \"#BF360C\""),
+                    "backgroundColor" to prop("string", "背景色，16进制（夜间模式必须为深色）"),
+                    "bottomBackground" to prop("string", "底部栏背景色，16进制"),
+                    "cardBackground" to prop("string", "卡片背景色，16进制，不填则默认 #F3EDF7"),
+                    "cardBackgroundAlpha" to prop("integer", "卡片透明度 0-100，默认 100"),
+                    "transparentNavBar" to prop("boolean", "是否透明导航栏，默认 false"),
+                    "backgroundImgPath" to prop("string", "背景图路径，null=纯色；http开头=网络图；本地路径=本地文件"),
+                    "backgroundImgBlur" to prop("integer", "背景图模糊强度 0-25，0=不模糊")
+                )
+            ),
+            tool(
+                "delete_theme_config",
+                "删除指定名称的主题配色（不可撤销）。执行前展示主题名称并批量确认。",
+                required = listOf("themeName"),
+                properties = mapOf(
+                    "themeName" to prop("string", "要删除的主题名称")
+                )
+            ),
+            tool(
+                "apply_theme_config",
+                "应用指定主题配色，使其立即生效。执行后 App 界面会自动刷新颜色（Activity 重建）。需批量确认。",
+                required = listOf("themeName"),
+                properties = mapOf(
+                    "themeName" to prop("string", "要应用的主题名称（需已通过 get_theme_configs 或 save_theme_config 存在于列表中）")
+                )
             )
         )
     }
+
 
     private fun tool(
         name: String,

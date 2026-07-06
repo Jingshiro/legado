@@ -6,11 +6,7 @@
 
 ## 📋 活跃开发文档
 
-| 文档 | 路径 | 说明 |
-|------|------|------|
-| AI 工具开发指南 | [[legado_new_tools_guide]] | 14个 AI 工具的完整定义、参数、返回格式 |
-| Material Design 迁移计划 | [[material_design_migration_plan]] | 5个阶段的 MD3 迁移策略 |
-| 高亮规则开发计划 | [[highlight_rule_plan]] | 替换规则扩展，支持正则捕获组样式 |
+*暂无活跃文档（当前阶段所有开发任务已完成）*
 
 ---
 
@@ -26,7 +22,7 @@
 | ~~`save_book_source`~~ | ~~导入书源（JSON/URL）~~ | ~~中~~ | 🚫 终止 |
 | ~~`manage_webdav`~~ | ~~WebDAV 备份管理~~ | ~~高~~ | 🚫 终止 |
 
-> 参考：[[legado_new_tools_guide]] 第二批（P1）
+> 参考：`archieved/legado_new_tools_guide`
 
 ---
 
@@ -40,13 +36,13 @@
 | `export_to_obsidian` | 想法导出到 Obsidian（AI 工具入口） | 低 | ✅ |
 | `get_detailed_reading_record` | 获取详细阅读记录 | 低 | ✅ |
 
-> 参考：[[legado_new_tools_guide]] 第三批（P2）
+> 参考：`archieved/legado_new_tools_guide`
 
 ---
 
 ## 🟢 P2 — Material Design 迁移
 
-> UI 已经大部分 OK，剩余是代码规范化和一致性工作。
+> UI 已经大部分 OK，核心的 Phase 1-3 布局和控件迁移已完成，高级样式微调暂缓。
 
 | 阶段 | 内容 | 工作量 | 状态 |
 |------|------|--------|------|
@@ -58,10 +54,10 @@
 | ~~Phase 3d~~ | ~~CardView → MaterialCardView~~ | | ✅ |
 | ~~Phase 3e~~ | ~~AppCompatSpinner 自动升级确认~~ | | ✅ |
 | ~~Phase 3f~~ | ~~AppCompatTextView/Button 散落控件替换~~ | | ✅ |
-| Phase 4 | 样式细节调优（色彩/ripple/Shape） | 3-5天 | ❌ |
-| Phase 5 | 进阶优化（Material3/Dynamic Color/Motion） | 按需 | ❌ |
+| Phase 4 | 样式细节调优（色彩/ripple/Shape） | 3-5天 | ⏸ 暂缓 |
+| Phase 5 | 进阶优化（Material3/Dynamic Color/Motion） | 按需 | ⏸ 暂缓 |
 
-> 参考：[[material_design_migration_plan]]
+> 参考：`archieved/material_design_migration_plan`
 
 ---
 
@@ -69,7 +65,7 @@
 
 | 功能 | 说明 | 状态 |
 |------|------|------|
-| 阅读记录排除订阅源 | [[implementation_plan_read_record]] 中 ReadRssActivity/VideoPlayerActivity 排除 RSS 源详细记录 | ✅ |
+| 阅读记录排除订阅源 | `archieved/implementation_plan_read_record` 中 ReadRssActivity/VideoPlayerActivity 排除 RSS 源详细记录 | ✅ |
 
 ---
 
@@ -86,3 +82,9 @@
 | 想法导出 Obsidian | `archieved/thought_obsidian_export_plan` | ✅ 已完成 |
 | 藏书票 | `archieved/reading_receipt` | ✅ 已完成 |
 | "我的"页面 MD3 | `archieved/my_page_md3_progress` | ✅ 已完成 |
+| 高亮规则开发计划 | `archieved/highlight_rule_plan` | ✅ 已完成 |
+| Legado 优化与增强计划 | `archieved/implementation_plan` | ✅ 已完成 |
+| 规则与主题配色管理计划 | `archieved/ai_rules_theme_plan` | ✅ 已完成 |
+| AI 工具实现指南 | `archieved/legado_new_tools_guide` | ✅ 已完成 |
+| Material Design 迁移计划 | `archieved/material_design_migration_plan` | ✅ 已完成 |
+

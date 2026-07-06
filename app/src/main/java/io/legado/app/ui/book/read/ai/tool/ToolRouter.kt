@@ -8,6 +8,7 @@ import io.legado.app.data.entities.RssSource
 import io.legado.app.help.AppWebDav
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.isLocal
+import io.legado.app.help.config.ThemeConfig
 import io.legado.app.help.http.okHttpClient
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -81,6 +82,10 @@ object ToolRouter {
                     "delete_book_source" -> batchDeleteBookSource(args)
                     "delete_rss_source" -> batchDeleteRssSource(args)
                     "delete_book" -> batchDeleteBook(args)
+                    "get_theme_configs" -> ToolExecuteResult.Data(getThemeConfigs())
+                    "save_theme_config" -> batchSaveThemeConfig(args)
+                    "delete_theme_config" -> batchDeleteThemeConfig(args)
+                    "apply_theme_config" -> batchApplyThemeConfig(args)
                     else -> ToolExecuteResult.Data("""{"error":"未知工具: $name"}""")
                 }
             } catch (e: Exception) {
@@ -215,9 +220,13 @@ object ToolRouter {
         val page = filtered.drop(offset).take(limit)
         return GSON.toJson(mapOf("success" to true, "data" to mapOf(
             "total" to filtered.size, "offset" to offset, "limit" to limit,
-            "rules" to page.map { r -> mapOf("id" to r.id.toString(), "name" to r.name,
+            "rules" to page.map { r -> mapOf(
+                "id" to r.id.toString(), "name" to r.name, "group" to (r.group ?: ""),
                 "pattern" to r.pattern, "replacement" to r.replacement,
-                "isRegex" to r.isRegex, "scope" to (r.scope ?: ""), "isEnabled" to r.isEnabled, "order" to r.order) })))
+                "isRegex" to r.isRegex, "isHighlight" to r.isHighlight,
+                "scope" to (r.scope ?: ""), "scopeTitle" to r.scopeTitle,
+                "scopeContent" to r.scopeContent, "excludeScope" to (r.excludeScope ?: ""),
+                "isEnabled" to r.isEnabled, "order" to r.order) })))
     }
 
     private fun getThoughts(args: Map<*, *>): String {
@@ -485,10 +494,15 @@ object ToolRouter {
                         val id = idStr?.toLongOrNull() ?: System.currentTimeMillis()
                         val rule = ReplaceRule(
                             id = id, name = m["name"] as? String ?: "",
+                            group = m["group"] as? String,
                             pattern = m["pattern"] as? String ?: "",
                             replacement = m["replacement"] as? String ?: "",
                             isRegex = m["isRegex"] as? Boolean ?: false,
+                            isHighlight = m["isHighlight"] as? Boolean ?: false,
                             scope = m["scope"] as? String ?: "",
+                            scopeTitle = m["scopeTitle"] as? Boolean ?: false,
+                            scopeContent = m["scopeContent"] as? Boolean ?: true,
+                            excludeScope = m["excludeScope"] as? String,
                             isEnabled = m["isEnabled"] as? Boolean ?: true,
                             order = (m["order"] as? Number)?.toInt() ?: if (isNew) appDb.replaceRuleDao.maxOrder + 1 else 0
                         )
@@ -644,6 +658,105 @@ object ToolRouter {
         }
     }
 
+    // ========== 主题配色管理 ==========
+
+    private fun getThemeConfigs(): String {
+        return GSON.toJson(mapOf(
+            "success" to true,
+            "data" to mapOf(
+                "total" to ThemeConfig.configList.size,
+                "themes" to ThemeConfig.configList.map { c ->
+                    mapOf(
+                        "themeName" to c.themeName,
+                        "isNightTheme" to c.isNightTheme,
+                        "primaryColor" to c.primaryColor,
+                        "accentColor" to c.accentColor,
+                        "backgroundColor" to c.backgroundColor,
+                        "bottomBackground" to c.bottomBackground,
+                        "cardBackground" to (c.cardBackground ?: "#F3EDF7"),
+                        "cardBackgroundAlpha" to c.cardBackgroundAlpha,
+                        "transparentNavBar" to c.transparentNavBar,
+                        "backgroundImgPath" to (c.backgroundImgPath ?: ""),
+                        "backgroundImgBlur" to c.backgroundImgBlur
+                    )
+                }
+            )
+        ))
+    }
+
+    private suspend fun batchSaveThemeConfig(args: Map<*, *>): ToolExecuteResult {
+        val themeName = args["themeName"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"themeName 参数不能为空"}""")
+        val isNightTheme = args["isNightTheme"] as? Boolean
+            ?: return ToolExecuteResult.Data("""{"error":"isNightTheme 参数不能为空"}""")
+        val primaryColor = args["primaryColor"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"primaryColor 参数不能为空"}""")
+        val accentColor = args["accentColor"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"accentColor 参数不能为空"}""")
+        val backgroundColor = args["backgroundColor"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"backgroundColor 参数不能为空"}""")
+        val bottomBackground = args["bottomBackground"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"bottomBackground 参数不能为空"}""")
+        val transparentNavBar = args["transparentNavBar"] as? Boolean ?: false
+        val backgroundImgBlur = (args["backgroundImgBlur"] as? Number)?.toInt() ?: 0
+        val cardBackground = args["cardBackground"] as? String
+        val cardBackgroundAlpha = (args["cardBackgroundAlpha"] as? Number)?.toInt() ?: 100
+        val backgroundImgPath = args["backgroundImgPath"] as? String
+
+        val isNew = ThemeConfig.configList.none { it.themeName == themeName }
+        val action = if (isNew) "新建" else "修改"
+        return ToolExecuteResult.BatchConfirmation(description = "${action}主题「$themeName」") {
+            withContext(Dispatchers.IO) {
+                val config = ThemeConfig.Config(
+                    themeName = themeName,
+                    isNightTheme = isNightTheme,
+                    primaryColor = primaryColor,
+                    accentColor = accentColor,
+                    backgroundColor = backgroundColor,
+                    bottomBackground = bottomBackground,
+                    cardBackground = cardBackground,
+                    cardBackgroundAlpha = cardBackgroundAlpha,
+                    transparentNavBar = transparentNavBar,
+                    backgroundImgPath = backgroundImgPath,
+                    backgroundImgBlur = backgroundImgBlur
+                )
+                ThemeConfig.addConfig(config)
+                ThemeConfig.save()
+            }
+            GSON.toJson(mapOf("success" to true, "data" to mapOf(
+                "themeName" to themeName, "action" to action,
+                "note" to "主题已保存，调用 apply_theme_config 可立即应用")))
+        }
+    }
+
+    private suspend fun batchDeleteThemeConfig(args: Map<*, *>): ToolExecuteResult {
+        val themeName = args["themeName"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"themeName 参数不能为空"}""")
+        val index = ThemeConfig.configList.indexOfFirst { it.themeName == themeName }
+        if (index < 0) return ToolExecuteResult.Data("""{"error":"未找到主题「$themeName」"}""")
+        return ToolExecuteResult.BatchConfirmation(description = "删除主题「$themeName」（不可撤销）") {
+            withContext(Dispatchers.IO) {
+                ThemeConfig.delConfig(index)
+            }
+            """{"success":true,"message":"主题「$themeName」已删除"}"""
+        }
+    }
+
+    private suspend fun batchApplyThemeConfig(args: Map<*, *>): ToolExecuteResult {
+        val themeName = args["themeName"] as? String
+            ?: return ToolExecuteResult.Data("""{"error":"themeName 参数不能为空"}""")
+        val config = ThemeConfig.configList.find { it.themeName == themeName }
+            ?: return ToolExecuteResult.Data("""{"error":"未找到主题「$themeName」，请先通过 save_theme_config 保存"}""")
+        return ToolExecuteResult.BatchConfirmation(description = "应用主题「$themeName」（界面将自动刷新）") {
+            withContext(Dispatchers.Main) {
+                ThemeConfig.applyConfig(splitties.init.appCtx, config)
+            }
+            GSON.toJson(mapOf("success" to true, "data" to mapOf(
+                "themeName" to config.themeName, "isNightTheme" to config.isNightTheme,
+                "message" to "主题「${config.themeName}」已应用，界面正在刷新")))
+        }
+    }
+
     // ========== 工具方法 ==========
 
     private fun bookToSimple(book: Book): Map<String, Any?> {
@@ -702,3 +815,5 @@ object ToolRouter {
         }
     }
 }
+
+    // ========== 主题配色管理（内部实现移到上方 object 内） ==========
