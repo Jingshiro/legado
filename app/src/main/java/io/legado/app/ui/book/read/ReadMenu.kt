@@ -670,7 +670,7 @@ class ReadMenu @JvmOverloads constructor(
     fun upBookView() {
         binding.tvBookName.text = ReadBook.book?.name ?: ""
         ReadBook.curTextChapter?.let {
-            binding.tvChapterName.text = it.title
+            binding.tvChapterName.text = it.title.replace(Regex("<[^>]+>"), "")
             binding.tvChapterName.visible()
             if (!ReadBook.isLocalBook) {
                 binding.tvChapterUrl.text = it.chapter.getAbsoluteURL()

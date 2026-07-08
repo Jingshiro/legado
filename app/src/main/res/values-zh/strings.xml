@@ -1315,6 +1315,7 @@
     <string name="style_color">颜色</string>
     <string name="style_font_size">字号</string>
     <string name="style_font_family">字体</string>
+    <string name="style_center">居中</string>
     <string name="style_custom_color">自定义颜色</string>
     <string name="highlight_mode_hint">在替换为中使用HTML标签设置样式，如 &lt;span style=\"color:red\"&gt;$1&lt;/span&gt;</string>
 </resources>

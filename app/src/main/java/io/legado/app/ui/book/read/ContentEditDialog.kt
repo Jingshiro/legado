@@ -46,7 +46,7 @@ class ContentEditDialog : BaseDialogFragment(R.layout.dialog_content_edit) {
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
         binding.toolBar.setBackgroundColor(primaryColor)
-        binding.toolBar.title = ReadBook.curTextChapter?.title
+        binding.toolBar.title = ReadBook.curTextChapter?.title?.replace(Regex("<[^>]+>"), "")
         initMenu()
         binding.toolBar.setOnClickListener {
             lifecycleScope.launch {
@@ -149,12 +149,7 @@ class ContentEditDialog : BaseDialogFragment(R.layout.dialog_content_edit) {
                         WebBook.getContentAwait(bookSource, book, chapter)
                     }
                 }
-                return@execute content ?: let {
-                    val contentProcessor = ContentProcessor.get(book.name, book.origin)
-                    val content = BookHelp.getContent(book, chapter) ?: return@let null
-                    contentProcessor.getContent(book, chapter, content, includeTitle = false)
-                        .toString()
-                }
+                return@execute content ?: BookHelp.getContent(book, chapter)
             }.onStart {
                 loadStateLiveData.postValue(true)
             }.onSuccess {

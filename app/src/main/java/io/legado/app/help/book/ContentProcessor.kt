@@ -8,6 +8,7 @@ import io.legado.app.constant.AppPattern.spaceRegex
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
+import io.legado.app.data.entities.ReplaceBook
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.exception.RegexTimeoutException
 import io.legado.app.help.config.AppConfig
@@ -32,6 +33,10 @@ class ContentProcessor private constructor(
     companion object {
         private val processors = hashMapOf<String, WeakReference<ContentProcessor>>()
         private val isAndroid8 = Build.VERSION.SDK_INT in 26..27
+
+        private fun debugLog(msg: String) {
+            AppLog.put("[高亮调试] $msg")
+        }
 
         /**
          * 高亮规则处理结果的 LRU 缓存。
@@ -100,12 +105,20 @@ class ContentProcessor private constructor(
         titleReplaceRules.run {
             clear()
             val rules = appDb.replaceRuleDao.findEnabledByTitleScope(bookName, bookOrigin)
-            addAll(rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) })
+            val filtered = rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) }
+            debugLog("upReplaceRules titleRules: DB=${rules.size}, afterThemeFilter=${filtered.size}, targetBind=$targetBind, book=$bookName")
+            addAll(filtered)
         }
         contentReplaceRules.run {
             clear()
             val rules = appDb.replaceRuleDao.findEnabledByContentScope(bookName, bookOrigin)
-            addAll(rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) })
+            val filtered = rules.filter { it.bindToThemes.isNullOrBlank() || it.bindToThemes!!.split(",").contains(targetBind) }
+            val highlightRules = filtered.filter { it.isHighlight }
+            debugLog("upReplaceRules contentRules: DB=${rules.size}, afterThemeFilter=${filtered.size}, highlightCount=${highlightRules.size}, targetBind=$targetBind")
+            highlightRules.forEach { rule ->
+                debugLog("  content高亮规则: id=${rule.id}, name=${rule.name}, pattern=${rule.pattern}, replacement=${rule.replacement}")
+            }
+            addAll(filtered)
         }
     }
 
@@ -125,6 +138,43 @@ class ContentProcessor private constructor(
     @Suppress("MemberVisibilityCanBePrivate")
     fun getContentReplaceRules(): List<ReplaceRule> {
         return contentReplaceRules
+    }
+
+    /**
+     * 获取带高亮的章节标题（供 ReadBook 等外部调用）
+     */
+    fun getDisplayTitleWithHighlight(
+        chapter: BookChapter,
+        useReplace: Boolean,
+        replaceBook: ReplaceBook?
+    ): String {
+        var displayTitle = chapter.getDisplayTitle(
+            getTitleReplaceRules(),
+            useReplace = useReplace,
+            replaceBook = replaceBook
+        )
+        if (useReplace) {
+            val highlightRules = getTitleReplaceRules().filter {
+                it.isHighlight && it.pattern.isNotEmpty()
+            }
+            highlightRules.forEach { item ->
+                try {
+                    displayTitle = applyHighlightRule(displayTitle, item)
+                } catch (e: Exception) {
+                    AppLog.put("标题高亮规则 ${item.name}替换出错.\n${displayTitle}", e)
+                }
+            }
+            val hasHtmlTag = displayTitle.contains("<b>") || displayTitle.contains("<i>")
+                || displayTitle.contains("<u>") || displayTitle.contains("<font ")
+                || displayTitle.contains("<strong>") || displayTitle.contains("<span ")
+            if (hasHtmlTag) {
+                displayTitle = splitMultiLineHtmlTags(displayTitle)
+                displayTitle = displayTitle.lines().joinToString("\n") { line ->
+                    if (line.isBlank()) line else "<usehtml>$line<endhtml>"
+                }
+            }
+        }
+        return displayTitle
     }
 
     fun getContent(
@@ -203,7 +253,15 @@ class ContentProcessor private constructor(
                     try {
                         val tmp = if (item.isHighlight) {
                             // 高亮模式：按捕获组应用样式
-                            applyHighlightRule(mContent, item)
+                            val result = applyHighlightRule(mContent, item)
+                            val matched = mContent != result
+                            debugLog("正文高亮规则[${item.name}]: pattern=${item.pattern}, matched=$matched, contentLen=${mContent.length}, resultLen=${result.length}")
+                            if (matched) {
+                                // 截取部分预览
+                                val preview = result.replace(Regex("<[^>]+>"), "").take(50)
+                                debugLog("  生效! 预览: $preview...")
+                            }
+                            result
                         } else if (item.isRegex) {
                             mContent.replace(
                                 item.name,
@@ -235,12 +293,16 @@ class ContentProcessor private constructor(
                     val hasHtmlTag = mContent.contains("<b>") || mContent.contains("<i>")
                         || mContent.contains("<u>") || mContent.contains("<font ")
                         || mContent.contains("<strong>") || mContent.contains("<span ")
+                    debugLog("usehtml检查: hasEffectiveHighlight=true, hasHtmlTag=$hasHtmlTag, contentLen=${mContent.length}")
                     if (hasHtmlTag) {
                         mContent = splitMultiLineHtmlTags(mContent)
                         mContent = mContent.lines().joinToString("\n") { line ->
                             if (line.isBlank()) line else "<usehtml>$line<endhtml>"
                         }
+                        debugLog("usehtml包裹完成, usehtml行数=${mContent.lines().count { it.startsWith("<usehtml>") }}")
                     }
+                } else {
+                    debugLog("usehtml检查: effectiveReplaceRules=${effectiveReplaceRules?.size ?: "null"}, hasHighlight=${effectiveReplaceRules?.any { it.isHighlight }}")
                 }
             }
             useHtmlMap.forEach { (placeholder, originalContent) ->
@@ -249,11 +311,12 @@ class ContentProcessor private constructor(
         }
         if (includeTitle) {
             //重新添加标题
-            mContent = chapter.getDisplayTitle(
-                getTitleReplaceRules(),
-                useReplace = useReplace && book.getUseReplaceRule(),
-                replaceBook = replaceBook
-            ) + "\n" + mContent
+            val displayTitle = getDisplayTitleWithHighlight(
+                chapter,
+                useReplace && book.getUseReplaceRule(),
+                replaceBook
+            )
+            mContent = displayTitle + "\n" + mContent
         }
         if (isAndroid8) {
             mContent = mContent.replace('\u00A0', ' ')
@@ -286,7 +349,10 @@ class ContentProcessor private constructor(
         // LRU 缓存命中检查：key = 内容长度|内容哈希|规则id|pattern|replacement
         // 用 length 辅助 hashCode 以极大降低碰撞概率（length 相同且 hashCode 相同才可能误命中）
         val cacheKey = "${content.length}|${content.hashCode()}|${rule.id}|${rule.pattern}|${rule.replacement}"
-        highlightCache.get(cacheKey)?.let { return it }
+        highlightCache.get(cacheKey)?.let {
+            debugLog("applyHighlightRule 缓存命中: rule=${rule.name}, contentLen=${content.length}")
+            return it
+        }
 
         val regex = if (rule.isRegex) {
             val options = mutableSetOf<RegexOption>()
@@ -302,6 +368,7 @@ class ContentProcessor private constructor(
         // 构建带样式的替换结果
         val sb = StringBuilder()
         var lastEnd = 0
+        var matchCount = 0
         regex.findAll(content).forEach { matchResult ->
             // 添加匹配前的原文
             sb.append(content, lastEnd, matchResult.range.first)
@@ -320,9 +387,10 @@ class ContentProcessor private constructor(
                 }
 
                 // 替换模板中的 $N（带标签或不带标签）
-                // 先替换带标签的: <tag>$N</tag>（支持嵌套标签如 <b><font color="red">$N</font></b>）
+                // 只匹配样式标签(b/i/u/font/span/strong/em/big/small)，不碰 div/p 结构标签
+                val styleTagNames = "b|i|u|font|span|strong|em|big|small"
                 val taggedPattern = Regex(
-                    """((?:<[^/][^>]*>)+)\$$groupIndex((?:</[^>]*>)+)""",
+                    """((?:<(?!\/)(?:$styleTagNames)\b[^>]*>)+)\$$groupIndex((?:<\/(?:$styleTagNames)>)+)""",
                     RegexOption.IGNORE_CASE
                 )
                 styledReplacement = taggedPattern.replace(styledReplacement, styledText)
@@ -331,6 +399,7 @@ class ContentProcessor private constructor(
             }
             sb.append(styledReplacement)
             lastEnd = matchResult.range.last + 1
+            matchCount++
         }
         // 添加最后一个匹配后的内容
         if (lastEnd < content.length) {
@@ -339,6 +408,7 @@ class ContentProcessor private constructor(
 
         val result = sb.toString()
         highlightCache.put(cacheKey, result)
+        debugLog("applyHighlightRule 完成: rule=${rule.name}, matchCount=$matchCount, resultLen=${result.length}")
         return result
     }
 

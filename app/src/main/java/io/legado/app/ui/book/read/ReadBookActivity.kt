@@ -1842,7 +1842,7 @@ class ReadBookActivity : BaseReadBookActivity(),
             val bookmark = book.createBookMark().apply {
                 chapterIndex = ReadBook.durChapterIndex
                 chapterPos = ReadBook.durChapterPos
-                chapterName = page.title
+                chapterName = page.title.replace(Regex("<[^>]+>"), "")
                 bookText = page.text.trim()
             }
             showDialogFragment(BookmarkDialog(bookmark))

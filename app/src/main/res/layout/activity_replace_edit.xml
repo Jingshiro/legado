@@ -215,6 +215,18 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/style_font_family" />
 
+                <TextView
+                    android:id="@+id/tv_center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="@string/style_center"
+                    android:textSize="14sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/style_center" />
+
             </LinearLayout>
 
             <androidx.appcompat.widget.LinearLayoutCompat

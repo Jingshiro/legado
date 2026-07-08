@@ -146,6 +146,8 @@ object CssStyleParser {
         return HighlightStyle(isBold, isItalic, isUnderline, color, fontSizePx, fontFamily)
     }
 
+    // 样式标签名（不包含 div/p 等结构标签，避免丢失外层包裹）
+    private val styleTagNames = "b|i|u|font|span|strong|em|big|small"
     private val groupStylesCache = LruCache<String, Map<Int, HighlightStyle>>(100)
 
     /**
@@ -159,9 +161,9 @@ object CssStyleParser {
 
         val result = mutableMapOf<Int, HighlightStyle>()
 
-        // 匹配 $N 周围所有开闭标签
+        // 匹配 $N 周围的样式标签（不包含 div/p 等结构标签）
         val pattern = Regex(
-            """((?:<[^/][^>]*>)+)\$(\d+)((?:</[^>]*>)+)""",
+            """((?:<(?!\/)(?:$styleTagNames)\b[^>]*>)+)\$(\d+)((?:<\/(?:$styleTagNames)>)+)""",
             RegexOption.IGNORE_CASE
         )
         pattern.findAll(replacement).forEach { match ->

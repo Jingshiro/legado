@@ -138,7 +138,7 @@ data class BookChapter(
         }
         if (useReplace && replaceRules != null) kotlin.run {
             replaceRules.forEach { item ->
-                if (item.pattern.isNotEmpty()) {
+                if (item.pattern.isNotEmpty() && !item.isHighlight) {
                     try {
                         val mDisplayTitle = if (item.isRegex) {
                             displayTitle.replace(

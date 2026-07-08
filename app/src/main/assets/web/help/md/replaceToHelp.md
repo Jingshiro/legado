@@ -28,8 +28,11 @@
 | `<i>...</i>` | *斜体* | `<i>$1</i>` |
 | `<u>...</u>` | 下划线 | `<u>$1</u>` |
 | `<font color="red">...</font>` | 颜色 | `<font color="red">$1</font>` |
+| `<font face="楷体">...</font>` | 字体 | `<font face="楷体">$1</font>` |
+| `<span style="font-size:18px">...</span>` | 字号 | `<span style="font-size:18px">$1</span>` |
 | `<big>...</big>` | 大号字 | `<big>$1</big>` |
 | `<small>...</small>` | 小号字 | `<small>$1</small>` |
+| `<div style="text-align: center;">...</div>` | 居中 | `<div style="text-align: center;">$1</div>` |
 
 支持的颜色名：red, blue, green, orange, purple, brown, pink, gold, gray, black
 
@@ -57,6 +60,18 @@
 正则："(.*?)"和'(.*?)'
 替换为：<b>$1</b>和<font color="red">$2</font>
 ```
+
+### 居中显示
+```
+替换为：<div style="text-align: center;">$0</div>
+```
+> 适合配合"作用于标题"使用，让章节标题居中显示。
+
+### 更换字体
+```
+替换为：<font face="楷体">$0</font>
+```
+> 适合全文匹配 `^[\s\S]*$` 时统一更换正文字体。
 
 ### 丢弃某个捕获组（不显示）
 ```

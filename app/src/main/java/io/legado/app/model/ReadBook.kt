@@ -711,10 +711,10 @@ object ReadBook : CoroutineScope by MainScope() {
         chapterLoadingJobs[chapter.index]?.cancel()
         val job = Coroutine.async(this, start = CoroutineStart.LAZY) {
             val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val displayTitle = chapter.getDisplayTitle(
-                contentProcessor.getTitleReplaceRules(),
+            val displayTitle = contentProcessor.getDisplayTitleWithHighlight(
+                chapter,
                 book.getUseReplaceRule(),
-                replaceBook = book.toReplaceBook()
+                book.toReplaceBook()
             )
             val contents = contentProcessor
                 .getContent(book, chapter, content, includeTitle = false)
@@ -800,10 +800,10 @@ object ReadBook : CoroutineScope by MainScope() {
         }
         kotlin.runCatching {
             val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val displayTitle = chapter.getDisplayTitle(
-                contentProcessor.getTitleReplaceRules(),
+            val displayTitle = contentProcessor.getDisplayTitleWithHighlight(
+                chapter,
                 book.getUseReplaceRule(),
-                replaceBook = book.toReplaceBook()
+                book.toReplaceBook()
             )
             val contents = contentProcessor
                 .getContent(book, chapter, content, includeTitle = false)
