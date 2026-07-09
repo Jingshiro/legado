@@ -38,6 +38,7 @@ import io.legado.app.ui.book.read.page.entities.column.TextColumn
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.fastSum
 import io.legado.app.utils.getTextWidthsCompat
+import io.legado.app.utils.spToPx
 import io.legado.app.utils.splitNotBlank
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -728,7 +729,8 @@ class TextChapterLayout(
         hasIndent: Boolean = false,
     ) {
         val textViewTagHandler = TextViewTagHandler()
-        val spanned = htmlContent.parseAsHtml(HtmlCompat.FROM_HTML_MODE_COMPACT, tagHandler = textViewTagHandler)
+        val processedHtml = convertFontSizeSpans(htmlContent)
+        val spanned = processedHtml.parseAsHtml(HtmlCompat.FROM_HTML_MODE_COMPACT, tagHandler = textViewTagHandler)
         val width = visibleWidth
         val textPaint = contentPaint
         val textColor = ReadBookConfig.textColor
@@ -764,8 +766,17 @@ class TextChapterLayout(
         } else {
             Layout.Alignment.ALIGN_NORMAL
         }
+        // 扫描文本中所有字号，用最大字号创建布局，避免大字号字符空间不足
+        val layoutPaint = TextPaint(textPaint)
+        val sizeSpans = spannable.getSpans(0, spannable.length, AbsoluteSizeSpan::class.java)
+        if (sizeSpans.isNotEmpty()) {
+            val maxSizePx = sizeSpans.maxOf { it.size }.toFloat()
+            if (maxSizePx > layoutPaint.textSize) {
+                layoutPaint.textSize = maxSizePx
+            }
+        }
         val staticLayout = if (atLeastApi28) {
-            StaticLayout.Builder.obtain(spannable, 0, spannable.length, textPaint, width)
+            StaticLayout.Builder.obtain(spannable, 0, spannable.length, layoutPaint, width)
                 .setAlignment(alignment)
                 .setIncludePad(true)
                 .setUseLineSpacingFromFallbacks(true)
@@ -774,7 +785,7 @@ class TextChapterLayout(
             @Suppress("DEPRECATION")
             StaticLayout(
                 spannable,
-                textPaint,
+                layoutPaint,
                 width,
                 alignment,
                 1f,
@@ -782,7 +793,7 @@ class TextChapterLayout(
                 true
             )
         }
-        val tempPaint = TextPaint(textPaint)
+        val tempPaint = TextPaint(layoutPaint)
         for (lineIndex in 0 until staticLayout.lineCount) {
             val lineStart = staticLayout.getLineStart(lineIndex)
             val lineEnd = staticLayout.getLineEnd(lineIndex)
@@ -804,7 +815,7 @@ class TextChapterLayout(
             val mLineBottom = staticLayout.getLineBottom(lineIndex).toFloat()
             val lineHeight = mLineBottom - mLineTop
             prepareNextPageIfNeed(durY + lineHeight)
-            textLine.upTopBottom(durY, lineHeight, textPaint.fontMetrics) //y坐标
+            textLine.upTopBottom(durY, lineHeight, layoutPaint.fontMetrics) //y坐标
 
             val columns = mutableListOf<BaseColumn>()
             // 首行添加段落缩进
@@ -1056,6 +1067,7 @@ class TextChapterLayout(
     private fun extractTextSize(spanned: Spanned, index: Int, defaultSize: Float): Float {
         val sizeSpans = spanned.getSpans(index, index + 1, AbsoluteSizeSpan::class.java)
         sizeSpans.firstOrNull()?.let { span ->
+            // AbsoluteSizeSpan.size 已经在创建时转换为 px
             return span.size.toFloat()
         }
         val relativeSpans = spanned.getSpans(index, index + 1, RelativeSizeSpan::class.java)
@@ -1539,6 +1551,52 @@ class TextChapterLayout(
     private fun isZeroWidthChar(char: Char): Boolean {
         val code = char.code
         return code == 8203 || code == 8204 || code == 8205 || code == 8288
+    }
+
+    /**
+     * 将 <span style="font-size:Nsp"> 转换为自定义标签 <fontsize_N>
+     * 以便 TextViewTagHandler 可以创建 AbsoluteSizeSpan
+     * （Android 的 Html.fromHtml 不支持解析 span 标签的 CSS font-size 属性）
+     */
+    private fun convertFontSizeSpans(html: String): String {
+        val openPattern = Regex(
+            """<span\s+[^>]*style\s*=\s*["'][^"']*font-size\s*:\s*([\d.]+)\s*sp[^"']*["'][^>]*>""",
+            RegexOption.IGNORE_CASE
+        )
+        val sb = StringBuilder()
+        var i = 0
+        val tagStack = mutableListOf<String>()
+
+        while (i < html.length) {
+            val openMatch = openPattern.find(html, i)
+            if (openMatch != null && openMatch.range.first == i) {
+                val size = openMatch.groupValues[1].toIntOrNull()
+                if (size != null && size > 0) {
+                    val tagName = "${FONT_SIZE_TAG_PREFIX}$size"
+                    sb.append("<$tagName>")
+                    tagStack.add(tagName)
+                    i = openMatch.range.last + 1
+                    continue
+                }
+            }
+            if (html.startsWith("</span>", i, ignoreCase = true)) {
+                if (tagStack.isNotEmpty()) {
+                    val tagName = tagStack.removeAt(tagStack.lastIndex)
+                    sb.append("</$tagName>")
+                } else {
+                    sb.append("</span>")
+                }
+                i += 7
+            } else {
+                sb.append(html[i])
+                i++
+            }
+        }
+        return sb.toString()
+    }
+
+    companion object {
+        private const val FONT_SIZE_TAG_PREFIX = "fontsize_"
     }
 
 }

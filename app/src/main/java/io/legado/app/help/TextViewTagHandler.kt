@@ -8,12 +8,14 @@ import android.text.Editable
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.ClickableSpan
 import android.text.style.ReplacementSpan
 import android.view.View
 import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.dpToPx
+import io.legado.app.utils.spToPx
 import org.xml.sax.XMLReader
 import splitties.init.appCtx
 
@@ -24,6 +26,7 @@ class TextViewTagHandler(private val onButtonClickListener: OnButtonClickListene
         private const val HR_TAG = "hr"
         const val HR_PLACE_CHAR = "—"
         const val HR_PLACE_STR = "———"
+        private const val FONT_SIZE_TAG_PREFIX = "fontsize_"
     }
     interface OnButtonClickListener {
         fun onButtonClick(name: String, click: String)
@@ -38,6 +41,7 @@ class TextViewTagHandler(private val onButtonClickListener: OnButtonClickListene
         }
     }
     private val buttonTagStack = mutableListOf<Int>()
+    private val fontSizeTagStack = mutableListOf<Pair<Int, Int>>() // (position, sizePx)
 
     override fun handleTag(
         opening: Boolean,
@@ -102,6 +106,25 @@ class TextViewTagHandler(private val onButtonClickListener: OnButtonClickListene
                     output.length,
                     SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
+            }
+            tag.startsWith(FONT_SIZE_TAG_PREFIX, ignoreCase = true) -> {
+                val sizeSp = tag.substring(FONT_SIZE_TAG_PREFIX.length).toIntOrNull()
+                if (sizeSp != null && sizeSp > 0) {
+                    val sizePx = sizeSp.toFloat().spToPx().toInt()
+                    if (opening) {
+                        fontSizeTagStack.add(Pair(output.length, sizePx))
+                    } else if (fontSizeTagStack.isNotEmpty()) {
+                        val (start, size) = fontSizeTagStack.removeAt(fontSizeTagStack.lastIndex)
+                        if (size == sizePx) {
+                            output.setSpan(
+                                AbsoluteSizeSpan(sizePx),
+                                start,
+                                output.length,
+                                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
+                    }
+                }
             }
         }
     }

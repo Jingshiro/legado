@@ -276,15 +276,16 @@ class ReplaceEditActivity :
     override fun onDialogDismissed(dialogId: Int) = Unit
 
     /**
-     * 显示字号选择对话框，插入 <span style="font-size:Npx"></span>
+     * 显示字号选择对话框，插入 <span style="font-size:Nsp"></span>
+     * 单位与正文设置的字号一致（sp）
      */
     private fun showFontSizeDialog() {
-        val options = listOf("12px", "14px", "16px", "18px", "20px", "24px", "自定义...")
+        val options = listOf("12sp", "14sp", "16sp", "18sp", "20sp", "24sp", "自定义...")
         alert(title = getString(R.string.style_font_size)) {
             items(options) { _, index ->
                 if (index < options.lastIndex) {
-                    val px = options[index].removeSuffix("px")
-                    insertFontSizeTag(px)
+                    val sp = options[index].removeSuffix("sp")
+                    insertFontSizeTag(sp)
                 } else {
                     showCustomFontSizeInput()
                 }
@@ -302,16 +303,16 @@ class ReplaceEditActivity :
         alert(title = getString(R.string.style_font_size)) {
             customView { input }
             okButton {
-                val px = input.text.toString().trim()
-                if (px.isNotEmpty()) {
-                    insertFontSizeTag(px)
+                val sp = input.text.toString().trim()
+                if (sp.isNotEmpty()) {
+                    insertFontSizeTag(sp)
                 }
             }
             cancelButton()
         }
     }
 
-    private fun insertFontSizeTag(px: String) {
+    private fun insertFontSizeTag(sp: String) {
         val editText = binding.etReplaceTo
         val start = editText.selectionStart
         val end = editText.selectionEnd
@@ -321,7 +322,7 @@ class ReplaceEditActivity :
         } else {
             ""
         }
-        val openTag = "<span style=\"font-size:${px}px\">"
+        val openTag = "<span style=\"font-size:${sp}sp\">"
         val closeTag = "</span>"
         val insertText = "$openTag$selectedText$closeTag"
         if (start < 0 || start >= editable.length) {
