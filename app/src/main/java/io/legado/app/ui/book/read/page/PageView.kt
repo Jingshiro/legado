@@ -361,7 +361,12 @@ class PageView(context: Context) : FrameLayout(context) {
     @SuppressLint("SetTextI18n")
     fun setProgress(textPage: TextPage) = textPage.apply {
         tvBookName?.setTextIfNotEqual(ReadBook.book?.name)
-        tvTitle?.setTextIfNotEqual(textPage.title)
+        val titleText = if (title.contains("<") && title.contains(">")) {
+            androidx.core.text.HtmlCompat.fromHtml(title, androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+        } else {
+            title
+        }
+        tvTitle?.setTextIfNotEqual(titleText)
         val readProgress = readProgress
         tvTotalProgress?.setTextIfNotEqual(readProgress)
         tvTotalProgress1?.setTextIfNotEqual("${chapterIndex.plus(1)}/${chapterSize}")

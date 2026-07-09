@@ -155,6 +155,7 @@ class ReplaceEditActivity :
         binding.tvColor.setOnClickListener { showColorPicker() }
         binding.tvFontSize.setOnClickListener { showFontSizeDialog() }
         binding.tvFontFamily.setOnClickListener { showFontFamilyDialog() }
+        binding.tvCenter.setOnClickListener { insertStyleTag("div", " style=\"text-align: center;\"") }
         
         // 绑定主题多选框
         binding.etBindToThemes.setOnClickListener {
