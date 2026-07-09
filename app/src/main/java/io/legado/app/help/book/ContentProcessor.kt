@@ -393,7 +393,7 @@ class ContentProcessor private constructor(
                     """((?:<(?!\/)(?:$styleTagNames)\b[^>]*>)+)\$$groupIndex((?:<\/(?:$styleTagNames)>)+)""",
                     RegexOption.IGNORE_CASE
                 )
-                styledReplacement = taggedPattern.replace(styledReplacement, styledText)
+                styledReplacement = taggedPattern.replace(styledReplacement) { styledText }
                 // 再替换裸的 $N
                 styledReplacement = styledReplacement.replace("\$$groupIndex", styledText)
             }
