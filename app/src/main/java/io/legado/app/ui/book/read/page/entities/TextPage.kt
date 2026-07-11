@@ -270,11 +270,15 @@ data class TextPage(
                 length++
             }
         }
-        val columns = textLines[maxIndex].columns
-        for (index in 0 until columnIndex) {
+        val textLine = textLines[maxIndex]
+        val columns = textLine.columns
+        val artificialCount = maxOf(0, columns.size - textLine.charSize)
+        for (index in artificialCount until columnIndex) {
             val column = columns[index]
-            if (column is TextBaseColumn) {
+            if (column is io.legado.app.ui.book.read.page.entities.column.TextBaseColumn) {
                 length += column.charData.length
+            } else {
+                length += 1
             }
         }
         return length

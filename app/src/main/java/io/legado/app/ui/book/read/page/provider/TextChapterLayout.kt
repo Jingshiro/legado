@@ -580,12 +580,22 @@ class TextChapterLayout(
             textPage.lines.forEach { line ->
                 if (line.chapterPosition >= end) return@forEach
                 if (line.chapterPosition + line.charSize <= start) return@forEach
+                val artificialCount = maxOf(0, line.columns.size - line.charSize)
+                var charPosOffset = 0
                 line.columns.forEachIndexed { index, column ->
-                    val textColumn = column as? TextBaseColumn ?: return@forEachIndexed
-                    val charPos = line.chapterPosition + index
-                    if (charPos in start until end) {
-                        textColumn.thoughtText = selectedText
-                        textColumn.thoughtStyle = style
+                    if (index >= artificialCount) {
+                        val charPosStart = line.chapterPosition + charPosOffset
+                        if (charPosStart in start until end) {
+                            if (column is TextBaseColumn) {
+                                column.thoughtText = selectedText
+                                column.thoughtStyle = style
+                            }
+                        }
+                        if (column is TextBaseColumn) {
+                            charPosOffset += column.charData.length
+                        } else {
+                            charPosOffset += 1
+                        }
                     }
                 }
             }

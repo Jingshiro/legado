@@ -699,31 +699,34 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             textPos.relativePagePos = relativePos
             textPage.lines.forEachIndexed { lineIndex, textLine ->
                 textPos.lineIndex = lineIndex
+                val artificialCount = maxOf(0, textLine.columns.size - textLine.charSize)
                 textLine.columns.forEachIndexed { charIndex, column ->
-                    textPos.columnIndex = charIndex
-                    val compareStart = textPos.compare(selectStart)
-                    val compareEnd = textPos.compare(selectEnd)
-                    if (column is TextBaseColumn) {
-                        when {
-                            compareStart == -1 -> if (
-                                selectStart.columnIndex == textLine.columns.size
-                                && charIndex == textLine.columns.lastIndex
-                            ) {
-                                builder.append("\n")
-                            }
-
-                            compareEnd == 1 -> if (selectEnd.columnIndex == -1 && charIndex == 0) {
-                                builder.append("\n")
-                            }
-
-                            compareStart >= 0 && compareEnd <= 0 -> {
-                                builder.append(column.charData)
-                                if (
-                                    textLine.isParagraphEnd
+                    if (charIndex >= artificialCount) {
+                        textPos.columnIndex = charIndex
+                        val compareStart = textPos.compare(selectStart)
+                        val compareEnd = textPos.compare(selectEnd)
+                        if (column is TextBaseColumn) {
+                            when {
+                                compareStart == -1 -> if (
+                                    selectStart.columnIndex == textLine.columns.size
                                     && charIndex == textLine.columns.lastIndex
-                                    && compareEnd != 0
                                 ) {
                                     builder.append("\n")
+                                }
+
+                                compareEnd == 1 -> if (selectEnd.columnIndex == -1 && charIndex == artificialCount) {
+                                    builder.append("\n")
+                                }
+
+                                compareStart >= 0 && compareEnd <= 0 -> {
+                                    builder.append(column.charData)
+                                    if (
+                                        textLine.isParagraphEnd
+                                        && charIndex == textLine.columns.lastIndex
+                                        && compareEnd != 0
+                                    ) {
+                                        builder.append("\n")
+                                    }
                                 }
                             }
                         }
@@ -742,7 +745,7 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
                     chapterIndex = page.chapterIndex
                     chapterPos = chapter.getReadLength(page.index) +
                             page.getPosByLineColumn(selectStart.lineIndex, selectStart.columnIndex)
-                    chapterName = chapter.title
+                    chapterName = chapter.chapter.title
                     bookText = getSelectedText()
                 }
             }
@@ -765,7 +768,7 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
                     chapterIndex = page.chapterIndex,
                     chapterPos = chapter.getReadLength(page.index) +
                             page.getPosByLineColumn(selectStart.lineIndex, selectStart.columnIndex),
-                    chapterName = chapter.title,
+                    chapterName = chapter.chapter.title,
                     selectedText = selectedText,
                     textHash = selectedText.hashCode().toString(),
                     underlineStyle = lastStyle.style,
