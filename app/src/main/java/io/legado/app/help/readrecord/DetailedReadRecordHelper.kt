@@ -11,7 +11,8 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.utils.GSON
 import kotlinx.coroutines.Dispatchers.IO
 
-private const val MIN_SESSION_DURATION = 60_000L
+private const val MIN_SESSION_DURATION = 120_000L // 2 minutes
+private const val MERGE_SESSION_GAP = 180_000L // 3 minutes
 
 data class DetailedReadSession(
     val startTime: Long,
@@ -100,14 +101,22 @@ object DetailedReadRecordHelper {
         if (bookName.isBlank()) return
         Coroutine.async(context = IO) {
             val book = appDb.bookDao.findByName(bookName).firstOrNull()
-            appDb.detailedReadRecordDao.insert(
-                DetailedReadRecord(
-                    bookName = bookName,
-                    startTime = startTime,
-                    endTime = endTime,
-                    readIteration = book?.readIteration ?: 0
+            val lastRecord = appDb.detailedReadRecordDao.getLastRecord(bookName)
+            if (lastRecord != null && (startTime - lastRecord.endTime) <= MERGE_SESSION_GAP) {
+                // Merge with previous session
+                appDb.detailedReadRecordDao.update(
+                    lastRecord.copy(endTime = endTime)
                 )
-            )
+            } else {
+                appDb.detailedReadRecordDao.insert(
+                    DetailedReadRecord(
+                        bookName = bookName,
+                        startTime = startTime,
+                        endTime = endTime,
+                        readIteration = book?.readIteration ?: 0
+                    )
+                )
+            }
         }
     }
 

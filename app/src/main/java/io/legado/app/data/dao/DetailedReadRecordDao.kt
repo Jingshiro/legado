@@ -3,6 +3,7 @@ package io.legado.app.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import io.legado.app.data.entities.DetailedReadRecord
 
 @Dao
@@ -10,6 +11,9 @@ interface DetailedReadRecordDao {
 
     @Insert
     fun insert(record: DetailedReadRecord)
+
+    @Update
+    fun update(record: DetailedReadRecord)
 
     @Insert
     fun insertAll(records: List<DetailedReadRecord>)
@@ -31,6 +35,9 @@ interface DetailedReadRecordDao {
 
     @Query("select min(startTime) from detailedReadRecord where bookName = :bookName")
     fun getEarliestStartTime(bookName: String): Long?
+
+    @Query("select * from detailedReadRecord where bookName = :bookName order by endTime desc limit 1")
+    fun getLastRecord(bookName: String): DetailedReadRecord?
 
     @Query("delete from detailedReadRecord")
     fun clear()

@@ -1,0 +1,2533 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="classic">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Legado 阅读分析</title>
+    <!-- 网站图标 -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://pub-0e6ce5d0161d4148a621c594405613f1.r2.dev/mypet.svg"
+    />
+
+    <style>
+      /* --- 1. 字体引入 (必须放在最前面) --- */
+      /* 屏显臻宋 */
+      @import url("https://fontsapi.zeoseven.com/79/main/result.css");
+      /* 梧桐女书 */
+      @import url("https://fontsapi.zeoseven.com/268/main/result.css");
+
+      /* --- 2. 基础预设与变量 (主题配置) --- */
+      :root {
+        /* 这里直接引用导入 CSS 中定义的 font-family 名称 */
+        --font-main: "Clear Han Serif", "PingFang SC", serif;
+        --font-logo: "Nyushu Firmia", cursive;
+
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-pill: 50px;
+
+        --heatmap-size: 10px;
+        --heatmap-gap: 3px;
+
+        --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      /* 主题：素雅白 (默认) */
+      [data-theme="elegant"] {
+        --bg-body: #f9f9f7;
+        --bg-card: #ffffff;
+        --bg-input: #f2f2f0;
+        --primary: #58665b;
+        --primary-fade: #edf0ee;
+        --text-main: #2c2c2c;
+        --text-sub: #888888;
+        --border: #e6e6e6;
+        --accent: #8b5f5f;
+        --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        --title-color: #2c2c2c;
+
+        /* 图表配色 (绿/灰调) */
+        --chart-level-0: #f2f2f0;
+        --chart-level-1: #cce0cd;
+        --chart-level-2: #9bc69e;
+        --chart-level-3: #6ba86f;
+        --chart-level-4: #4e8a52;
+      }
+
+      /* 主题：古籍黄 */
+      [data-theme="vintage"] {
+        --bg-body: #f0ead6;
+        --bg-card: #faf6e8;
+        --bg-input: #e6dfcc;
+        --primary: #5c4033;
+        --primary-fade: #ebe3d3;
+        --text-main: #3e3027;
+        --text-sub: #8c7b70;
+        --border: #d6cdb8;
+        --accent: #a84936;
+        --shadow: 0 8px 30px rgba(62, 48, 39, 0.06);
+        --title-color: #3e3027;
+
+        /* 图表配色 (古籍黄 - 棕色系) */
+        --chart-level-0: #e6dfcc;
+        --chart-level-1: #e6d5b8;
+        --chart-level-2: #c2a878;
+        --chart-level-3: #8f7142;
+        --chart-level-4: #5c4033;
+      }
+
+      /* 主题：静谧黑 */
+      [data-theme="dark"] {
+        --bg-body: #1a1a1a;
+        --bg-card: #252525;
+        --bg-input: #333333;
+        --primary: #a8b5a8;
+        --primary-fade: #333833;
+        --text-main: #e0e0e0;
+        --text-sub: #888888;
+        --border: #3a3a3a;
+        --accent: #9dc8a1;
+        --title-color: #e0e0e0;
+
+        /* 图表配色 (静谧黑 - 绿色系) */
+        --chart-level-0: #333333;
+        --chart-level-1: #0e4429;
+        --chart-level-2: #006d32;
+        --chart-level-3: #26a641;
+        --chart-level-4: #39d353;
+      }
+
+      /* 主题：极简灰 */
+      [data-theme="gray"] {
+        --bg-body: #f0f2f5;
+        --bg-card: #ffffff;
+        --bg-input: #f0f2f5;
+        --primary: #607d8b;
+        --primary-fade: #eceff1;
+        --text-main: #263238;
+        --text-sub: #90a4ae;
+        --border: #cfd8dc;
+        --accent: #546e7a;
+        --title-color: #37474f;
+
+        /* 图表配色 (极简灰 - 蓝灰系) */
+        --chart-level-0: #f0f2f5;
+        --chart-level-1: #cfd8dc;
+        --chart-level-2: #90a4ae;
+        --chart-level-3: #607d8b;
+        --chart-level-4: #455a64;
+      }
+
+      /* 主题：深海蓝 */
+      [data-theme="blue"] {
+        --bg-body: #0f172a;
+        --bg-card: #1e293b;
+        --bg-input: #334155;
+        --primary: #38bdf8;
+        --primary-fade: #1e3a8a;
+        --text-main: #f1f5f9;
+        --text-sub: #94a3b8;
+        --border: #334155;
+        --accent: #7dd3fc;
+        --title-color: #38bdf8;
+
+        /* 图表配色 (深海蓝 - 蓝色系) */
+        --chart-level-0: #334155;
+        --chart-level-1: #1e3a8a;
+        --chart-level-2: #3b82f6;
+        --chart-level-3: #2563eb;
+        --chart-level-4: #1d4ed8;
+      }
+
+      /* --- 3. 全局样式 --- */
+      /* --- 强化的玻璃拟态核心配置 --- */
+      :root, [data-theme="elegant"], [data-theme="vintage"], [data-theme="gray"] {
+        --glass-bg: rgba(255, 255, 255, 0.55);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+      }
+      
+      [data-theme="dark"], [data-theme="blue"] {
+        --glass-bg: rgba(0, 0, 0, 0.45);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      }
+
+      .theme-switcher, .upload-box, .stat-card, .chart-container, .list-container, .fab, .modal-card, .heatmap-tooltip {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border) !important;
+        /* 使用顶部/左侧高光效果，强化玻璃厚度感 */
+        box-shadow: 
+          var(--glass-shadow), 
+          inset 1px 1px 0px rgba(255, 255, 255, 0.2) !important;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: var(--font-main);
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        transition:
+          background-color 0.5s ease,
+          color 0.5s ease;
+        font-weight: normal;
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* 用虚化光球作为背景，衬托毛玻璃 */
+      body::before, body::after {
+        content: "";
+        position: fixed;
+        width: 350px;
+        height: 350px;
+        border-radius: 50%;
+        z-index: 0;
+        filter: blur(100px);
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      body::before {
+        top: -5%;
+        left: -5%;
+        background: var(--primary);
+      }
+
+      body::after {
+        bottom: -5%;
+        right: -5%;
+        background: var(--accent);
+      }
+
+      .container {
+        width: 100%;
+        max-width: 700px;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* --- 4. 头部与主题切换 --- */
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .theme-switcher {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 8px 16px;
+        background: var(--bg-card);
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .theme-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+        position: relative;
+      }
+
+      .theme-dot:hover {
+        transform: scale(1.1);
+      }
+
+      [data-theme="elegant"] .theme-dot[data-set="elegant"],
+      [data-theme="classic"] .theme-dot[data-set="classic"],
+      [data-theme="vintage"] .theme-dot[data-set="vintage"],
+      [data-theme="dark"] .theme-dot[data-set="dark"],
+      [data-theme="gray"] .theme-dot[data-set="gray"],
+      [data-theme="blue"] .theme-dot[data-set="blue"],
+      [data-theme="macaron"] .theme-dot[data-set="macaron"] {
+        border-color: var(--text-main);
+        transform: scale(1.1);
+      }
+
+      .theme-dot[data-set="elegant"] {
+        background: #f9f9f7;
+        box-shadow: inset 0 0 0 1px #ddd;
+      }
+
+      .theme-dot[data-set="classic"] {
+        background: #6b8e6b;
+      }
+
+      .theme-dot[data-set="vintage"] {
+        background: #f0ead6;
+      }
+
+      .theme-dot[data-set="dark"] {
+        background: #333;
+        border: 1px solid #555;
+      }
+
+      .theme-dot[data-set="gray"] {
+        background: #607d8b;
+      }
+
+      .theme-dot[data-set="blue"] {
+        background: #38bdf8;
+      }
+
+      .theme-dot[data-set="macaron"] {
+        background: linear-gradient(135deg, #ff9aa2, #e2f0cb);
+      }
+
+      .app-title {
+        font-family: var(--font-logo);
+        font-size: 42px;
+        color: var(--title-color);
+        margin-bottom: 4px;
+        font-weight: normal;
+        letter-spacing: 0.1em;
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.02);
+        transition: color 0.3s;
+      }
+
+      .app-subtitle {
+        font-size: 14px;
+        color: var(--text-sub);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* --- 5. 上传与功能区 --- */
+      .upload-box {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 80px 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+        margin-top: 10px;
+      }
+
+      .upload-box:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+      }
+
+      .filter-bar {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.6s ease;
+      }
+
+      .filter-bar.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .filter-pill {
+        padding: 6px 16px;
+        border-radius: var(--radius-pill);
+        font-size: 14px;
+        cursor: pointer;
+        background: transparent;
+        color: var(--text-sub);
+        border: 1px solid var(--border);
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .filter-pill:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .filter-pill.active {
+        background: var(--primary);
+        color: var(--bg-card);
+        border-color: var(--primary);
+      }
+
+      @media (max-width: 480px) {
+        .app-title {
+          font-size: 32px;
+        }
+
+        .upload-box {
+          padding: 50px 20px;
+        }
+
+        .filter-bar {
+          gap: 6px;
+        }
+
+        .filter-pill {
+          padding: 5px 12px;
+          font-size: 12px;
+          flex: 1 0 auto;
+          text-align: center;
+        }
+
+        .stats-grid {
+          gap: 10px;
+        }
+
+        .stat-value {
+          font-size: 22px;
+        }
+      }
+
+      .date-picker-group {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--text-main);
+        animation: fadeIn 0.3s ease;
+        flex-wrap: wrap;
+      }
+
+      .date-input {
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text-main);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: inherit;
+        max-width: 130px;
+      }
+
+      /* --- 6. 数据展示 --- */
+      .section-title {
+        display: flex;
+        align-items: center;
+        margin: 30px 0 15px;
+        font-size: 16px;
+        color: var(--primary);
+        font-weight: bold;
+        letter-spacing: 0.05em;
+      }
+
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        margin-left: 15px;
+        opacity: 0.6;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: var(--bg-card);
+        padding: 25px 10px;
+        border-radius: var(--radius-lg);
+        text-align: center;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .stat-card:hover {
+        border-color: var(--primary);
+      }
+
+      .stat-value {
+        font-size: 26px;
+        font-weight: normal;
+        margin-bottom: 5px;
+        color: var(--text-main);
+        font-family: var(--font-main);
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: var(--text-sub);
+        letter-spacing: 1px;
+      }
+
+      .list-container {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: 10px 0;
+        border: 1px solid var(--border);
+        min-height: 100px;
+      }
+
+      .book-item {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        transition: background 0.2s;
+      }
+
+      .book-item:last-child {
+        border-bottom: none;
+      }
+
+      .book-item:hover {
+        background: var(--primary-fade);
+      }
+
+      .book-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .book-title {
+        max-width: 75%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-main);
+      }
+
+      .book-time {
+        color: var(--text-sub);
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .progress-bg {
+        height: 3px;
+        background: var(--bg-input);
+        width: 100%;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: var(--primary);
+        width: 0;
+        transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        border-radius: 2px;
+      }
+
+      /* --- 6.5 新增图表样式 (优化版) --- */
+      .chart-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-bottom: 30px;
+        transition: var(--transition);
+        /* 允许横向滚动 */
+        overflow-x: auto;
+      }
+
+      .chart-container:hover {
+        border-color: var(--primary);
+      }
+
+      /* 热力图布局 */
+      .heatmap-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: max-content;
+        min-width: 100%;
+        padding-right: 20px; /* 增加右侧留白 */
+      }
+
+      .heatmap-months {
+        display: flex;
+        margin-left: 28px;
+        /* 对齐grid */
+        margin-bottom: 5px;
+        font-size: 10px;
+        color: var(--text-sub);
+        width: calc(100% - 28px);
+        position: relative;
+        height: 15px;
+      }
+
+      .heatmap-month-label {
+        position: absolute;
+      }
+
+      .heatmap-body {
+        display: flex;
+        gap: 5px;
+      }
+
+      .heatmap-weekdays {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--text-sub);
+        padding-top: 2px;
+        /* 对齐cell */
+        height: 88px;
+        /* 7行 * (10px + 3px gap) = 88px */
+      }
+
+      .heatmap-grid {
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-rows: repeat(7, 10px);
+        /* grid-template-columns 由 JavaScript 动态设置 */
+        gap: 3px;
+      }
+
+      .heatmap-cell {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        background: var(--bg-input);
+        transition: all 0.2s;
+      }
+
+      .heatmap-cell:hover {
+        transform: scale(1.2);
+        border: 1px solid var(--border);
+      }
+
+      /* 颜色等级 (使用 CSS 变量，无需单独为每个主题写适配) */
+      .heatmap-cell[data-level="0"] {
+        background: var(--chart-level-0);
+      }
+
+      .heatmap-cell[data-level="1"] {
+        background: var(--chart-level-1);
+      }
+
+      .heatmap-cell[data-level="2"] {
+        background: var(--chart-level-2);
+      }
+
+      .heatmap-cell[data-level="3"] {
+        background: var(--chart-level-3);
+      }
+
+      .heatmap-cell[data-level="4"] {
+        background: var(--chart-level-4);
+      }
+
+      /* PC 端适配：放大热力图以强制滚动 */
+      @media (min-width: 769px) {
+        /* 恢复原容器宽度 */
+        .container {
+          max-width: 700px;
+        }
+
+        :root {
+          --heatmap-size: 11px; /* 放大: 11+3=14 */
+          --heatmap-gap: 3px;
+        }
+
+        .heatmap-weekdays {
+          height: 95px; /* 7*(11+3) - 3 = 95 */
+        }
+
+        /* PC 端不需要在 wrapper 层设置滚动 */
+        .heatmap-wrapper {
+          overflow-x: visible;
+        }
+      }
+
+      /* 自定义滚动条 - 全局应用 */
+      .chart-container::-webkit-scrollbar {
+        height: 6px !important;
+      }
+      .chart-container::-webkit-scrollbar-track {
+        background: transparent !important;
+      }
+      .chart-container::-webkit-scrollbar-button {
+        display: none !important;
+      }
+      .chart-container::-webkit-scrollbar-thumb {
+        background: transparent !important;
+        border-radius: 3px;
+      }
+      .chart-container:hover::-webkit-scrollbar-thumb {
+        background: var(--primary) !important;
+        opacity: 0.6;
+      }
+      .chart-container::-webkit-scrollbar-thumb:hover {
+        opacity: 1;
+      }
+
+      /* 独立的 Heatmap Tooltip 样式 (Card 风格) */
+      .heatmap-tooltip {
+        position: fixed;
+        z-index: 9999;
+        background: var(--bg-card); /* 跟随主题背景 */
+        color: var(--text-main); /* 跟随主题文字 */
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        text-align: left;
+        box-shadow: var(--shadow); /* 跟随主题阴影 */
+        border: 1px solid var(--border); /* 增加边框 */
+        transform: translate(-50%, -100%);
+        margin-top: -12px;
+        white-space: normal; /* 允许换行 */
+        width: 145px !important; /* 固定宽度 145px */
+        word-wrap: break-word; /* 长单词换行 */
+        overflow-wrap: break-word;
+      }
+
+      .heatmap-tooltip b {
+        font-size: 12px;
+        display: block;
+        margin-bottom: 4px;
+        color: var(--text-sub); /* 日期颜色淡化 */
+      }
+
+      .heatmap-tooltip span {
+        color: var(--primary); /* 跟随主题主色 */
+        font-weight: bold;
+      }
+
+      .heatmap-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 6px 0;
+        opacity: 0.5;
+      }
+
+      .trend-chart {
+        display: flex;
+        align-items: flex-end;
+        height: 180px;
+        width: 100%;
+        gap: 2px;
+        padding-top: 30px;
+        /* 增加顶部空间给 tooltip */
+        border-bottom: 1px solid var(--border);
+        /* 增加横轴线 */
+        padding-bottom: 0px;
+      }
+
+      .trend-bar-group {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        position: relative;
+        cursor: pointer;
+        min-width: 4px;
+      }
+
+      .trend-bar {
+        width: 100%;
+        background: var(--primary);
+        opacity: 0.8;
+        border-radius: 2px 2px 0 0;
+        transition:
+          height 0.4s ease,
+          opacity 0.2s;
+        min-height: 0px;
+        position: relative;
+        /* 为了定位内部的 tooltip */
+      }
+
+      .trend-bar-group:hover .trend-bar {
+        opacity: 1;
+        filter: brightness(1.1);
+      }
+
+      .trend-date {
+        font-size: 10px;
+        color: var(--text-sub);
+        text-align: center;
+        margin-top: 6px;
+        opacity: 1;
+        /* 常驻显示 */
+        position: absolute;
+        top: 100%;
+        width: 100%;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      /* 智能显示日期标签：默认隐藏，JS控制显示 */
+      .trend-date.hide {
+        display: none;
+      }
+
+      /* 移动端隐藏所有日期标签 */
+      @media (max-width: 768px) {
+        .trend-date {
+          display: none !important;
+        }
+      }
+
+      .trend-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--text-main);
+        color: var(--bg-card);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.1s;
+        white-space: nowrap;
+        z-index: 20;
+        margin-bottom: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        font-weight: bold;
+      }
+
+      .trend-bar-group:hover .trend-tooltip {
+        opacity: 1;
+      }
+
+      /* --- 7. AI 按钮与弹窗 --- */
+      .fab {
+        position: fixed;
+        bottom: 30px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+        transition: var(--transition);
+        z-index: 100;
+        color: var(--primary);
+      }
+
+      .fab:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary);
+        color: var(--accent);
+      }
+
+      .fab svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      .fab.hidden {
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        z-index: 200;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-card {
+        width: 90%;
+        max-width: 550px;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        transform: scale(0.98);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        max-height: 85vh;
+        border: 1px solid var(--border);
+      }
+
+      .modal-overlay.open .modal-card {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-title {
+        font-size: 18px;
+        color: var(--primary);
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      .close-btn {
+        cursor: pointer;
+        opacity: 0.5;
+        transition: 0.2s;
+      }
+
+      .close-btn:hover {
+        opacity: 1;
+        color: var(--accent);
+      }
+
+      .modal-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        font-size: 14px;
+        cursor: pointer;
+        color: var(--text-sub);
+        transition: 0.2s;
+        background: transparent;
+      }
+
+      .tab-btn.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        font-weight: bold;
+      }
+
+      .modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        /* 隐藏滚动条但允许滚动 */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE 10+ */
+      }
+
+      .modal-body::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      .form-label {
+        display: block;
+        font-size: 13px;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      .form-input,
+      .form-textarea,
+      .form-select {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        padding: 10px;
+        font-size: 14px;
+        color: var(--text-main);
+        transition: 0.2s;
+        font-family: inherit;
+        resize: vertical;
+      }
+
+      .form-input:focus,
+      .form-textarea:focus,
+      .form-select:focus {
+        background: var(--bg-card);
+        border-color: var(--primary);
+      }
+
+      .form-select {
+        cursor: pointer;
+      }
+
+      .style-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .style-tag {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: var(--radius-md);
+        background: var(--bg-input);
+        color: var(--text-sub);
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .style-tag:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .style-tag.selected {
+        background: var(--primary);
+        color: var(--bg-card);
+      }
+
+      .ai-result {
+        margin-top: 20px;
+        background: var(--bg-input);
+        padding: 15px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        line-height: 1.8;
+        color: var(--text-main);
+        min-height: 60px;
+        white-space: pre-wrap;
+        border-left: 2px solid var(--primary);
+      }
+
+      .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 8px 20px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: 0.2s;
+        background: transparent;
+      }
+
+      .btn-cancel {
+        color: var(--text-sub);
+        border-color: var(--border);
+      }
+
+      .btn-cancel:hover {
+        border-color: var(--text-main);
+        color: var(--text-main);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: var(--bg-card);
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .d-none {
+        display: none !important;
+      }
+
+      /* --- 8. 页脚 --- */
+      footer {
+        margin-top: 50px;
+        padding: 20px 0;
+        text-align: center;
+        border-top: 1px solid var(--border);
+        width: 100%;
+        font-size: 12px;
+        color: var(--text-sub);
+      }
+
+      footer a {
+        color: var(--primary);
+        text-decoration: none;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 5px;
+      }
+
+      footer a:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.5;
+        }
+
+        50% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0.5;
+        }
+      }
+
+      .ai-loading {
+        animation: pulse 1.5s infinite;
+        font-style: italic;
+        color: var(--text-sub);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- 头部 -->
+      <header>
+        <div class="theme-switcher">
+          <div class="theme-dot" data-set="elegant" title="素雅白"></div>
+          <div class="theme-dot" data-set="vintage" title="古籍黄"></div>
+          <div class="theme-dot" data-set="gray" title="极简灰"></div>
+          <div class="theme-dot" data-set="blue" title="深海蓝"></div>
+          <div class="theme-dot" data-set="dark" title="静谧黑"></div>
+        </div>
+        <h1 class="app-title">阅读数据分析</h1>
+        <div class="app-subtitle">Analysis for Legado</div>
+      </header>
+
+      <!-- 文件上传区 -->
+      <div class="upload-box" id="uploadBox">
+        <svg
+          style="
+            width: 48px;
+            height: 48px;
+            fill: var(--text-sub);
+            margin-bottom: 16px;
+            opacity: 0.5;
+          "
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v-2zm-4 4h4v2h-4v-2zm-4-4h2v2H7V9zm0 4h2v2H7v-2z"
+          ></path>
+        </svg>
+        <div
+          style="color: var(--text-sub); font-size: 15px; letter-spacing: 1px"
+        >
+          点击上传 Legado 备份 JSON
+        </div>
+        <input
+          type="file"
+          id="fileInput"
+          accept=".json"
+          style="display: none"
+        />
+      </div>
+
+      <!-- 主界面 -->
+      <div id="dashboard" class="d-none">
+        <!-- 筛选栏 -->
+        <div class="filter-bar show">
+          <div class="filter-pill active" data-type="all">全部</div>
+          <div class="filter-pill" data-type="year">本年</div>
+          <div class="filter-pill" data-type="month">本月</div>
+          <div class="filter-pill" data-type="week">本周</div>
+          <div class="filter-pill" data-type="custom">自定义</div>
+        </div>
+        <div class="date-picker-group" id="customDateGroup">
+          <input type="date" id="startDate" class="date-input" />
+          <span style="opacity: 0.5">-</span>
+          <input type="date" id="endDate" class="date-input" />
+          <button
+            class="btn btn-primary"
+            id="applyDateBtn"
+            style="padding: 4px 12px; font-size: 12px"
+          >
+            应用
+          </button>
+        </div>
+
+        <!-- 数据概览 -->
+        <div class="section-title">数据概览</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalTime">0.0</div>
+            <div class="stat-label">总时长 (小时)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="bookCount">0</div>
+            <div class="stat-label">阅读本数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avgTime">0</div>
+            <div class="stat-label">平均时长 (分)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="noteCount">—</div>
+            <div class="stat-label">想法记录 (条)</div>
+          </div>
+        </div>
+
+        <!-- 本日阅读时长统计 -->
+        <div class="section-title">本日阅读时长统计</div>
+        <div class="chart-container" style="display: flex; flex-direction: column; align-items: center; overflow: hidden;">
+          <div class="target-setting" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 13px; color: var(--text-sub);">每日目标 (分钟):</label>
+            <input type="number" id="dailyTargetInput" class="form-input" style="width: 80px; padding: 4px 8px;" min="1" value="60">
+            <button class="btn btn-primary" id="saveTargetBtn" style="padding: 4px 12px; font-size: 12px;">保存</button>
+          </div>
+          <div id="todayChartContainer" style="position: relative; width: 200px; height: 200px;">
+            <svg viewBox="0 0 100 100" style="transform: rotate(135deg); width: 100%; height: 100%;">
+              <!-- 基础环 -->
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg-input)" stroke-width="8" stroke-dasharray="188.5 251.3" stroke-dashoffset="0" stroke-linecap="round"></circle>
+              <!-- 进度环 -->
+              <circle id="todayProgressCircle" cx="50" cy="50" r="40" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="188.5 251.3" stroke-dashoffset="188.5" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out;"></circle>
+              <!-- 溢出进度环 -->
+              <circle id="todayOverflowCircle" cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="188.5 251.3" stroke-dashoffset="188.5" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out; opacity: 0;"></circle>
+            </svg>
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <div id="todayTimeText" style="font-size: 28px; font-weight: bold; color: var(--text-main); font-variant-numeric: tabular-nums;">00:00</div>
+              <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">今日阅读</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 排行榜 -->
+        <div class="section-title">时长 Top 10</div>
+        <div class="list-container" id="rankList">
+          <!-- JS 渲染内容 -->
+        </div>
+
+        <!-- 想法统计 -->
+        <div class="section-title" id="thoughtSectionTitle" style="display:none;">想法统计 Top 5</div>
+        <div class="list-container" id="thoughtList" style="display:none;">
+          <!-- JS 渲染内容 -->
+        </div>
+
+        <!-- 可视化图表 (阅读活跃度) -->
+        <div class="section-title">阅读活跃度 (当前年份)</div>
+        <div class="chart-container">
+          <div class="heatmap-wrapper">
+            <div class="heatmap-months" id="heatmapMonths"></div>
+            <div class="heatmap-body">
+              <div class="heatmap-weekdays">
+                <div>Mon</div>
+                <div>Wed</div>
+                <div>Fri</div>
+              </div>
+              <div class="heatmap-grid" id="heatmapChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部页脚 -->
+    <footer>
+      <div style="margin-bottom: 5px">Designed for Legado</div>
+      <a href="https://github.com/Jingshiro/LegadoRecord" target="_blank">
+        <svg
+          style="width: 14px; height: 14px; fill: currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+          />
+        </svg>
+        Jingshiro/LegadoRecord
+      </a>
+    </footer>
+
+    <!-- AI 悬浮按钮 -->
+    <div class="fab hidden" id="aiFab" title="AI 分析">
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+        ></path>
+      </svg>
+    </div>
+
+    <!-- AI 弹窗 -->
+    <div class="modal-overlay" id="aiModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">AI 读书锐评</div>
+          <div class="close-btn" id="closeModal" style="font-size: 20px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-family: sans-serif;">
+            ✕
+          </div>
+        </div>
+
+        <div class="modal-tabs">
+          <div class="tab-btn active" data-tab="tab-generate">评价生成</div>
+          <div class="tab-btn" data-tab="tab-settings">API 配置</div>
+        </div>
+
+        <div class="modal-body">
+          <div id="tab-generate">
+            <div style="margin-bottom: 15px">
+              <label class="form-label">风格预设</label>
+              <div class="style-tags" id="styleTagsContainer"></div>
+              <textarea
+                class="form-textarea"
+                id="customPrompt"
+                rows="3"
+                placeholder="选择上方标签，或输入你想要AI扮演的角色和要求..."
+              ></textarea>
+            </div>
+            <div class="ai-result d-none" id="aiOutput"></div>
+          </div>
+
+          <div id="tab-settings" class="d-none">
+            <div style="margin-bottom: 15px">
+              <label class="form-label">API Base URL</label>
+              <input
+                type="text"
+                class="form-input"
+                id="apiBaseUrl"
+                placeholder="例如 https://api.openai.com"
+              />
+            </div>
+            <div style="margin-bottom: 15px">
+              <label class="form-label">API Key</label>
+              <input
+                type="password"
+                class="form-input"
+                id="apiKey"
+                placeholder="sk-..."
+              />
+            </div>
+            <div style="margin-bottom: 15px">
+              <label
+                class="form-label"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <span>Model Name</span>
+                <button
+                  class="btn"
+                  id="fetchModelsBtn"
+                  style="
+                    padding: 4px 12px;
+                    font-size: 12px;
+                    border: 1px solid var(--primary);
+                    color: var(--primary);
+                  "
+                >
+                  拉取模型列表
+                </button>
+              </label>
+              <select
+                class="form-select d-none"
+                id="modelSelect"
+                style="margin-bottom: 8px"
+              >
+                <option value="">请选择模型...</option>
+              </select>
+              <input
+                type="text"
+                class="form-input"
+                id="modelInput"
+                placeholder="gpt-3.5-turbo 或选择上方下拉框"
+              />
+            </div>
+            <div style="font-size: 12px; color: var(--text-sub)">
+              * 配置仅保存在本地浏览器中，请放心使用。
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-cancel" id="cancelBtn">取消</button>
+          <button class="btn btn-primary" id="confirmBtn">开始生成</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- 主题切换逻辑 ---
+      const themeDots = document.querySelectorAll(".theme-dot");
+      const html = document.documentElement;
+
+      // 读取本地存储的主题
+      const savedTheme = localStorage.getItem("app_theme") || "elegant"; // 默认改为elegant
+      html.setAttribute("data-theme", savedTheme);
+      themeDots.forEach((dot) => {
+        dot.addEventListener("click", () => {
+          const theme = dot.dataset.set;
+          html.setAttribute("data-theme", theme);
+          localStorage.setItem("app_theme", theme);
+        });
+      });
+
+      // --- 全局变量与 DOM ---
+      let allData = [];
+      let allSessions = []; // 保存流水数据
+      let allNotes = [];   // 保存笔记/想法数据
+      let currentFilteredData = [];
+      let currentFilteredNotes = []; // 当前时间段筛选后的笔记
+      let currentFilterName = "全部时间";
+
+      // 预设 AI 风格
+      const promptStyles = [
+        {
+          name: "毒舌评论",
+          content:
+            "风格：冷幽默、辛辣、毒舌。请根据我的阅读列表，无情地吐槽我的阅读品味，用反讽的语气指出我的问题，不要留情面。",
+        },
+        {
+          name: "热心迷妹",
+          content:
+            "风格：可爱、崇拜。你是我的超级粉丝，无论我读什么你都觉得我很棒，用很多感叹号，疯狂夸赞我。",
+        },
+        {
+          name: "哲学大师",
+          content:
+            "风格：深沉、哲学。请从存在主义视角分析我的阅读轨迹，用晦涩但高级的词汇，探讨我灵魂的归宿。",
+        },
+        {
+          name: "专业分析",
+          content:
+            "风格：数据分析师。客观、理性。分析我的阅读时长分布、阅读类型倾向，给出阅读效率的改进建议。",
+        },
+        {
+          name: "摸鱼鉴定",
+          content:
+            "风格：幽默。分析我这些书是不是在上班摸鱼时看的，计算我大概通过阅读赚了老板多少钱。",
+        },
+      ];
+
+      // 缓存配置
+      let aiConfig = {
+        baseUrl: localStorage.getItem("ai_base_url") || "",
+        apiKey: localStorage.getItem("ai_api_key") || "",
+        model: localStorage.getItem("ai_model") || "gpt-3.5-turbo",
+      };
+
+      const els = {
+        uploadBox: document.getElementById("uploadBox"),
+        fileInput: document.getElementById("fileInput"),
+        dashboard: document.getElementById("dashboard"),
+        filterPills: document.querySelectorAll(".filter-pill"),
+        customDateGroup: document.getElementById("customDateGroup"),
+        dateInputs: {
+          start: document.getElementById("startDate"),
+          end: document.getElementById("endDate"),
+        },
+        applyDateBtn: document.getElementById("applyDateBtn"),
+        stats: {
+          totalTime: document.getElementById("totalTime"),
+          bookCount: document.getElementById("bookCount"),
+          avgTime: document.getElementById("avgTime"),
+          noteCount: document.getElementById("noteCount"),
+        },
+        rankList: document.getElementById("rankList"),
+        thoughtList: document.getElementById("thoughtList"),
+        thoughtSectionTitle: document.getElementById("thoughtSectionTitle"),
+        charts: {
+          heatmap: document.getElementById("heatmapChart"),
+        },
+        todayChart: {
+          targetInput: document.getElementById("dailyTargetInput"),
+          saveBtn: document.getElementById("saveTargetBtn"),
+          progressCircle: document.getElementById("todayProgressCircle"),
+          overflowCircle: document.getElementById("todayOverflowCircle"),
+          timeText: document.getElementById("todayTimeText"),
+        },
+        aiFab: document.getElementById("aiFab"),
+        aiModal: document.getElementById("aiModal"),
+        closeModal: document.getElementById("closeModal"),
+        cancelBtn: document.getElementById("cancelBtn"),
+        confirmBtn: document.getElementById("confirmBtn"),
+        tabBtns: document.querySelectorAll(".tab-btn"),
+        tabContents: {
+          generate: document.getElementById("tab-generate"),
+          settings: document.getElementById("tab-settings"),
+        },
+        inputs: {
+          baseUrl: document.getElementById("apiBaseUrl"),
+          apiKey: document.getElementById("apiKey"),
+          model: document.getElementById("modelInput"),
+          styleContainer: document.getElementById("styleTagsContainer"),
+          customPrompt: document.getElementById("customPrompt"),
+          output: document.getElementById("aiOutput"),
+        },
+      };
+
+      // 初始化输入框
+      els.inputs.baseUrl.value = aiConfig.baseUrl;
+      els.inputs.apiKey.value = aiConfig.apiKey;
+      els.inputs.model.value = aiConfig.model;
+
+      // 拉取模型列表按钮
+      const fetchModelsBtn = document.getElementById("fetchModelsBtn");
+      const modelSelect = document.getElementById("modelSelect");
+
+      fetchModelsBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const baseUrl = els.inputs.baseUrl.value.trim();
+        const apiKey = els.inputs.apiKey.value.trim();
+
+        if (!baseUrl || !apiKey) {
+          alert("请先填写 API Base URL 和 API Key");
+          return;
+        }
+
+        fetchModelsBtn.disabled = true;
+        fetchModelsBtn.innerText = "拉取中...";
+
+        try {
+          // 处理 API 地址末尾斜杠
+          let url = baseUrl.replace(/\/+$/, "");
+          // 智能补全 /v1/models
+          if (!url.endsWith("/models")) {
+            if (url.endsWith("/v1")) {
+              url += "/models";
+            } else {
+              url += "/v1/models";
+            }
+          }
+
+          // 直接请求 API
+          const res = await fetch(url, {
+            method: "GET", // 通常 models 是 GET 请求
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+            },
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+          const models = data.data || [];
+
+          if (models.length === 0) {
+            alert("未获取到任何模型");
+            return;
+          }
+
+          // 填充下拉框
+          modelSelect.innerHTML =
+            '<option value="">请选择模型...</option>' +
+            models
+              .map((m) => `<option value="${m.id}">${m.id}</option>`)
+              .join("");
+          modelSelect.classList.remove("d-none");
+
+          // 选择事件
+          modelSelect.onchange = () => {
+            if (modelSelect.value) {
+              els.inputs.model.value = modelSelect.value;
+            }
+          };
+        } catch (err) {
+          alert(
+            "拉取模型失败: " +
+              err.message +
+              "\n请检查跨域(CORS)设置或HTTPS/HTTP混合内容问题",
+          );
+        } finally {
+          fetchModelsBtn.disabled = false;
+          fetchModelsBtn.innerText = "拉取模型列表";
+        }
+      });
+
+      // 渲染风格标签
+      promptStyles.forEach((s) => {
+        const tag = document.createElement("div");
+        tag.className = "style-tag";
+        tag.innerText = s.name;
+        tag.onclick = () => {
+          document
+            .querySelectorAll(".style-tag")
+            .forEach((t) => t.classList.remove("selected"));
+          tag.classList.add("selected");
+          els.inputs.customPrompt.value = s.content;
+        };
+        els.inputs.styleContainer.appendChild(tag);
+      });
+
+      // --- 文件处理 ---
+      els.uploadBox.addEventListener("click", () => els.fileInput.click());
+      els.uploadBox.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        els.uploadBox.style.borderColor = "var(--primary)";
+      });
+      els.uploadBox.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        els.uploadBox.style.borderColor = "var(--border)";
+      });
+      els.uploadBox.addEventListener("drop", (e) => {
+        e.preventDefault();
+        els.uploadBox.style.borderColor = "var(--border)";
+        handleFile(e.dataTransfer.files[0]);
+      });
+      els.fileInput.addEventListener("change", (e) =>
+        handleFile(e.target.files[0]),
+      );
+
+      function processRawData(rawData) {
+        // 兼容处理多种数据格式:
+        // 1. 新格式: [{bookName: "xxx", sessions: [...], notes: [...]}, ...]
+        // 2. 旧流水格式: [{bookName: "xxx", startTime, endTime}, ...]
+        // 3. 旧备份格式: {books: [{name, readTime, lastRead}, ...]}
+
+        // 检测新格式 (包含 sessions 数组)
+        const isNewFormat =
+          Array.isArray(rawData) &&
+          rawData.length > 0 &&
+          Array.isArray(rawData[0].sessions);
+
+        // 提取 notes（新格式才会有）
+        allNotes = [];
+        if (isNewFormat) {
+          rawData.forEach((book) => {
+            if (book.notes && Array.isArray(book.notes)) {
+              book.notes.forEach((note) => {
+                allNotes.push({
+                  bookName: note.bookName || book.bookName || "无名书籍",
+                  chapterName: note.chapterName || "",
+                  bookText: note.bookText || "",
+                  content: note.content || "",
+                  time: note.time || 0,
+                });
+              });
+            }
+          });
+        }
+
+        if (isNewFormat) {
+          // 新格式: 展开为扁平化的 sessions 数组
+          allSessions = [];
+          rawData.forEach((book) => {
+            if (book.sessions && Array.isArray(book.sessions)) {
+              book.sessions.forEach((session) => {
+                allSessions.push({
+                  bookName: book.bookName || "无名书籍",
+                  startTime: session.startTime,
+                  endTime: session.endTime,
+                });
+              });
+            }
+          });
+          allData = processData(allSessions); // 聚合为书籍维度
+        } else {
+          // 检测旧流水格式 (扁平数组且包含 startTime/endTime)
+          const isOldSessionData =
+            Array.isArray(rawData) &&
+            rawData.length > 0 &&
+            (rawData[0].startTime !== undefined ||
+              rawData[0].endTime !== undefined);
+
+          if (isOldSessionData) {
+            allSessions = rawData; // 保存原始流水
+            allData = processData(allSessions); // 聚合为书籍维度
+          } else {
+            // 旧版备份格式
+            const books = Array.isArray(rawData)
+              ? rawData
+              : rawData.books || [];
+            allSessions = []; // 旧版无流水
+            allData = books
+              .map((item) => {
+                const name = item.name || item.bookName || "无名书籍";
+                let ts = item.latestReadTime || item.lastRead || 0;
+                if (ts > 0 && ts < 10000000000) ts *= 1000;
+                let duration = item.totalReadingTime || item.readTime || 0;
+                duration = Math.floor(duration / 1000);
+                return { bookName: name, lastRead: ts, readTime: duration };
+              })
+              .filter((item) => item.readTime > 60);
+          }
+        }
+
+        els.uploadBox.style.display = "none";
+        els.dashboard.classList.remove("d-none");
+        els.aiFab.classList.remove("hidden");
+        applyFilter("all");
+      }
+
+      function handleFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const rawData = JSON.parse(e.target.result);
+            processRawData(rawData);
+          } catch (err) {
+            console.error(err);
+            alert(
+              "文件解析失败，请确保是 Legado 的 JSON 备份文件。\n错误信息: " +
+                err.message,
+            );
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // --- 供 Legado 自动注入调用的全局函数 ---
+      window.setLegadoRecord = function (jsonDataStr) {
+        if (!jsonDataStr) return;
+        try {
+          const rawData =
+            typeof jsonDataStr === "string"
+              ? JSON.parse(jsonDataStr)
+              : jsonDataStr;
+          processRawData(rawData);
+        } catch (e) {
+          console.error("解析 Legado 自动注入的阅读记录失败", e);
+        }
+      };
+
+      // 新增：数据聚合逻辑
+      // 新增：核心数据分析 (合并+过滤，AI标准)
+      function analyzeSessions(sessions) {
+        const bookGroups = {};
+        sessions.forEach((s) => {
+          const name = s.bookName || "无名书籍";
+          // 确保数据有效
+          if ((s.endTime || 0) > (s.startTime || 0)) {
+            if (!bookGroups[name]) bookGroups[name] = [];
+            bookGroups[name].push({ ...s });
+          }
+        });
+
+        const results = [];
+        Object.entries(bookGroups).forEach(([name, list]) => {
+          // A. 排序
+          list.sort((a, b) => a.startTime - b.startTime);
+
+          // B. 合并 (Gap < 60s)
+          const merged = [];
+          if (list.length > 0) {
+            let cur = list[0];
+            for (let i = 1; i < list.length; i++) {
+              const next = list[i];
+              if (next.startTime - cur.endTime < 60000) {
+                cur.endTime = Math.max(cur.endTime, next.endTime);
+              } else {
+                merged.push(cur);
+                cur = next;
+              }
+            }
+            merged.push(cur);
+          }
+
+          // C. 过滤 ( < 60s )
+          const valid = merged.filter((s) => s.endTime - s.startTime >= 60000);
+          if (valid.length === 0) return;
+
+          // D. 统计
+          let total = 0;
+          let maxD = 0;
+          let minD = Number.MAX_SAFE_INTEGER;
+          let lastR = 0;
+          const starts = [];
+          const ends = [];
+          let hasIterationData = false;
+          const brushNumbers = new Set();
+
+          valid.forEach((s) => {
+            const dur = (s.endTime - s.startTime) / 1000;
+            total += dur;
+            if (dur > maxD) maxD = dur;
+            if (dur < minD) minD = dur;
+            if (s.endTime > lastR) lastR = s.endTime;
+            starts.push(new Date(s.startTime));
+            ends.push(new Date(s.endTime));
+            if (s.readIteration !== undefined && s.readIteration !== null) {
+              hasIterationData = true;
+              brushNumbers.add(Math.floor(s.readIteration / 2) + 1);
+            }
+          });
+
+          results.push({
+            bookName: name,
+            readTime: total,
+            lastRead: lastR,
+            count: valid.length,
+            maxDuration: maxD,
+            minDuration: minD,
+            startTimes: starts,
+            endTimes: ends,
+            totalDuration: total, // Alias for AI compatibility
+            brushNumbers: hasIterationData ? Array.from(brushNumbers).sort((a, b) => a - b) : null,
+          });
+        });
+
+        return results.sort((a, b) => b.readTime - a.readTime);
+      }
+
+      function processData(sessions) {
+        return analyzeSessions(sessions);
+      }
+
+      // --- 筛选逻辑 ---
+      els.filterPills.forEach((pill) => {
+        pill.addEventListener("click", () => {
+          els.filterPills.forEach((p) => p.classList.remove("active"));
+          pill.classList.add("active");
+          const type = pill.dataset.type;
+          currentFilterName = pill.innerText;
+
+          if (type === "custom") {
+            els.customDateGroup.style.display = "flex";
+          } else {
+            els.customDateGroup.style.display = "none";
+            applyFilter(type);
+          }
+        });
+      });
+
+      els.applyDateBtn.addEventListener("click", () => {
+        if (!els.dateInputs.start.value || !els.dateInputs.end.value) return;
+        currentFilterName = `${els.dateInputs.start.value} 至 ${els.dateInputs.end.value}`;
+        applyFilter(
+          "custom",
+          els.dateInputs.start.value,
+          els.dateInputs.end.value,
+        );
+      });
+
+      let currentStartTs = 0;
+      let currentEndTs = 9999999999999;
+
+      function applyFilter(type, startStr, endStr) {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        let startTs = 0;
+        let endTs = 9999999999999;
+
+        if (type === "year") {
+          startTs = new Date(now.getFullYear(), 0, 1).getTime();
+        } else if (type === "month") {
+          startTs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+        } else if (type === "week") {
+          const day = now.getDay() || 7;
+          const monday = new Date(now);
+          monday.setDate(now.getDate() - day + 1);
+          startTs = monday.getTime();
+        } else if (type === "custom" && startStr && endStr) {
+          startTs = new Date(startStr + "T00:00:00").getTime();
+          endTs = new Date(endStr + "T23:59:59").getTime();
+        }
+
+        if (allSessions.length > 0) {
+          // 新逻辑：先按时间段筛选 Session，再进行聚合分析
+          const rangeSessions = allSessions.filter((s) => {
+            if (type === "all") return true;
+            return s.startTime >= startTs && s.startTime <= endTs;
+          });
+          currentFilteredData = analyzeSessions(rangeSessions);
+        } else {
+          // 旧逻辑 (兼容没有流水数据的备份)
+          currentFilteredData = allData.filter((item) => {
+            if (!item.lastRead && type !== "all") return false;
+            if (!item.lastRead) return true;
+            return item.lastRead >= startTs && item.lastRead <= endTs;
+          });
+        }
+
+        currentStartTs = startTs;
+        currentEndTs = endTs;
+
+        // 按时间段筛选 notes，并存为全局变量供 AI 提示词使用
+        currentFilteredNotes = allNotes.filter((n) => {
+          if (type === "all") return true;
+          return n.time >= startTs && n.time <= endTs;
+        });
+
+        renderDashboard(currentFilteredData, startTs, endTs, currentFilteredNotes);
+      }
+
+      function renderDashboard(data, startTs, endTs, filteredNotes = []) {
+        // 统计
+        const totalSec = data.reduce((a, b) => a + b.readTime, 0);
+        els.stats.totalTime.innerText = (totalSec / 3600).toFixed(1);
+        els.stats.bookCount.innerText = data.length;
+        els.stats.avgTime.innerText = data.length
+          ? Math.round(totalSec / 60 / data.length)
+          : 0;
+
+        // 想法统计
+        if (allNotes.length > 0) {
+          els.stats.noteCount.innerText = filteredNotes.length;
+          // 按书名聚合计数
+          const noteByBook = {};
+          filteredNotes.forEach((n) => {
+            const name = n.bookName || "无名书籍";
+            noteByBook[name] = (noteByBook[name] || 0) + 1;
+          });
+          const top5 = Object.entries(noteByBook)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+          if (top5.length > 0) {
+            els.thoughtSectionTitle.style.display = "";
+            els.thoughtList.style.display = "";
+            const maxCount = top5[0][1];
+            els.thoughtList.innerHTML = top5
+              .map(([name, count], i) => {
+                const percent = (count / maxCount) * 100;
+                return `
+                  <div class="book-item" style="animation: fadeUp 0.4s cubic-bezier(0.2,0.8,0.2,1) forwards; opacity:0; animation-delay:${i * 0.05}s; transform:translateY(15px);">
+                    <div class="book-header">
+                      <span class="book-title">${i + 1}. ${name}</span>
+                      <span class="book-time">${count} 条</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-bar" style="width:${percent}%"></div></div>
+                  </div>`;
+              })
+              .join("");
+          } else {
+            els.thoughtSectionTitle.style.display = "none";
+            els.thoughtList.style.display = "none";
+          }
+        } else {
+          // 旧数据，无 notes，保持隐藏，并重置数值
+          els.stats.noteCount.innerText = "—";
+          els.thoughtSectionTitle.style.display = "none";
+          els.thoughtList.style.display = "none";
+        }
+
+        // 图表渲染 - 这里的逻辑需要修正，趋势图应该跟随时间段
+        if (allSessions.length > 0) {
+          // 热力图始终显示最近一年，不随筛选变化 (参考 Github)
+          renderHeatmap(allSessions);
+
+          // 趋势图需要跟随筛选
+          // 如果没有指定时间 (即全部时间)，默认显示最近 30 天
+          let tStart = startTs;
+          let tEnd = endTs;
+          const now = new Date().getTime();
+
+          // 处理 "全部时间" 或无效时间的情况
+          if (
+            startTs === 0 ||
+            startTs === undefined ||
+            endTs >= 9999999999999
+          ) {
+            tEnd = now;
+            tStart = now - 30 * 24 * 3600 * 1000; // 默认前30天
+          }
+
+          renderTodayChart(allSessions);
+        } else {
+          els.charts.heatmap.innerHTML =
+            '<div style="padding:10px;text-align:center;color:var(--text-sub)">无详细阅读记录，无法生成热力图</div>';
+          els.todayChart.timeText.innerText = "00:00";
+        }
+
+        // 列表
+        const sorted = [...data]
+          .sort((a, b) => b.readTime - a.readTime)
+          .slice(0, 10);
+        if (sorted.length === 0) {
+          els.rankList.innerHTML =
+            '<div style="text-align:center;color:var(--text-sub);padding:30px;">此时间段无阅读记录</div>';
+          return;
+        }
+
+        const maxTime = sorted[0].readTime;
+        els.rankList.innerHTML = sorted
+          .map((book, i) => {
+            const percent = (book.readTime / maxTime) * 100;
+            return `
+                <div class="book-item" style="animation: fadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; animation-delay: ${i * 0.05}s; transform: translateY(15px);">
+                    <div class="book-header">
+                        <span class="book-title">${i + 1}. ${book.bookName}</span>
+                        <span class="book-time">${(book.readTime / 3600).toFixed(1)}h</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-bar" style="width:${percent}%"></div></div>
+                </div>`;
+          })
+          .join("");
+      }
+
+      // 新增：渲染热力图 (GitHub 风格)
+      function renderHeatmap(sessions) {
+        const gridEl = els.charts.heatmap;
+        gridEl.innerHTML = "";
+        const monthsEl = document.getElementById("heatmapMonths");
+        monthsEl.innerHTML = "";
+
+        // Tooltip 初始化 (单例)
+        let tooltip = document.getElementById("heatmap-tooltip");
+        if (!tooltip) {
+          tooltip = document.createElement("div");
+          tooltip.id = "heatmap-tooltip";
+          tooltip.className = "heatmap-tooltip"; // 使用新样式类
+          document.body.appendChild(tooltip);
+        }
+
+        // 1. 聚合数据 (Key: YYYY-MM-DD)
+        const dailyData = {};
+        const dailyBooks = {}; // Map<date, Map<bookName, duration>>
+
+        sessions.forEach((s) => {
+          const date = new Date(s.startTime); // 使用 startTime
+          const k = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+          const dur = (s.endTime - s.startTime) / 1000;
+          if (dur > 0) {
+            dailyData[k] = (dailyData[k] || 0) + dur;
+
+            if (!dailyBooks[k]) dailyBooks[k] = {};
+            dailyBooks[k][s.bookName || "无名书籍"] =
+              (dailyBooks[k][s.bookName || "无名书籍"] || 0) + dur;
+          }
+        });
+
+        // 辅助：获取某日阅读最久
+        const getTopBook = (dateKey) => {
+          const books = dailyBooks[dateKey];
+          if (!books) return null;
+          let max = 0;
+          let name = "";
+          for (const b in books) {
+            if (books[b] > max) {
+              max = books[b];
+              name = b;
+            }
+          }
+          return name ? { name, time: max } : null;
+        };
+
+        const today = new Date();
+        const year = today.getFullYear();
+        
+        // 当年 12月 31日
+        const endDate = new Date(year, 11, 31);
+        
+        // 当年 1月 1日
+        let startDate = new Date(year, 0, 1);
+        
+        // 退回到 1月 1日所在周的周日
+        const dayOfWeek = startDate.getDay();
+        startDate.setDate(startDate.getDate() - dayOfWeek);
+
+        // 计算总周数
+        const totalDays = Math.ceil((endDate - startDate) / 86400000) + 1;
+        const weeks = Math.ceil(totalDays / 7);
+
+        let lastMonth = -1;
+        let html = "";
+        let iterDate = new Date(startDate);
+
+        // 动态获取 CSS 变量计算尺寸
+        const computedStyle = getComputedStyle(document.documentElement);
+        const sizeVal =
+          parseFloat(computedStyle.getPropertyValue("--heatmap-size")) || 10;
+        const gapVal =
+          parseFloat(computedStyle.getPropertyValue("--heatmap-gap")) || 3;
+        const unitSize = sizeVal + gapVal; // PC: 9+2=11, Mobile: 10+3=13
+
+        for (let w = 0; w < weeks; w++) {
+          const weekSunday = new Date(iterDate);
+          const weekSaturday = new Date(iterDate);
+          weekSaturday.setDate(weekSunday.getDate() + 6);
+          if (weekSunday.getMonth() !== lastMonth) {
+            // 如果第一周的周日落在了上一年的12月，则跳过绘制该 "Dec" 标签
+            if (!(w === 0 && weekSunday.getMonth() === 11)) {
+              const mName = weekSunday.toLocaleDateString("en-US", {
+                month: "short",
+              });
+              // 动态计算位置
+              const realLeft = w * unitSize;
+              monthsEl.innerHTML += `<div class="heatmap-month-label" style="left:${realLeft}px">${mName}</div>`;
+            }
+            lastMonth = weekSunday.getMonth();
+          }
+          for (let d = 0; d < 7; d++) {
+            const k = `${iterDate.getFullYear()}-${String(iterDate.getMonth() + 1).padStart(2, "0")}-${String(iterDate.getDate()).padStart(2, "0")}`;
+            const sec = dailyData[k] || 0;
+
+            if (iterDate.getFullYear() !== year) {
+              // 补充在网格里但不属于今年的空白天数
+              html += `<div class="heatmap-cell" style="opacity:0; pointer-events:none"></div>`;
+            } else if (iterDate > today) {
+              // 今年的未来日期显示为空白格子
+              html += `<div class="heatmap-cell" data-level="0" style="pointer-events:none"></div>`;
+            } else {
+              let level = 0;
+              if (sec > 0) level = 1;
+              if (sec >= 3600) level = 2; // 1h
+              if (sec >= 10800) level = 3; // 3h
+              if (sec >= 18000) level = 4; // 5h
+
+              // 构建数据属性
+              let dataAttrs = `data-level="${level}" data-date="${k}" data-total="${(sec / 60).toFixed(0)}"`;
+              if (level > 0) {
+                const best = getTopBook(k);
+                if (best) {
+                  dataAttrs += ` data-book="${best.name.replace(/"/g, "&quot;")}" data-book-time="${(best.time / 60).toFixed(0)}"`;
+                }
+              }
+
+              html += `<div class="heatmap-cell" ${dataAttrs}></div>`;
+            }
+
+            iterDate.setDate(iterDate.getDate() + 1);
+          }
+        }
+        gridEl.innerHTML = html;
+        // 使用变量控制列宽
+        gridEl.style.gridTemplateColumns = `repeat(${weeks}, var(--heatmap-size))`;
+
+        // 添加交互
+        const cells = gridEl.querySelectorAll(".heatmap-cell");
+        cells.forEach((cell) => {
+          const show = (e) => {
+            const lv = cell.getAttribute("data-level");
+            if (!lv || lv === "0") return;
+
+            const date = cell.getAttribute("data-date");
+            const total = cell.getAttribute("data-total");
+            const book = cell.getAttribute("data-book");
+            const bookTime = cell.getAttribute("data-book-time");
+
+            let content = `<b>${date}</b>`;
+            content += `总阅读: ${total} min`;
+
+            if (book) {
+              content += `<div class="heatmap-divider"></div>
+                      本日最长: <span>${book}</span> (${bookTime}m)`;
+            }
+
+            tooltip.innerHTML = content;
+            tooltip.style.opacity = "1";
+
+            const rect = cell.getBoundingClientRect();
+            const left = rect.left + rect.width / 2;
+            const top = rect.top; // transform handles the -100% and centering
+
+            tooltip.style.left = left + "px";
+            tooltip.style.top = top + "px";
+          };
+
+          cell.addEventListener("mouseenter", show);
+          cell.addEventListener("click", (e) => {
+            // 阻止冒泡，避免触发 document 点击关闭
+            e.stopPropagation();
+            show(e);
+          });
+          cell.addEventListener("mouseleave", () => {
+            // PC 端 hover leave 隐藏；移动端点击后怎么隐藏？
+            tooltip.style.opacity = "0";
+          });
+        });
+
+        // 点击空白处关闭 Tooltip (移动端)
+        document.addEventListener("click", () => {
+          tooltip.style.opacity = "0";
+        });
+
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          const scrollToEnd = () => {
+            const wrapper = document.querySelector(".chart-container"); // 移动端是 container 滚动
+            if (wrapper) {
+              const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+              wrapper.scrollLeft = maxScroll;
+            }
+          };
+
+          // 立即尝试一次
+          requestAnimationFrame(scrollToEnd);
+          setTimeout(scrollToEnd, 100);
+          setTimeout(scrollToEnd, 300);
+          setTimeout(scrollToEnd, 500);
+        }
+      }
+
+      // 初始化今日目标设定
+      let dailyTargetMinutes = parseInt(localStorage.getItem("daily_reading_target")) || 60;
+      if (els.todayChart && els.todayChart.targetInput) {
+        els.todayChart.targetInput.value = dailyTargetMinutes;
+        els.todayChart.saveBtn.onclick = () => {
+          const val = parseInt(els.todayChart.targetInput.value);
+          if (val > 0) {
+            dailyTargetMinutes = val;
+            localStorage.setItem("daily_reading_target", val);
+            renderTodayChart(allSessions);
+            alert("目标已保存！");
+          }
+        };
+      }
+
+      // 新增：渲染本日阅读时长统计
+      function renderTodayChart(sessions) {
+        if (!els.todayChart || !els.todayChart.progressCircle) return;
+        
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const endOfToday = startOfToday + 24 * 3600 * 1000 - 1;
+        
+        let todaySeconds = 0;
+        sessions.forEach((s) => {
+          // 只统计今天的阅读时长
+          if (s.endTime >= startOfToday && s.startTime <= endOfToday) {
+            const sTime = Math.max(s.startTime, startOfToday);
+            const eTime = Math.min(s.endTime, endOfToday);
+            if (eTime > sTime) {
+              todaySeconds += (eTime - sTime) / 1000;
+            }
+          }
+        });
+        
+        const todayMinutes = Math.floor(todaySeconds / 60);
+        const displaySeconds = Math.floor(todaySeconds % 60);
+        
+        // 格式化 mm:ss
+        els.todayChart.timeText.innerText = `${String(todayMinutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}`;
+        
+        // 计算进度
+        const targetSeconds = dailyTargetMinutes * 60;
+        const totalDash = 188.5; // 3/4 circle circumference
+        
+        let progressPct = Math.min(todaySeconds / targetSeconds, 1);
+        let overflowPct = 0;
+        
+        if (todaySeconds > targetSeconds) {
+          // 溢出部分（最多显示一圈即再加100%）
+          overflowPct = Math.min((todaySeconds - targetSeconds) / targetSeconds, 1);
+        }
+        
+        // Dashoffset: 188.5 is empty, 0 is full
+        const progressOffset = totalDash - (totalDash * progressPct);
+        els.todayChart.progressCircle.style.strokeDashoffset = progressOffset;
+        
+        if (overflowPct > 0) {
+          const overflowOffset = totalDash - (totalDash * overflowPct);
+          els.todayChart.overflowCircle.style.strokeDashoffset = overflowOffset;
+          els.todayChart.overflowCircle.style.opacity = "1";
+        } else {
+          els.todayChart.overflowCircle.style.strokeDashoffset = totalDash;
+          els.todayChart.overflowCircle.style.opacity = "0";
+        }
+      }
+
+      // --- AI 弹窗逻辑 ---
+      const toggleModal = (show) => {
+        if (show) {
+          els.aiModal.classList.add("open");
+        } else {
+          els.aiModal.classList.remove("open");
+        }
+      };
+      els.aiFab.onclick = () => toggleModal(true);
+      els.closeModal.onclick = () => toggleModal(false);
+      els.cancelBtn.onclick = () => toggleModal(false);
+      els.aiModal.onclick = (e) => {
+        if (e.target === els.aiModal) toggleModal(false);
+      };
+
+      // 标签页切换
+      els.tabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          els.tabBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          Object.values(els.tabContents).forEach((el) =>
+            el.classList.add("d-none"),
+          );
+          document.getElementById(btn.dataset.tab).classList.remove("d-none");
+          els.confirmBtn.innerText =
+            btn.dataset.tab === "tab-settings" ? "保存设置" : "开始生成";
+        });
+      });
+
+      // 生成与保存
+      els.confirmBtn.addEventListener("click", async () => {
+        // 如果是设置页，保存并返回
+        if (!els.tabContents.settings.classList.contains("d-none")) {
+          aiConfig.baseUrl = els.inputs.baseUrl.value.trim();
+          aiConfig.apiKey = els.inputs.apiKey.value.trim();
+          aiConfig.model = els.inputs.model.value.trim();
+          localStorage.setItem("ai_base_url", aiConfig.baseUrl);
+          localStorage.setItem("ai_api_key", aiConfig.apiKey);
+          localStorage.setItem("ai_model", aiConfig.model);
+          els.tabBtns[0].click(); // 切回生成页
+          return;
+        }
+
+        // 生成页逻辑
+        if (!aiConfig.baseUrl || !aiConfig.apiKey) {
+          alert('请先在"API 配置"中设置您的 BaseURL 和 API Key');
+          els.tabBtns[1].click();
+          return;
+        }
+        // if (currentFilteredData.length === 0) return alert('当前没有数据可供分析'); // Let it slide for demo if needed, but keeping safety check is good.
+        if (currentFilteredData.length === 0)
+          return alert("当前没有数据可供分析");
+
+        const prompt = els.inputs.customPrompt.value.trim();
+        if (!prompt) return alert("请输入或选择一个风格");
+
+        await generateReview(prompt);
+      });
+
+      async function generateReview(systemPrompt) {
+        const resultBox = els.inputs.output;
+        resultBox.classList.remove("d-none");
+        resultBox.innerHTML = `<div class="ai-loading">正在深度分析 ${currentFilterName} 的阅读画像...</div>`;
+        els.confirmBtn.disabled = true;
+
+        // --- 深度数据聚合逻辑 ---
+        // 使用 Dashboard 计算好的数据 (已包含合并与过滤)
+        if (currentFilteredData.length === 0) {
+          resultBox.innerText =
+            "当前时间段没有符合条件的阅读记录 (需单次阅读 > 1分钟)。";
+          els.confirmBtn.disabled = false;
+          return;
+        }
+
+        const summaryData = currentFilteredData
+          .slice(0, 15)
+          .map((stat) => {
+            const name = stat.bookName;
+
+            // 兼容旧数据 (无详细流水)
+            if (!stat.startTimes) {
+              return `- 书名：${name}\n   时长：${(stat.readTime / 3600).toFixed(1)}h\n   (简略数据)`;
+            }
+
+            const count = stat.count;
+            const avgMin = (stat.totalDuration / count / 60).toFixed(0);
+
+            // 阅读周期
+            const minTs = Math.min(...stat.startTimes);
+            const maxTs = Math.max(...stat.endTimes);
+            const daysSpan = Math.max(
+              1,
+              Math.ceil((maxTs - minTs) / (24 * 3600 * 1000)),
+            );
+
+            // 活跃时间段 (早/午/晚)
+            const periods = {
+              "早(5-12)": 0,
+              "午(12-18)": 0,
+              "晚(18-23)": 0,
+              "夜(23-5)": 0,
+            };
+
+            // 极限时间点 (HH:MM)
+            let minMins = 24 * 60;
+            let maxMins = -1;
+
+            stat.startTimes.forEach((d) => {
+              const h = d.getHours();
+              const m = d.getMinutes();
+              const curMins = h * 60 + m; // 分钟数
+              if (curMins < minMins) minMins = curMins;
+
+              // 统计时段
+              if (h >= 5 && h < 12) periods["早(5-12)"]++;
+              else if (h >= 12 && h < 18) periods["午(12-18)"]++;
+              else if (h >= 18 && h < 23) periods["晚(18-23)"]++;
+              else periods["夜(23-5)"]++;
+            });
+
+            stat.endTimes.forEach((d) => {
+              const h = d.getHours();
+              const m = d.getMinutes();
+              const curMins = h * 60 + m;
+              if (curMins > maxMins) maxMins = curMins;
+            });
+
+            // 格式化时间
+            const formatTime = (totalMins) => {
+              if (totalMins < 0 || totalMins > 24 * 60) return "--";
+              const h = Math.floor(totalMins / 60);
+              const m = totalMins % 60;
+              return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+            };
+
+            // 格式化时长 (h/m)
+            const formatDur = (sec) => {
+              if (sec < 3600) return `${(sec / 60).toFixed(1)}m`;
+              return `${(sec / 3600).toFixed(1)}h`;
+            };
+
+            // 找出主导时间段
+            const topPeriod = Object.entries(periods).sort(
+              (a, b) => b[1] - a[1],
+            )[0][0];
+
+            // 获取该书当前时间段内的笔记（最新5条）
+            const bookNotes = currentFilteredNotes
+              .filter((n) => n.bookName === name && (n.bookText || n.content))
+              .sort((a, b) => b.time - a.time)
+              .slice(0, 5);
+
+            const notesStr = bookNotes.length > 0
+              ? `\n   笔记：\n` + bookNotes.map((n, idx) => {
+                  const text = n.bookText ? `「${n.bookText}」` : "";
+                  const thought = n.content ? (text ? ` → ${n.content}` : n.content) : "";
+                  return `     ${idx + 1}. ${text}${thought}`;
+                }).join("\n")
+              : "";
+
+            // 新增阅读次数说明
+            let brushInfoResult = "";
+            if (stat.brushNumbers && stat.brushNumbers.length > 0) {
+                if (stat.brushNumbers.length === 1) {
+                    brushInfoResult = `\n   阅读次数：在指定时间段内为第${stat.brushNumbers[0]}刷`;
+                } else {
+                    brushInfoResult = `\n   阅读次数：在指定时间段内共${stat.brushNumbers.length}次重复阅读（涵盖${stat.brushNumbers.map(n => "第" + n + "刷").join('和')}），当前是第${stat.brushNumbers[stat.brushNumbers.length-1]}刷`;
+                }
+            }
+
+            return `
+- 书名：${name}
+   时长：${(stat.totalDuration / 3600).toFixed(1)}h
+   周期：${daysSpan}天（其中最长${formatDur(stat.maxDuration)}，最短${formatDur(stat.minDuration)}，共打开${count}次）${brushInfoResult}
+   时段：主要阅读时间段是${topPeriod}，最早${formatTime(minMins)}开始，最晚${formatTime(maxMins)}结束${notesStr}`;
+          })
+          .join("\n");
+
+        try {
+          let res;
+          // 自定义渠道 (Custom)
+          let url = aiConfig.baseUrl.trim().replace(/\/+$/, "");
+          // 参考 Reader 中的 URL 处理逻辑
+          if (!url.endsWith("/chat/completions")) {
+            if (url.endsWith("/v1")) {
+              url += "/chat/completions";
+            } else {
+              url += "/v1/chat/completions";
+            }
+          }
+
+          const requestBody = {
+            model: aiConfig.model,
+            messages: [
+              {
+                role: "system",
+                content: `你是一个专业的阅读数据分析师，请参考网易云音乐、美团外卖等app的年度报告风格对用户的阅读数据进行深度分析。当前分析时段：${currentFilterName}。\n用户要求你的说话风格是：${systemPrompt}`,
+              },
+              {
+                role: "user",
+                content: `这是我最近的深度阅读数据：\n${summaryData}\n\n请根据这些数据结合我对你要求的说话风格，生成我的阅读报告。`,
+              },
+            ],
+            temperature: 0.7,
+          };
+
+          // 直接调用 API
+          res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${aiConfig.apiKey}`,
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson.error || `HTTP Error: ${res.status}`);
+          }
+          const json = await res.json();
+          // 兼容不同格式 (Official endpoint returns standard OpenAI format too, but with extra fields maybe)
+          const content =
+            json.choices?.[0]?.message?.content ||
+            json.output ||
+            "AI 未返回有效内容";
+
+          // 打字机效果
+          resultBox.innerHTML = "";
+          let i = 0;
+          const timer = setInterval(() => {
+            resultBox.textContent += content.charAt(i++);
+            if (i >= content.length) clearInterval(timer);
+          }, 20);
+        } catch (e) {
+          resultBox.innerHTML = `<span style="color:var(--accent)">请求失败: ${e.message}<br>如果网络正常，请检查API地址是否支持CORS跨域。</span>`;
+        } finally {
+          els.confirmBtn.disabled = false;
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -24,7 +24,7 @@ import io.legado.app.lib.permission.PermissionsCompat
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.service.WebService
 import io.legado.app.ui.about.AboutActivity
-import io.legado.app.ui.about.ReadRecordActivity
+import io.legado.app.ui.about.ReadRecordWebActivity
 import io.legado.app.ui.book.bookmark.AllBookmarkActivity
 import io.legado.app.ui.book.read.ai.AiChatActivity
 import io.legado.app.ui.main.my.ReadingSkillActivity
@@ -126,12 +126,9 @@ class MyFragment() : BaseFragment(R.layout.fragment_my_config), MainFragmentInte
             true
         }
 
-        // 阅读记录 - 打开内置浏览器
+        // 阅读记录 - 打开内置可视化页面
         binding.btnReadRecord.setOnClickListener {
-            startActivity<WebViewActivity> {
-                putExtra("url", "https://jingshiro.github.io/LegadoRecord/")
-                putExtra("title", getString(R.string.read_record))
-            }
+            startActivity<ReadRecordWebActivity>()
         }
 
         // 监听 WebService 状态变化
