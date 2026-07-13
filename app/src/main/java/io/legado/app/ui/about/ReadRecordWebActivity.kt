@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import android.view.View
+import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -12,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewAssetLoader
 import io.legado.app.R
 import io.legado.app.base.BaseActivity
+import io.legado.app.constant.AppLog
 import io.legado.app.data.appDb
 import io.legado.app.databinding.ActivityReadRecordWebBinding
 import io.legado.app.help.readrecord.DetailedReadRecordHelper
@@ -74,6 +76,12 @@ class ReadRecordWebActivity : BaseActivity<ActivityReadRecordWebBinding>() {
                     if (newProgress >= 100) {
                         binding.progressBar.visibility = View.GONE
                     }
+                }
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    consoleMessage?.let {
+                        AppLog.put("ReadRecordWeb JS: ${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+                    }
+                    return super.onConsoleMessage(consoleMessage)
                 }
             }
 

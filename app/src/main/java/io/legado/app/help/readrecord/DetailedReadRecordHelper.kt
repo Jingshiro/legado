@@ -12,6 +12,7 @@ import io.legado.app.utils.GSON
 import kotlinx.coroutines.Dispatchers.IO
 
 private const val MIN_SESSION_DURATION = 120_000L // 2 minutes
+// The gap logic and filtering is now primarily handled by the frontend for accuracy, but we keep Kotlin side merge to reduce DB fragmentation.
 private const val MERGE_SESSION_GAP = 180_000L // 3 minutes
 
 data class DetailedReadSession(
@@ -102,10 +103,11 @@ object DetailedReadRecordHelper {
         Coroutine.async(context = IO) {
             val book = appDb.bookDao.findByName(bookName).firstOrNull()
             val lastRecord = appDb.detailedReadRecordDao.getLastRecord(bookName)
-            if (lastRecord != null && (startTime - lastRecord.endTime) <= MERGE_SESSION_GAP) {
+            val gap = startTime - (lastRecord?.endTime ?: 0)
+            if (lastRecord != null && gap in 0..MERGE_SESSION_GAP) {
                 // Merge with previous session
                 appDb.detailedReadRecordDao.update(
-                    lastRecord.copy(endTime = endTime)
+                    lastRecord.copy(endTime = Math.max(lastRecord.endTime, endTime))
                 )
             } else {
                 appDb.detailedReadRecordDao.insert(
@@ -146,22 +148,17 @@ class DetailedReadRecordTracker(
     private val bookNameProvider: () -> String?
 ) {
     private var startTime: Long? = null
-    private var bookName: String? = null
 
     fun start() {
         if (!AppConfig.enableReadRecord) return
         if (startTime != null) return
-        val name = bookNameProvider()?.trim().orEmpty()
-        if (name.isBlank()) return
         startTime = System.currentTimeMillis()
-        bookName = name
     }
 
     fun stop() {
         val start = startTime ?: return
-        val name = bookName ?: bookNameProvider()?.trim()
+        val name = bookNameProvider()?.trim()
         startTime = null
-        bookName = null
         if (name.isNullOrBlank()) return
         DetailedReadRecordHelper.insertSession(name, start, System.currentTimeMillis())
     }

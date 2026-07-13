@@ -1779,13 +1779,13 @@
           // A. 排序
           list.sort((a, b) => a.startTime - b.startTime);
 
-          // B. 合并 (Gap < 60s)
+          // B. 合并 (Gap < 180s = 3分钟)
           const merged = [];
           if (list.length > 0) {
             let cur = list[0];
             for (let i = 1; i < list.length; i++) {
               const next = list[i];
-              if (next.startTime - cur.endTime < 60000) {
+              if (next.startTime - cur.endTime < 180000) {
                 cur.endTime = Math.max(cur.endTime, next.endTime);
               } else {
                 merged.push(cur);
@@ -1795,8 +1795,8 @@
             merged.push(cur);
           }
 
-          // C. 过滤 ( < 60s )
-          const valid = merged.filter((s) => s.endTime - s.startTime >= 60000);
+          // C. 过滤 ( < 120s = 2分钟 )
+          const valid = merged.filter((s) => s.endTime - s.startTime >= 120000);
           if (valid.length === 0) return;
 
           // D. 统计
@@ -1842,6 +1842,38 @@
 
       function processData(sessions) {
         return analyzeSessions(sessions);
+      }
+
+      function cleanSessions(sessions) {
+        const bookGroups = {};
+        sessions.forEach((s) => {
+          const name = s.bookName || "无名书籍";
+          if ((s.endTime || 0) > (s.startTime || 0)) {
+            if (!bookGroups[name]) bookGroups[name] = [];
+            bookGroups[name].push({ ...s });
+          }
+        });
+        const clean = [];
+        Object.values(bookGroups).forEach((list) => {
+          list.sort((a, b) => a.startTime - b.startTime);
+          const merged = [];
+          if (list.length > 0) {
+            let cur = list[0];
+            for (let i = 1; i < list.length; i++) {
+              const next = list[i];
+              if (next.startTime - cur.endTime < 180000) {
+                cur.endTime = Math.max(cur.endTime, next.endTime);
+              } else {
+                merged.push(cur);
+                cur = next;
+              }
+            }
+            merged.push(cur);
+          }
+          const valid = merged.filter((s) => s.endTime - s.startTime >= 120000);
+          clean.push(...valid);
+        });
+        return clean.sort((a, b) => a.startTime - b.startTime);
       }
 
       // --- 筛选逻辑 ---
