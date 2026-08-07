@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import android.view.View
 import android.webkit.ConsoleMessage
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -17,6 +18,7 @@ import io.legado.app.constant.AppLog
 import io.legado.app.data.appDb
 import io.legado.app.databinding.ActivityReadRecordWebBinding
 import io.legado.app.help.readrecord.DetailedReadRecordHelper
+import io.legado.app.utils.GSON
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -55,6 +57,9 @@ class ReadRecordWebActivity : BaseActivity<ActivityReadRecordWebBinding>() {
                 displayZoomControls = false
                 builtInZoomControls = false
             }
+
+            // JS bridge：让页面按需从数据库查询笔记，避免把全量笔记/书签文本一次性注入导致 OOM
+            addJavascriptInterface(ReadRecordJsBridge(), "LegadoBridge")
 
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
@@ -109,7 +114,11 @@ class ReadRecordWebActivity : BaseActivity<ActivityReadRecordWebBinding>() {
     private fun loadDataFromDb() {
         lifecycleScope.launch {
             val jsonData = withContext(IO) {
-                DetailedReadRecordHelper.buildExportJson(appDb.detailedReadRecordDao.all())
+                // 只注入阅读会话，笔记通过 JS bridge 按需查询，防止全量文本撑爆内存 (OOM)
+                DetailedReadRecordHelper.buildExportJson(
+                    appDb.detailedReadRecordDao.all(),
+                    includeNotes = false
+                )
             }
             // 回到主线程
             if (pageReady) {
@@ -123,14 +132,67 @@ class ReadRecordWebActivity : BaseActivity<ActivityReadRecordWebBinding>() {
 
     /**
      * 调用页面内置的 window.setLegadoRecord() 函数注入数据。
+     * 第二个参数 useBridgeNotes=true 让页面通过 JS bridge 按需加载笔记，而不是从 JSON 读取。
      * 该函数由 LegadoRecord HTML 原版提供，接受 JSON 字符串或对象。
      */
     private fun injectData(json: String) {
         pendingJsonData = null
         binding.webView.evaluateJavascript(
-            "if(typeof setLegadoRecord === 'function'){ setLegadoRecord($json); }",
+            "if(typeof setLegadoRecord === 'function'){ setLegadoRecord($json, true); }",
             null
         )
+    }
+
+    /**
+     * JS bridge，供页面按需查询当前时间范围内的笔记（书签 + 想法）。
+     * 返回结构：{ total, perBook: {书名: 数量}, notes: [{bookName, chapterName, bookText, content, time}, ...] }
+     * notes 只返回最新的 limit 条（默认 500），避免一次性加载全量笔记文本导致 OOM。
+     */
+    @Suppress("unused")
+    private class ReadRecordJsBridge {
+        @JavascriptInterface
+        fun getNotes(startTs: Long, endTs: Long, maxCount: Int): String {
+            val limit = maxCount.coerceIn(10, 1000)
+            val bookmarks = appDb.bookmarkDao.getByTimeRange(startTs, endTs, limit)
+            val thoughts = appDb.bookThoughtDao.getByTimeRange(startTs, endTs, limit)
+
+            val perBook = linkedMapOf<String, Int>()
+            appDb.bookmarkDao.countByTimeRange(startTs, endTs).forEach {
+                perBook[it.bookName] = perBook.getOrDefault(it.bookName, 0) + it.cnt.toInt()
+            }
+            appDb.bookThoughtDao.countByTimeRange(startTs, endTs).forEach {
+                perBook[it.bookName] = perBook.getOrDefault(it.bookName, 0) + it.cnt.toInt()
+            }
+
+            val notes = mutableListOf<Map<String, Any?>>()
+            bookmarks.forEach {
+                notes += mapOf(
+                    "bookName" to it.bookName,
+                    "chapterName" to it.chapterName,
+                    "bookText" to it.bookText,
+                    "content" to it.content,
+                    "time" to it.time
+                )
+            }
+            thoughts.forEach {
+                notes += mapOf(
+                    "bookName" to it.bookName,
+                    "chapterName" to it.chapterName,
+                    "bookText" to it.selectedText,
+                    "content" to it.thought,
+                    "time" to it.createTime
+                )
+            }
+            val capped = notes.sortedByDescending { it["time"] as Long }.take(limit)
+
+            return GSON.toJson(
+                mapOf(
+                    "total" to perBook.values.sum(),
+                    "perBook" to perBook,
+                    "notes" to capped
+                )
+            )
+        }
     }
 
     override fun onDestroy() {

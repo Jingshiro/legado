@@ -2,6 +2,7 @@ package io.legado.app.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import io.legado.app.data.entities.DetailedReadRecord
@@ -9,13 +10,14 @@ import io.legado.app.data.entities.DetailedReadRecord
 @Dao
 interface DetailedReadRecordDao {
 
-    @Insert
+    // 唯一索引 (bookName, startTime, endTime) 兜底：完全重复的 session 会被 IGNORE，从源头杜绝重复写入
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(record: DetailedReadRecord)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.IGNORE)
     fun update(record: DetailedReadRecord)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAll(records: List<DetailedReadRecord>)
 
     @Query("select * from detailedReadRecord order by bookName asc, startTime asc")

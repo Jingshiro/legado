@@ -4,6 +4,10 @@ import androidx.room.*
 import io.legado.app.data.entities.Bookmark
 import kotlinx.coroutines.flow.Flow
 
+data class BookNameCount(
+    val bookName: String,
+    val cnt: Long
+)
 
 @Dao
 interface BookmarkDao {
@@ -17,6 +21,20 @@ interface BookmarkDao {
 
     @Query("select * from bookmarks order by bookName collate localized, bookAuthor collate localized, chapterIndex, chapterPos")
     fun flowAll(): Flow<List<Bookmark>>
+
+    @Query(
+        """select bookName, count(*) as cnt from bookmarks 
+        where time >= :startTime and time <= :endTime 
+        group by bookName order by cnt desc"""
+    )
+    fun countByTimeRange(startTime: Long, endTime: Long): List<BookNameCount>
+
+    @Query(
+        """select * from bookmarks 
+        where time >= :startTime and time <= :endTime 
+        order by time desc limit :limit"""
+    )
+    fun getByTimeRange(startTime: Long, endTime: Long, limit: Int): List<Bookmark>
 
     @Query(
         """select * from bookmarks 

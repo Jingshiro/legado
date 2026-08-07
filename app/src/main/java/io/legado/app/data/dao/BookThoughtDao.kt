@@ -20,6 +20,24 @@ interface BookThoughtDao {
 
     @Query(
         """
+        SELECT bookName, count(*) as cnt FROM book_thoughts
+        WHERE createTime >= :startTime AND createTime <= :endTime
+        GROUP BY bookName ORDER BY cnt DESC
+    """
+    )
+    fun countByTimeRange(startTime: Long, endTime: Long): List<BookNameCount>
+
+    @Query(
+        """
+        SELECT * FROM book_thoughts
+        WHERE createTime >= :startTime AND createTime <= :endTime
+        ORDER BY createTime DESC LIMIT :limit
+    """
+    )
+    fun getByTimeRange(startTime: Long, endTime: Long, limit: Int): List<BookThought>
+
+    @Query(
+        """
         SELECT * FROM book_thoughts
         WHERE bookName = :bookName AND bookAuthor = :bookAuthor
         ORDER BY chapterIndex, chapterPos, createTime

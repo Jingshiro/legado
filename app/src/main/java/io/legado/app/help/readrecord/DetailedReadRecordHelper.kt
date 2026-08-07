@@ -5,6 +5,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.legado.app.data.appDb
+import io.legado.app.data.entities.Bookmark
+import io.legado.app.data.entities.BookThought
 import io.legado.app.data.entities.DetailedReadRecord
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.coroutine.Coroutine
@@ -40,13 +42,18 @@ object DetailedReadRecordHelper {
         }.sortedBy { it.bookName }
     }
 
-    fun buildExportJson(records: List<DetailedReadRecord>): String {
+    fun buildExportJson(records: List<DetailedReadRecord>, includeNotes: Boolean = true): String {
         if (records.isEmpty()) return "[]"
         val root = JsonArray()
 
         // 预先查询所有笔记并在内存中按书名分组，避免在循环中重复查询数据库，防止 N+1 性能问题
-        val allThoughtsByBook = appDb.bookThoughtDao.all.groupBy { it.bookName }
-        val allBookmarksByBook = appDb.bookmarkDao.all.groupBy { it.bookName }
+        // WebView 可视化页面已改为通过 JS bridge 按需加载笔记，这里可以不注入笔记，避免全量文本撑爆内存 (OOM)
+        val allThoughtsByBook =
+            if (includeNotes) appDb.bookThoughtDao.all.groupBy { it.bookName }
+            else emptyMap<String, List<BookThought>>()
+        val allBookmarksByBook =
+            if (includeNotes) appDb.bookmarkDao.all.groupBy { it.bookName }
+            else emptyMap<String, List<Bookmark>>()
 
         records.groupBy { it.bookName }.toSortedMap().forEach { (bookName, sessions) ->
             val obj = JsonObject()
@@ -64,28 +71,31 @@ object DetailedReadRecordHelper {
             // 整合笔记：BookThought（想法）和 Bookmark（书签）
             val notesArray = JsonArray()
 
-            // 从 BookThought 表中查询该书的所有想法
-            val thoughts = allThoughtsByBook[bookName]?.sortedBy { it.createTime } ?: emptyList()
-            thoughts.forEach { thought ->
-                val noteObj = JsonObject()
-                noteObj.addProperty("bookName", thought.bookName)
-                noteObj.addProperty("chapterName", thought.chapterName)
-                noteObj.addProperty("bookText", thought.selectedText)
-                noteObj.addProperty("content", thought.thought)
-                noteObj.addProperty("time", thought.createTime)
-                notesArray.add(noteObj)
-            }
+            if (includeNotes) {
+                // 从 BookThought 表中查询该书的所有想法
+                val thoughts =
+                    allThoughtsByBook[bookName]?.sortedBy { it.createTime } ?: emptyList()
+                thoughts.forEach { thought ->
+                    val noteObj = JsonObject()
+                    noteObj.addProperty("bookName", thought.bookName)
+                    noteObj.addProperty("chapterName", thought.chapterName)
+                    noteObj.addProperty("bookText", thought.selectedText)
+                    noteObj.addProperty("content", thought.thought)
+                    noteObj.addProperty("time", thought.createTime)
+                    notesArray.add(noteObj)
+                }
 
-            // 从 Bookmark 表中查询该书的所有书签（包含书签笔记内容）
-            val bookmarks = allBookmarksByBook[bookName]?.sortedBy { it.time } ?: emptyList()
-            bookmarks.forEach { bookmark ->
-                val noteObj = JsonObject()
-                noteObj.addProperty("bookName", bookmark.bookName)
-                noteObj.addProperty("chapterName", bookmark.chapterName)
-                noteObj.addProperty("bookText", bookmark.bookText)
-                noteObj.addProperty("content", bookmark.content)
-                noteObj.addProperty("time", bookmark.time)
-                notesArray.add(noteObj)
+                // 从 Bookmark 表中查询该书的所有书签（包含书签笔记内容）
+                val bookmarks = allBookmarksByBook[bookName]?.sortedBy { it.time } ?: emptyList()
+                bookmarks.forEach { bookmark ->
+                    val noteObj = JsonObject()
+                    noteObj.addProperty("bookName", bookmark.bookName)
+                    noteObj.addProperty("chapterName", bookmark.chapterName)
+                    noteObj.addProperty("bookText", bookmark.bookText)
+                    noteObj.addProperty("content", bookmark.content)
+                    noteObj.addProperty("time", bookmark.time)
+                    notesArray.add(noteObj)
+                }
             }
 
             obj.add("notes", notesArray)
@@ -124,10 +134,13 @@ object DetailedReadRecordHelper {
 
     fun insertFromExport(records: List<DetailedReadRecordExport>) {
         if (records.isEmpty()) return
+        // 先按 (bookName, startTime, endTime) 在列表内去重，数据库唯一索引再兜底，恢复重复备份不会造成数据膨胀
+        val seen = HashSet<Triple<String, Long, Long>>()
         val insertList = records.flatMap { export ->
             export.sessions.mapNotNull { session ->
                 val duration = session.endTime - session.startTime
-                if (duration <= MIN_SESSION_DURATION || export.bookName.isBlank()) {
+                val key = Triple(export.bookName, session.startTime, session.endTime)
+                if (duration <= MIN_SESSION_DURATION || export.bookName.isBlank() || !seen.add(key)) {
                     null
                 } else {
                     DetailedReadRecord(

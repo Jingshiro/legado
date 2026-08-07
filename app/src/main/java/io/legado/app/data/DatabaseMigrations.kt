@@ -20,6 +20,7 @@ object DatabaseMigrations {
             migration_31_32, migration_32_33, migration_33_34, migration_34_35,
             migration_35_36, migration_36_37, migration_37_38, migration_38_39,
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
+            migration_99_100,
         )
     }
 
@@ -321,6 +322,27 @@ object DatabaseMigrations {
     private val migration_42_43 = object : Migration(42, 43) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE `chapters` ADD `isVolume` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
+    /**
+     * 99 -> 100：修复详细阅读记录重复膨胀。
+     * 1. 清理历史重复记录：按 (bookName, startTime, endTime) 分组，每组只保留最早的一条；
+     * 2. 创建唯一索引，从源头杜绝相同 session 重复写入。
+     */
+    private val migration_99_100 = object : Migration(99, 100) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                delete from detailedReadRecord where id not in (
+                    select min(id) from detailedReadRecord group by bookName, startTime, endTime
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                "create unique index if not exists index_detailedReadRecord_bookName_startTime_endTime " +
+                    "on detailedReadRecord(bookName, startTime, endTime)"
+            )
         }
     }
 

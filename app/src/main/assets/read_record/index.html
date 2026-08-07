@@ -1450,6 +1450,12 @@
       let currentFilteredNotes = []; // 当前时间段筛选后的笔记
       let currentFilterName = "全部时间";
 
+      // 笔记数据来源：bridge（原生按需查询，避免全量注入撑爆内存）或 json（从注入/导入的 JSON 读取）
+      const USE_BRIDGE = typeof window.LegadoBridge !== "undefined";
+      let noteMode = "json";
+      let noteTotal = 0;       // 当前时间段的笔记总数（bridge 精确统计）
+      let notePerBook = {};    // 当前时间段内各书笔记数（bridge 精确统计）
+
       // 预设 AI 风格
       const promptStyles = [
         {
@@ -1648,7 +1654,7 @@
         handleFile(e.target.files[0]),
       );
 
-      function processRawData(rawData) {
+      function processRawData(rawData, useBridgeNotes = false) {
         // 兼容处理多种数据格式:
         // 1. 新格式: [{bookName: "xxx", sessions: [...], notes: [...]}, ...]
         // 2. 旧流水格式: [{bookName: "xxx", startTime, endTime}, ...]
@@ -1660,9 +1666,16 @@
           rawData.length > 0 &&
           Array.isArray(rawData[0].sessions);
 
-        // 提取 notes（新格式才会有）
+        // 笔记来源：App 注入时通过原生 bridge 按需查询，不随 JSON 全量下发；
+        // 文件导入时则从导入的 JSON 中读取
+        noteMode = useBridgeNotes ? "bridge" : "json";
         allNotes = [];
-        if (isNewFormat) {
+        currentFilteredNotes = [];
+        noteTotal = 0;
+        notePerBook = {};
+
+        // 提取 notes（新格式才会有，仅文件导入路径使用）
+        if (isNewFormat && !useBridgeNotes) {
           rawData.forEach((book) => {
             if (book.notes && Array.isArray(book.notes)) {
               book.notes.forEach((note) => {
@@ -1748,14 +1761,15 @@
       }
 
       // --- 供 Legado 自动注入调用的全局函数 ---
-      window.setLegadoRecord = function (jsonDataStr) {
+      // 第二个参数 useBridgeNotes=true 表示笔记通过原生 bridge 按需加载，不再随 JSON 注入
+      window.setLegadoRecord = function (jsonDataStr, useBridgeNotes) {
         if (!jsonDataStr) return;
         try {
           const rawData =
             typeof jsonDataStr === "string"
               ? JSON.parse(jsonDataStr)
               : jsonDataStr;
-          processRawData(rawData);
+          processRawData(rawData, useBridgeNotes === true);
         } catch (e) {
           console.error("解析 Legado 自动注入的阅读记录失败", e);
         }
@@ -1946,13 +1960,37 @@
         currentStartTs = startTs;
         currentEndTs = endTs;
 
-        // 按时间段筛选 notes，并存为全局变量供 AI 提示词使用
-        currentFilteredNotes = allNotes.filter((n) => {
-          if (type === "all") return true;
-          return n.time >= startTs && n.time <= endTs;
+        // 加载当前时间段的笔记：bridge 模式下按需从原生查询，避免全量数据撑爆内存
+        loadNotesForRange(startTs, endTs, () => {
+          renderDashboard(currentFilteredData, startTs, endTs, currentFilteredNotes);
         });
+      }
 
-        renderDashboard(currentFilteredData, startTs, endTs, currentFilteredNotes);
+      function loadNotesForRange(startTs, endTs, callback) {
+        if (noteMode !== "bridge" || !USE_BRIDGE) {
+          // json 模式：从已加载的 allNotes 中按时间段筛选
+          currentFilteredNotes = allNotes.filter((n) => {
+            if (startTs === 0 && endTs >= 9999999999999) return true;
+            return n.time >= startTs && n.time <= endTs;
+          });
+          if (callback) callback();
+          return;
+        }
+        try {
+          // 原生 bridge 返回 { total, perBook, notes }，notes 为最新的 500 条，全文保留
+          const res = JSON.parse(window.LegadoBridge.getNotes(startTs, endTs, 500));
+          noteTotal = res.total || 0;
+          notePerBook = res.perBook || {};
+          allNotes = res.notes || [];
+          currentFilteredNotes = allNotes;
+        } catch (e) {
+          console.error("加载笔记失败，已按空数据处理", e);
+          noteTotal = 0;
+          notePerBook = {};
+          allNotes = [];
+          currentFilteredNotes = [];
+        }
+        if (callback) callback();
       }
 
       function renderDashboard(data, startTs, endTs, filteredNotes = []) {
@@ -1964,15 +2002,20 @@
           ? Math.round(totalSec / 60 / data.length)
           : 0;
 
-        // 想法统计
-        if (allNotes.length > 0) {
-          els.stats.noteCount.innerText = filteredNotes.length;
+        // 想法统计（bridge 模式使用原生精确统计，避免全量笔记占内存）
+        const hasNotes = noteMode === "bridge" ? noteTotal > 0 : allNotes.length > 0;
+        if (hasNotes) {
+          els.stats.noteCount.innerText =
+            noteMode === "bridge" ? noteTotal : filteredNotes.length;
           // 按书名聚合计数
-          const noteByBook = {};
-          filteredNotes.forEach((n) => {
-            const name = n.bookName || "无名书籍";
-            noteByBook[name] = (noteByBook[name] || 0) + 1;
-          });
+          const noteByBook =
+            noteMode === "bridge"
+              ? notePerBook
+              : filteredNotes.reduce((acc, n) => {
+                  const name = n.bookName || "无名书籍";
+                  acc[name] = (acc[name] || 0) + 1;
+                  return acc;
+                }, {});
           const top5 = Object.entries(noteByBook)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
