@@ -40,3 +40,6 @@ generate_icons.py
 .mcp.json
 build_output.txt
 iconnew.png
+
+# 本地环境配置
+.env

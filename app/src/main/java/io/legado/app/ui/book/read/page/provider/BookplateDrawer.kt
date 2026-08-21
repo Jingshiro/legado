@@ -19,6 +19,7 @@ import io.legado.app.R
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.help.PaintPool
+import io.legado.app.help.book.ReadIterationHelper
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.ui.book.read.page.entities.TextPage
 import io.legado.app.utils.dpToPx
@@ -81,7 +82,7 @@ object BookplateDrawer {
         PaintPool.recycle(tmpPaint)
 
         // ── 卡片高度计算 ──
-        val baseH = 300.dpToPx()
+        val baseH = 344.dpToPx()
         val cardHeight = (baseH + reviewSectionH).toFloat()
         val maxH = screenHeight * 0.75f
         val effectiveH = minOf(cardHeight, maxH)
@@ -216,21 +217,54 @@ object BookplateDrawer {
 
         currentY += 22.dpToPx()
 
-        // 阅读时间
+        // 开始时间
         paint.textAlign = Paint.Align.LEFT
         paint.color = Color.parseColor(TEXT_SECONDARY)
         paint.typeface = serif
         paint.textSize = 12.5f.dpToPx()
-        canvas.drawText("阅读时间", labelX, currentY.toFloat(), paint)
+        canvas.drawText("开始时间", labelX, currentY.toFloat(), paint)
 
         val earliestStartTime = appDb.detailedReadRecordDao.getEarliestStartTime(book.name) ?: book.addTime
         val trueStartTime = if (earliestStartTime > 0) earliestStartTime else book.addTime
-        val timeStr = if (trueStartTime > 0) dateFormat.format(Date(trueStartTime)) else "____/__/__"
+        val startStr = if (trueStartTime > 0) dateFormat.format(Date(trueStartTime)) else "____/__/__"
         paint.color = Color.parseColor(TEXT_PRIMARY)
         paint.typeface = serifBold
         paint.textSize = 13.5f.dpToPx()
         paint.textAlign = Paint.Align.RIGHT
-        canvas.drawText(timeStr, valueRightX, currentY.toFloat(), paint)
+        canvas.drawText(startStr, valueRightX, currentY.toFloat(), paint)
+
+        currentY += 22.dpToPx()
+
+        // 结束时间
+        paint.textAlign = Paint.Align.LEFT
+        paint.color = Color.parseColor(TEXT_SECONDARY)
+        paint.typeface = serif
+        paint.textSize = 12.5f.dpToPx()
+        canvas.drawText("结束时间", labelX, currentY.toFloat(), paint)
+
+        val readEndTime = getReadEndTime(book)
+        val endStr = if (readEndTime > 0) dateFormat.format(Date(readEndTime)) else "____/__/__"
+        paint.color = Color.parseColor(TEXT_PRIMARY)
+        paint.typeface = serifBold
+        paint.textSize = 13.5f.dpToPx()
+        paint.textAlign = Paint.Align.RIGHT
+        canvas.drawText(endStr, valueRightX, currentY.toFloat(), paint)
+
+        currentY += 22.dpToPx()
+
+        // 完读次数
+        paint.textAlign = Paint.Align.LEFT
+        paint.color = Color.parseColor(TEXT_SECONDARY)
+        paint.typeface = serif
+        paint.textSize = 12.5f.dpToPx()
+        canvas.drawText("完读次数", labelX, currentY.toFloat(), paint)
+
+        val finishCount = ReadIterationHelper.getFinishCount(book.readIteration)
+        paint.color = Color.parseColor(TEXT_PRIMARY)
+        paint.typeface = serifBold
+        paint.textSize = 13.5f.dpToPx()
+        paint.textAlign = Paint.Align.RIGHT
+        canvas.drawText("$finishCount 次", valueRightX, currentY.toFloat(), paint)
 
         currentY += 18.dpToPx()
 
@@ -392,6 +426,15 @@ object BookplateDrawer {
         canvas.drawText(dotPattern, centerX, currentY.toFloat(), paint)
 
         PaintPool.recycle(paint)
+    }
+
+    /**
+     * 结束时间：完读时间优先，其次最后一次阅读记录，最后取最近阅读时间
+     */
+    private fun getReadEndTime(book: Book): Long {
+        book.finishTime.takeIf { it > 0 }?.let { return it }
+        appDb.detailedReadRecordDao.getLastRecord(book.name)?.endTime?.takeIf { it > 0 }?.let { return it }
+        return book.durChapterTime
     }
 
     /**

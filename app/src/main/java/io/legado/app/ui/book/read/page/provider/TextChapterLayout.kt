@@ -542,17 +542,26 @@ class TextChapterLayout(
         if (chapterText.isEmpty()) return
         val (normalizedChapter, normalizedToRawIndex) = normalizeWithIndexMap(chapterText)
         thoughts.forEach { thought ->
+            val targetPos = thought.chapterPos
             var startSearch = 0
-            var matched = false
+            var bestStart = -1
+            var bestEnd = -1
+            var bestDist = Int.MAX_VALUE
             while (startSearch < chapterText.length) {
                 val start = chapterText.indexOf(thought.selectedText, startSearch)
                 if (start < 0) break
                 val end = start + thought.selectedText.length
-                markThoughtRange(start, end, thought.selectedText, thought)
+                val dist = kotlin.math.abs(start - targetPos)
+                if (dist < bestDist) {
+                    bestDist = dist
+                    bestStart = start
+                    bestEnd = end
+                }
                 startSearch = start + thought.selectedText.length
-                matched = true
             }
-            if (!matched) {
+            if (bestStart >= 0) {
+                markThoughtRange(bestStart, bestEnd, thought.selectedText, thought)
+            } else {
                 markThoughtRangeWithNormalized(
                     thought.selectedText,
                     normalizedChapter,

@@ -87,7 +87,7 @@ class ThoughtUnderlineStyleDialog(
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
-        (activity as ReadBookActivity).bottomDialog++
+        (activity as? ReadBookActivity)?.bottomDialog++
         binding.root.applyNavigationBarPadding()
         val bg = requireContext().bottomBackground
         (binding.root as? com.google.android.material.card.MaterialCardView)

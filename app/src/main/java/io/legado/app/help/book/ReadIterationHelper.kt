@@ -80,6 +80,15 @@ object ReadIterationHelper {
     }
 
     /**
+     * 完读次数（已完整读完的遍数）
+     * 0->0, 1->1, 2(二刷中)->1, 3(二刷完)->2, 4->2, 5->3 ...
+     */
+    fun getFinishCount(readIteration: Int): Int {
+        if (readIteration <= 0) return 0
+        return (readIteration + 1) / 2
+    }
+
+    /**
      * 让书进入下一轮次（读完->二刷, 二刷完->三刷, ...）
      * 即 readIteration + 1
      */
