@@ -857,12 +857,17 @@ class TextChapterLayout(
             }
             var charIndex = lineStart
             while (charIndex < lineEnd) {
-                val char = spanned[charIndex].toString()
+                // 代理对整体作为一个字符簇，避免 emoji 等增补平面字符被拆开
+                val charLen = if (
+                    spanned[charIndex].isHighSurrogate() &&
+                    charIndex + 1 < lineEnd && spanned[charIndex + 1].isLowSurrogate()
+                ) 2 else 1
+                val char = spanned.subSequence(charIndex, charIndex + charLen).toString()
                 lineText.append(char)
                 if (char == "\n") {
                     textLine.isParagraphEnd = true
                     durY += lineHeight * paragraphSpacing / 10f //段距
-                    charIndex++
+                    charIndex += charLen
                     continue
                 }
                 val charX = staticLayout.getPrimaryHorizontal(charIndex)
@@ -873,15 +878,15 @@ class TextChapterLayout(
                 val isItalic = extractIsItalic(spanned, charIndex)
                 val isUnderline = extractIsUnderline(spanned, charIndex)
                 val typeface = extractTypeface(spanned, charIndex)
-                val charRight = if (charIndex + 1 < lineEnd) {
-                    staticLayout.getPrimaryHorizontal(charIndex + 1)
+                val charRight = if (charIndex + charLen < lineEnd) {
+                    staticLayout.getPrimaryHorizontal(charIndex + charLen)
                 } else {
                     tempPaint.textSize = textSize
                     val charWidth = tempPaint.measureText(char)
                     charX + charWidth
                 }
                 var needAddText = true
-                spanned.getSpans(charIndex, charIndex + 1, ImageSpan::class.java).firstOrNull()?.let { span -> //处理图片
+                spanned.getSpans(charIndex, charIndex + charLen, ImageSpan::class.java).firstOrNull()?.let { span -> //处理图片
                     val source = span.source ?: return@let
                     val urlMatcher = paramPattern.matcher(source)
                     if (urlMatcher.find()) {
@@ -948,7 +953,7 @@ class TextChapterLayout(
                     }
                     needAddText = false
                 }
-                spanned.getSpans(charIndex, charIndex + 1, ReplacementSpan::class.java).firstOrNull()?.let { _ -> //自定义标签
+                spanned.getSpans(charIndex, charIndex + charLen, ReplacementSpan::class.java).firstOrNull()?.let { _ -> //自定义标签
                     if (char == HR_PLACE_CHAR) {
                         columns.add(
                             TextHtmlColumn(
@@ -979,7 +984,7 @@ class TextChapterLayout(
                         )
                     )
                 }
-                charIndex++
+                charIndex += charLen
                 if (charIndex == lineEnd && lineIndex == staticLayout.lineCount - 1) {
                     textLine.isParagraphEnd = true
                     durY += lineHeight * paragraphSpacing / 10f //段距
@@ -1549,19 +1554,21 @@ class TextChapterLayout(
         start: Int = 0
     ): Pair<ArrayList<String>, ArrayList<Float>> {
         val length = text.length
-        var clusterCount = 0
-        for (i in start..<start + length) {
-            if (widthsArray[i] > 0) clusterCount++
-        }
-        val widths = ArrayList<Float>(clusterCount)
-        val stringList = ArrayList<String>(clusterCount)
+        val widths = ArrayList<Float>(length)
+        val stringList = ArrayList<String>(length)
         var i = 0
         while (i < length) {
             val clusterBaseIndex = i++
-            widths.add(widthsArray[start + clusterBaseIndex])
+            // 代理对必须保持在同一簇，否则增补平面字符（emoji等）会被拆成乱码
+            var clusterWidth = widthsArray[start + clusterBaseIndex]
+            if (text[clusterBaseIndex].isHighSurrogate() && i < length && text[i].isLowSurrogate()) {
+                clusterWidth += widthsArray[start + i]
+                i++
+            }
             while (i < length && widthsArray[start + i] == 0f && !isZeroWidthChar(text[i])) {
                 i++
             }
+            widths.add(clusterWidth)
             stringList.add(text.substring(clusterBaseIndex, i))
         }
         return stringList to widths

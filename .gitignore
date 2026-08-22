@@ -43,3 +43,11 @@ iconnew.png
 
 # 本地环境配置
 .env
+
+# personal debug / orphan scripts, do not upload
+avd.bat
+avd.sh
+.github/scripts/tg_bot.py
+.github/scripts/lzy_web.py
+.github/scripts/cronet.sh
+notes/

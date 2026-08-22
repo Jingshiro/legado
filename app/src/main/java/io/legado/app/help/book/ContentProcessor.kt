@@ -39,6 +39,16 @@ class ContentProcessor private constructor(
         }
 
         /**
+         * 替换规则处理期间的 img 标签保护。
+         * 部分替换/净化规则（如对话格式化、标点转换）的正则会匹配到 <img> 标签内部
+         * 的引号、花括号等字符，破坏标签结构导致图片无法渲染。
+         * 处理前将 img 标签替换为私有区占位符，处理完成后还原。
+         */
+        private const val IMG_MASK_PREFIX = "\uE000IMG"
+        private const val IMG_MASK_SUFFIX = "\uE001"
+        private val imgTagRegex = Regex("<img\\b[^>]*>", RegexOption.IGNORE_CASE)
+
+        /**
          * 高亮规则处理结果的 LRU 缓存。
          * Key: "内容长度|内容哈希|规则id|pattern|replacement"
          * Value: applyHighlightRule 的处理结果
@@ -246,6 +256,15 @@ class ContentProcessor private constructor(
                 //替换
                 effectiveReplaceRules = arrayListOf()
                 mContent = mContent.lines().joinToString("\n") { it.trim() }
+                // 遮罩 img 标签，避免替换规则破坏标签内部结构
+                val imgRestoreMap = mutableMapOf<String, String>()
+                if (mContent.contains("<img", ignoreCase = true)) {
+                    mContent = imgTagRegex.replace(mContent) { matchResult ->
+                        val placeholder = "$IMG_MASK_PREFIX${imgRestoreMap.size}$IMG_MASK_SUFFIX"
+                        imgRestoreMap[placeholder] = matchResult.value
+                        placeholder
+                    }
+                }
                 getContentReplaceRules().forEach { item ->
                     if (item.pattern.isEmpty()) {
                         return@forEach
@@ -297,12 +316,28 @@ class ContentProcessor private constructor(
                     if (hasHtmlTag) {
                         mContent = splitMultiLineHtmlTags(mContent)
                         mContent = mContent.lines().joinToString("\n") { line ->
-                            if (line.isBlank()) line else "<usehtml>$line<endhtml>"
+                            // 含 img 占位符的行走普通文本路径，图片由 ImageColumn 渲染
+                            if (line.isBlank() || line.contains(IMG_MASK_PREFIX)) line else "<usehtml>$line<endhtml>"
                         }
                         debugLog("usehtml包裹完成, usehtml行数=${mContent.lines().count { it.startsWith("<usehtml>") }}")
                     }
                 } else {
                     debugLog("usehtml检查: effectiveReplaceRules=${effectiveReplaceRules?.size ?: "null"}, hasHighlight=${effectiveReplaceRules?.any { it.isHighlight }}")
+                }
+                // 还原被保护的 img 标签（在 usehtml 包裹之后，确保图片不被路由到 setTypeHtml）
+                imgRestoreMap.forEach { (placeholder, original) ->
+                    mContent = mContent.replace(placeholder, original)
+                }
+                // 含 img 的行不进 HTML 渲染路径，样式标签会以明文显示，直接剥掉
+                if (imgRestoreMap.isNotEmpty()) {
+                    val styleTagRegex = Regex("</?(?:font|b|strong|i|em|u|span)\\b[^>]*>", RegexOption.IGNORE_CASE)
+                    mContent = mContent.lines().joinToString("\n") { line ->
+                        if (line.contains("<img", ignoreCase = true)) {
+                            styleTagRegex.replace(line, "")
+                        } else {
+                            line
+                        }
+                    }
                 }
             }
             useHtmlMap.forEach { (placeholder, originalContent) ->
