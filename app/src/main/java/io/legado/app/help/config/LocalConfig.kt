@@ -128,6 +128,12 @@ by appCtx.getSharedPreferences("local", Context.MODE_PRIVATE) {
             putBoolean("deleteReadRecord", value)
         }
 
+    var deleteThought: Boolean
+        get() = getBoolean("deleteThought")
+        set(value) {
+            putBoolean("deleteThought", value)
+        }
+
     var appCrash: Boolean
         get() = getBoolean("appCrash")
         set(value) {

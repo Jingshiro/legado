@@ -55,7 +55,8 @@ class BookshelfManageViewModel(application: Application) : BaseViewModel(applica
     fun deleteBook(
         books: List<Book>,
         deleteOriginal: Boolean = false,
-        deleteRecords: Boolean = false
+        deleteRecords: Boolean = false,
+        deleteThoughts: Boolean = false
     ) {
         execute {
             appDb.bookDao.delete(*books.toTypedArray())
@@ -63,6 +64,9 @@ class BookshelfManageViewModel(application: Application) : BaseViewModel(applica
                 if (deleteRecords) {
                     appDb.readRecordDao.deleteByName(it.name)
                     appDb.detailedReadRecordDao.deleteByBookName(it.name)
+                }
+                if (deleteThoughts) {
+                    appDb.bookThoughtDao.deleteByBook(it.name, it.author)
                 }
                 if (it.isLocal) {
                     LocalBook.deleteBook(it, deleteOriginal)

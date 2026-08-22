@@ -483,6 +483,7 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
     fun delBook(
         deleteOriginal: Boolean = false,
         deleteRecords: Boolean = false,
+        deleteThoughts: Boolean = false,
         success: (() -> Unit)? = null
     ) {
         execute {
@@ -492,6 +493,9 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
                 if (deleteRecords) {
                     appDb.readRecordDao.deleteByName(it.name)
                     appDb.detailedReadRecordDao.deleteByBookName(it.name)
+                }
+                if (deleteThoughts) {
+                    appDb.bookThoughtDao.deleteByBook(it.name, it.author)
                 }
                 if (it.isLocal) {
                     LocalBook.deleteBook(it, deleteOriginal)

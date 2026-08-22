@@ -669,6 +669,7 @@
     <string name="system_typeface">Kiểu chữ hệ thống</string>
     <string name="delete_book_file">Xóa tệp nguồn</string>
     <string name="delete_read_record">Đồng thời xóa lịch sử đọc</string>
+    <string name="delete_book_thought">Đồng thời xóa suy nghĩ</string>
     <string name="text_default">Mặc định</string>
     <string name="default1">Mặc định-1</string>
     <string name="default2">Mặc định-2</string>

@@ -670,6 +670,7 @@
     <string name="system_typeface">System typeface</string>
     <string name="delete_book_file">Delete source file</string>
     <string name="delete_read_record">Eliminar también el historial de lectura</string>
+    <string name="delete_book_thought">Eliminar también los pensamientos</string>
     <string name="text_default">Default</string>
     <string name="default1">Default-1</string>
     <string name="default2">Default-2</string>

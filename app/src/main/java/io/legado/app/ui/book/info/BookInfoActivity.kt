@@ -970,11 +970,16 @@ class BookInfoActivity :
                         setText(R.string.delete_read_record)
                         isChecked = LocalConfig.deleteReadRecord
                     }
+                    val thoughtCheckBox = CheckBox(this@BookInfoActivity).apply {
+                        setText(R.string.delete_book_thought)
+                        isChecked = LocalConfig.deleteThought
+                    }
                     val view = LinearLayout(this@BookInfoActivity).apply {
                         setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
                         orientation = LinearLayout.VERTICAL
                         deleteOriginalCheckBox?.let { addView(it) }
                         addView(recordCheckBox)
+                        addView(thoughtCheckBox)
                     }
                     customView { view }
                     yesButton {
@@ -982,8 +987,13 @@ class BookInfoActivity :
                             LocalConfig.deleteBookOriginal = deleteOriginalCheckBox.isChecked
                         }
                         LocalConfig.deleteReadRecord = recordCheckBox.isChecked
+                        LocalConfig.deleteThought = thoughtCheckBox.isChecked
                         SourceCallBack.callBackBook(SourceCallBack.DEL_BOOK_SHELF, viewModel.bookSource, book) //确认后删除书架
-                        viewModel.delBook(LocalConfig.deleteBookOriginal, recordCheckBox.isChecked) {
+                        viewModel.delBook(
+                            LocalConfig.deleteBookOriginal,
+                            recordCheckBox.isChecked,
+                            thoughtCheckBox.isChecked
+                        ) {
                             setResult(RESULT_OK)
                             finish()
                         }
