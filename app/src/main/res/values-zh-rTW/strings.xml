@@ -667,6 +667,7 @@
     <string name="plus">加</string>
     <string name="system_typeface">系統內建字體樣式</string>
     <string name="delete_book_file">刪除來源文件</string>
+    <string name="delete_read_record">同時刪除閱讀記錄（含時長統計）</string>
     <string name="text_default">默认</string>
     <string name="default1">預設一</string>
     <string name="default2">預設二</string>

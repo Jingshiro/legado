@@ -480,11 +480,19 @@ class BookInfoViewModel(application: Application) : BaseViewModel(application) {
         return book
     }
 
-    fun delBook(deleteOriginal: Boolean = false, success: (() -> Unit)? = null) {
+    fun delBook(
+        deleteOriginal: Boolean = false,
+        deleteRecords: Boolean = false,
+        success: (() -> Unit)? = null
+    ) {
         execute {
             bookData.value?.let {
                 it.delete()
                 inBookshelf = false
+                if (deleteRecords) {
+                    appDb.readRecordDao.deleteByName(it.name)
+                    appDb.detailedReadRecordDao.deleteByBookName(it.name)
+                }
                 if (it.isLocal) {
                     LocalBook.deleteBook(it, deleteOriginal)
                 }

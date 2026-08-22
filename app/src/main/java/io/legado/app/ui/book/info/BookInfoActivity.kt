@@ -959,24 +959,31 @@ class BookInfoActivity :
                     titleResource = R.string.draw,
                     messageResource = R.string.sure_del
                 ) {
-                    var checkBox: CheckBox? = null
+                    var deleteOriginalCheckBox: CheckBox? = null
                     if (book.isLocal) {
-                        checkBox = CheckBox(this@BookInfoActivity).apply {
+                        deleteOriginalCheckBox = CheckBox(this@BookInfoActivity).apply {
                             setText(R.string.delete_book_file)
                             isChecked = LocalConfig.deleteBookOriginal
                         }
-                        val view = LinearLayout(this@BookInfoActivity).apply {
-                            setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-                            addView(checkBox)
-                        }
-                        customView { view }
                     }
+                    val recordCheckBox = CheckBox(this@BookInfoActivity).apply {
+                        setText(R.string.delete_read_record)
+                        isChecked = LocalConfig.deleteReadRecord
+                    }
+                    val view = LinearLayout(this@BookInfoActivity).apply {
+                        setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
+                        orientation = LinearLayout.VERTICAL
+                        deleteOriginalCheckBox?.let { addView(it) }
+                        addView(recordCheckBox)
+                    }
+                    customView { view }
                     yesButton {
-                        if (checkBox != null) {
-                            LocalConfig.deleteBookOriginal = checkBox.isChecked
+                        if (deleteOriginalCheckBox != null) {
+                            LocalConfig.deleteBookOriginal = deleteOriginalCheckBox.isChecked
                         }
+                        LocalConfig.deleteReadRecord = recordCheckBox.isChecked
                         SourceCallBack.callBackBook(SourceCallBack.DEL_BOOK_SHELF, viewModel.bookSource, book) //确认后删除书架
-                        viewModel.delBook(LocalConfig.deleteBookOriginal) {
+                        viewModel.delBook(LocalConfig.deleteBookOriginal, recordCheckBox.isChecked) {
                             setResult(RESULT_OK)
                             finish()
                         }

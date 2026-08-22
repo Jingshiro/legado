@@ -330,14 +330,21 @@ class BookshelfManageActivity :
                 setText(R.string.delete_book_file)
                 isChecked = LocalConfig.deleteBookOriginal
             }
+            val recordCheckBox = CheckBox(this@BookshelfManageActivity).apply {
+                setText(R.string.delete_read_record)
+                isChecked = LocalConfig.deleteReadRecord
+            }
             val view = LinearLayout(this@BookshelfManageActivity).apply {
                 setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
+                orientation = LinearLayout.VERTICAL
                 addView(checkBox)
+                addView(recordCheckBox)
             }
             customView { view }
             okButton {
                 LocalConfig.deleteBookOriginal = checkBox.isChecked
-                viewModel.deleteBook(adapter.selection, checkBox.isChecked)
+                LocalConfig.deleteReadRecord = recordCheckBox.isChecked
+                viewModel.deleteBook(adapter.selection, checkBox.isChecked, recordCheckBox.isChecked)
             }
             noButton()
         }
@@ -398,17 +405,24 @@ class BookshelfManageActivity :
                     setText(R.string.delete_book_file)
                     isChecked = LocalConfig.deleteBookOriginal
                 }
-                val view = LinearLayout(this@BookshelfManageActivity).apply {
-                    setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
-                    addView(checkBox)
-                }
-                customView { view }
             }
+            val recordCheckBox = CheckBox(this@BookshelfManageActivity).apply {
+                setText(R.string.delete_read_record)
+                isChecked = LocalConfig.deleteReadRecord
+            }
+            val view = LinearLayout(this@BookshelfManageActivity).apply {
+                setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
+                orientation = LinearLayout.VERTICAL
+                checkBox?.let { addView(it) }
+                addView(recordCheckBox)
+            }
+            customView { view }
             okButton {
                 if (checkBox != null) {
                     LocalConfig.deleteBookOriginal = checkBox.isChecked
                 }
-                viewModel.deleteBook(listOf(book), LocalConfig.deleteBookOriginal)
+                LocalConfig.deleteReadRecord = recordCheckBox.isChecked
+                viewModel.deleteBook(listOf(book), LocalConfig.deleteBookOriginal, recordCheckBox.isChecked)
             }
         }
     }
